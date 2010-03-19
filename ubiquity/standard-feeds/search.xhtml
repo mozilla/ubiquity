@@ -420,6 +420,7 @@ CmdUtils.makeSearchCommand({
     container: "#main > table > tbody > tr",
     title: "td + td + td > a",
     thumbnail: "td:first > a > img",
+    body: "td + td + td > *:not(a)",
     maxResults: 8,
   },
 });
@@ -439,15 +440,15 @@ CmdUtils.makeSearchCommand({
       Utils.paramsToString({
         appid: ("wZ.3jHnV34GC4QakIuzfgHTGiU..1SfNPw" +
                 "PAuasmt.L5ytoIPOuZAdP1txE4s6KfRBp9"),
-        results: 6,
+        results: 10,
         output: "json",
       }, "?query=%s&")),
     type: "json",
     container: "ResultSet.Result",
     href: "Url",
     title: "Title",
-    preview: "Summary",
-    maxResults: 6,
+    body: "Summary",
+    maxResults: 10,
   },
 });
 
@@ -769,7 +770,8 @@ CmdUtils.makeSearchCommand({
   parser: {
     container: "#results li",
     title: "h3 > a",
-    preview: "p",
+    body: "p",
+    maxResults: 10,
   },
 });
 
@@ -779,10 +781,11 @@ CmdUtils.makeSearchCommand({
   defaultUrl: "http://www.ebay.com/",
   icon: "chrome://ubiquity/skin/icons/ebay.ico",
   parser: {
-    container: ".pcell",
-    title: ".title",
-    preview: ".prchold",
+    container: ".pcell, .sml",
+    title: ".title, .dtl",
+    body: ".prchold, .prc",
     thumbnail: "img",
+    maxResults: 30,
   },
 });
 
@@ -794,6 +797,7 @@ CmdUtils.makeSearchCommand({
   parser: {
     container: "#result-table > tbody > tr > td",
     title: "a:first",
+    body: "div > div + div",
     maxResults: 10,
   },
 });
@@ -806,7 +810,7 @@ CmdUtils.makeSearchCommand({
   parser: {
     container: "#new_left > a + div",
     title: ".DsAndEntryName a",
-    preview: ".content",
+    body: ".content",
   },
 });
 

@@ -180,7 +180,7 @@ function getHiddenWindow() Utils.hiddenWindow;
 // as reference names aren't cannonical across feeds.
 //
 // {{{id}}} is the id or name of the command.
- 
+
 function getCommand(id) commandSource.getCommand(id);
 
 // === {{{ CmdUtils.executeCommand(command, args) }}} ===
@@ -837,74 +837,70 @@ function CreateAlias(options) {
 }
 
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===
-// A specialized version of {{{CmdUtils.CreateCommand()}}}, this lets
+// A specialized version of {{{CmdUtils.CreateCommand()}}}. This lets
 // you make commands that interface with search engines, without
 // having to write so much boilerplate code.
+// Also see https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command .
 //
-// {{{options}}} as the argument of {{{CmdUtils.CreateCommand()}}},
+// {{{options}}} is same as the argument of {{{CmdUtils.CreateCommand()}}},
 // except that instead of {{{options.arguments}}}, {{{options.execute}}},
-// and {{{options.preview}}} you only need a single property:
+// and {{{options.preview}}}, you only need a single property:
 // *{{{url}}}\\
-// The URL of a search results page from the search
-// engine of your choice.  Must contain the literal string {{{{QUERY}}}} or
-// {{{%s}}}, which will be replaced with the user's search term
-// to generate a URL that should point to the correct page of search
-// results.  (We're assuming that the user's search term appears in
-// the URL of the search results page, which is true for most search
-// engines.)  For example: {{{http://www.google.com/search?q={QUERY}}}}
+//  The URL of a search results page from the search engine of your choice.
+//  Must contain the literal string {{{{QUERY}}}} or {{{%s}}}, which will be
+//  replaced with the user's search term to generate a URL that should point to
+//  the correct page of search results. (We're assuming that the user's search
+//  term appears in the URL of the search results page, which is true for most
+//  search engines.) For example: {{{http://www.google.com/search?q={QUERY}}}}
 //
-// Also note that {{{options.icon}}} if not passed, will be generated from
-// the URL passed in {{{options.url}}}, and {{{options.description}}} if
-// not passed, will be auto generated from a template and {{{options.name}}}.
+// If not specified, {{{options.name}}}, {{{options.icon}}},
+// {{{options.description}}}, {{{options.execute}}} will be auto generated.
 //
-// The {{{options.execute}}}, {{{options.preview}}}, and
-// {{{options.takes}}} properties are all automatically generated for you
-// from {{{options.url}}}, so all you need to provide is {{{options.url}}}
-// and {{{options.name}}}.  You can choose to provide other optional
-// properties, which work the same way as they do for
-// {{{CmdUtils.CreateCommand()}}}.  You can also override the auto-generated
-// {{{preview()}}} function by providing your own as {{{options.preview}}}.
-//
+// Other optional parameters of {{{options}}} are:
 // *{{{postData}}}\\
-// Will make the command use POST instead of GET,
-// and the data (key:value pairs or string) are all passed to the URL passed in
-// {{{options.url}}}. Instead of passing the search params in the URL, pass
-// it (along with any other params) like so:
-// {{{
-//   postData: {"q": "{QUERY}", "hl": "en"}
-//   postData: "q={QUERY}&hl=en"
-// }}}
-// When this is done, the query will be substituted in as usual.
-//
+//  Makes the command use POST instead of GET, and the data
+//  (key:value pairs or string) are all passed to the {{{options.url}}}.
+//  Instead of including the search params in the URL, pass it
+//  (along with any other params) like so:
+//  {{{ {"q": "{QUERY}", "hl": "en"} }}} or {{{ "q={QUERY}&hl=en" }}}.
+//  When this is done, the query will be substituted in as usual.
 // *{{{defaultUrl}}}\\
-// Specifies the URL that will be opened in the case
-// where the user has not provided a search string.
-//
-// An extra option {{{options.parser}}} can be passed, which will make
-// Ubiquity automatically generate a keyboard navigatable preview of
-// the results. It is passed as an object containing at the very least
-// {{{options.parser.title}}}, either a jQuery selector that matches the
-// titles of the results or a function given a single argument (the container 
-// of the result) that must return a string to be used as title. 
-// It is highly recommended that you include {{{options.parser.container}}},
-// a jQuery selector that will match an element that groups
-// result-data.  If this is not passed, Ubiquity will fall back to a
-// fragile method of pairing titles, previews and thumbnails, which
-// might not always work.  {{{options.parser.preview}}} can either be a
-// jQuery selector that will match the preview returned by the search
-// provider or a function that will receive a single argument (the
-// container grouping the result-data) and must return a string that will
-// be used as preview or a jQuery object; {{{options.parser.baseurl}}}, 
-// a string that will be prefixed to relative links, such that relative paths 
-// will still work out of context. If not passed, it will be auto-generated 
-// from {{{options.url}}} (and thus //may// be incorrect)
-// {{{options.parser.thumbnail}}}, a jQuery selector that will match a
-// thumbnail which will automatically be displayed in the
-// preview. Note: if it doesn't point to an {{{<img>}}} element,
-// ubiquity will try and find a child of the node of type {{{img}}}
-// inside the element, and use the first-found one.
-// {{{options.parser.maxResults (= 4)}}} specifies the max number of results.
-// {{{options.charset}}} specifies the query charset.
+//  A URL string that will be opened in the case
+//  where the user has not provided a search string.
+// *{{{charset}}}\\
+//  A string specifying the character set of query.
+// *{{{parser}}}\\
+//  Generates keyboard navigatable previews by parsing the search results.
+//  It is passed as an object containing following properties.
+//  The ones marked as //path// expect either a jQuery selector string,
+//  a JSON path string (like {{{"granma.mom.me"}}}). Each of them can also be
+//  a filter function that receivs a parent context and returns a result of
+//  same type (jQuery object or string).
+// *{{{parser.type}}}\\
+//  A string that's passed to {{{jQuery.ajax()}}}'s {{{type}}} parameter when
+//  requesting. If {{{"json"}}}, the parser expects JSON paths.
+// *{{{parser.title}}}\\
+//  //Required//. The //path// to the title of each result.
+// *{{{parser.container}}} //Recommended// //Path//\\
+//  A //path// to each container that groups each of
+//  title/body/href/thumbnail result sets.
+// *{{{parser.body}}}\\
+//  A //path// to the content of each result.
+// *{{{parser.href}}}\\
+//  A //path// to the URL of each result.
+//  Should point to an {{{<a>}}} if jQuery mode.
+// *{{{parser.thumbnail}}} //Path//\\
+//  A //path// to the thumbnail URL of each result.
+//  Should point to an {{{<img>}}} if jQuery mode.
+// *{{{parser.baseUrl}}}\\
+//  A URL string that will be the base for relative links, such that they will
+//  still work out of context. If not passed, it will be auto-generated from
+//  {{{options.url}}} (and thus //may// be incorrect).
+// *{{{parser.maxResults}}}\\
+//  An integer specifying the max number of results. Defaults to 4.
+// *{{{parser.html}}}\\
+//  JSON mode only. An array of strings specifying //path//s
+//  that should be treated as HTML.
 //
 // Examples:
 // {{{
@@ -936,7 +932,6 @@ function CreateAlias(options) {
 // });
 //
 // CmdUtils.makeSearchCommand({
-//   names: ["video.baidu", "\u767E\u5EA6\u89C6\u9891"],
 //   url: "http://video.baidu.com/v?word={QUERY}",
 //   charset: "gb2312",
 //   parser: {
@@ -949,197 +944,167 @@ function CreateAlias(options) {
 // }}}
 
 function makeSearchCommand(options) {
-  const {jQuery, noun_arb_text} = this.__globalObject, CU = this;
-  function insertQuery(target, query, charset) {
-    var re = /%s|{QUERY}/g;
-    var fn = charset ? escape : encodeURIComponent;
-    if (charset) query = Utils.convertFromUnicode(charset, query);
-    if (typeof target === "object") {
-      var ret = {};
-      for (var key in target) ret[key] = target[key].replace(re, query);
-      return ret;
-    }
-    return target && target.replace(re, fn(query));
-  }
-  options.arguments = {"object search term": noun_arb_text};
-  options.execute = function searchExecute({object: {text}}) {
-    if (!text && "defaultUrl" in options)
-      Utils.openUrlInBrowser(options.defaultUrl);
-    else
-      Utils.openUrlInBrowser(
-        insertQuery(options.url, text, charset),
-        insertQuery(options.postData, text, charset));
-  };
-  var [baseurl, domain] = /^.*?:\/\/([^?#/]+)/(options.url) || [""];
+  var [baseUrl, domain] = /^\w+:\/\/([^?#/]+)/(options.url) || [""];
   var [name] = [].concat(options.names || options.name);
   if (!name) name = options.name = domain;
   var htmlName = Utils.escapeHtml(name);
-  var {charset} = options;
-  if (!("icon" in options)) {
-    // guess where the favicon is
-    options.icon = baseurl + "/favicon.ico";
-  }
-  if (!("description" in options)) {
-    // generate description from the name of the seach command
-    // options.description = "Searches " + htmlName + " for your words.";
+  if (!("icon" in options)) options.icon = baseUrl + "/favicon.ico";
+  if (!("description" in options))
+    // "Searches %s for your words."
     options.description = L(
       "ubiquity.cmdutils.searchdescription",
       "defaultUrl" in options ? htmlName.link(options.defaultUrl) : htmlName);
-  }
-  if ("parser" in options) {
-    let {parser} = options;
-    if ("type" in parser) parser.type = parser.type.toLowerCase();
-    if (!("baseurl" in parser)) parser.baseurl = baseurl;
-  }
-  "preview" in options || (options.preview = function searchPreview(pblock,
-                                                                    args) {
-    const Klass = "search-command";
-    var {text, html} = args.object;
-    if (!text) return void this.previewDefault(pblock);
-
-    var {parser} = options;
-    //errorToLocalize
-    pblock.innerHTML = (
-      "<div class='" + Klass + "'>" +
-      L("ubiquity.cmdutils.searchcmd", htmlName, html) +
-      (parser ? "<p class='loading'>Loading results...</p>" : "") +
-      "</div>");
-    if (!parser) return;
-
-    var url = insertQuery(parser.url || options.url, text, charset);
-    if ("postData" in options)
-      var postData = insertQuery(options.postData, text, charset);
-    function searchParser(data) {
-      var template = "", results = [], sane = true;
-      //errorToLocalize
-      if (!data)
-        template = "<p class='error'>Error parsing search results.</p>";
-      else if (parser.type === "json") {
-        for each (let p in parser.container.split(".")) data = data[p];
-        for (let key in data) {
-          let result = {}, d = data[key];
-          result.title = d[parser.title];
-          result.href = d[parser.href];
-          if ("preview" in parser)
-            result.preview = (typeof parser.preview === "function"
-                              ? parser.preview(d)
-                              : d[parser.preview]);
-          if ("thumbnail" in parser)
-            result.thumbnail = d[parser.thumbnail];
-          results.push(result);
-        }
+  if (!("arguments" in options) || !("argument" in options))
+    options.argument = this.__globalObject.noun_arb_text;
+  if (!("execute" in options)) options.execute = makeSearchCommand.execute;
+  if (!("preview" in options)) {
+    options.preview = makeSearchCommand.preview;
+    if ("parser" in options) let ({parser} = options) {
+      function fallback(n3w, old) {
+        if (n3w in parser || !(old in parser)) return;
+        Utils.reportWarning(
+          "makeSearchCommand: parser." + old + " is deprecated. " +
+          "Use parser." + n3w + " instead.", 2);
+        parser[n3w] = parser[old];
       }
-      else {
-        let div = pblock.ownerDocument.createElement("div");
-        div.innerHTML = data;
-        let doc = jQuery(div);
-        if ("container" in parser) {
-          doc.find(parser.container).each(function eachContainer() {
-            let result = {}, $this = jQuery(this);
-            result.title = (typeof parser.title === "function"
-                            ? parser.title(this)
-                            : $this.find(parser.title));
-            if ("preview" in parser)
-              result.preview = (typeof parser.preview === "function"
-                                ? parser.preview(this)
-                                : $this.find(parser.preview));
-            if ("href" in parser)
-              result.href = (typeof parser.href === "function"
-                             ? parser.href(this)
-                             : $this.find(parser.href));
-            if ("thumbnail" in parser)
-              result.thumbnail = $this.find(parser.thumbnail);
-            results.push(result);
-          });
-        }
-        else {
-          //errorToLocalize
-          Utils.reportWarning(name + " : " +
-                              "falling back to fragile parsing");
-          let titles = doc.find(parser.title);
-          if ("preview" in parser) {
-            var previews = doc.find(parser.preview);
-            sane = titles.length === previews.length;
-          }
-          if ("thumbnail" in parser) {
-            var thumbnails = doc.find(parser.thumbnail);
-            sane = titles.length === thumbnails.length;
-          }
-          for (let i = 0, len = titles.length; i < len; ++i) {
-            let result = {title: titles.eq(i)};
-            if (sane && previews)
-              result.preview = previews.eq(i);
-            if (sane && thumbnails)
-              result.thumbnail = thumbnails.eq(i);
-            results.push(result);
-          }
-        }
-        results = results.filter(function filterResults(result) {
-          var {title, thumbnail, preview, href} = result;
-          if (!(title || "").length) return false;
-          if (!href) {
-            if (title[0].nodeName !== "A") title = title.find("A:first");
-            result.href = title.attr("href");
-          }
-          result.title = title.html();
-          if ((thumbnail || "").length) {
-            if (thumbnail[0].nodeName !== "IMG")
-              thumbnail = thumbnail.find("img:first");
-            result.thumbnail = thumbnail.attr("src");
-          }
-          if (preview && typeof preview !== "string")
-            result.preview = preview.html();
-          return true;
-        });
-      }
-      if (data && results.length) {
-        template = "<dl class='list'>";
-        let max = Math.min(results.length, parser.maxResults || 4);
-        let {baseurl} = parser;
-        let {escapeHtml, uri} = Utils;
-        for (let i = 0; i < max; ++i) {
-          let result = results[i], key = i < 35 ? (i+1).toString(36) : "-";
-          template += (
-            "<dt class='title'><kbd>" + key + "</kbd> <a href='" +
-            escapeHtml(uri({uri: result.href, base: baseurl}).spec) +
-            "' accesskey='" + key + "'>" + result.title + "</a></dt>");
-          if ("thumbnail" in result)
-            template += (
-              "<dd class='thumbnail'><img src='" +
-              escapeHtml(uri({uri: result.thumbnail, base: baseurl}).spec) +
-              "'/></dd>");
-          if ("preview" in result)
-            template += "<dd class='preview'>" + result.preview + "</dd>";
-        }
-        template += "</dl>";
-        sane || Utils.reportWarning(
-          name + " : we did not find an equal amount of titles, " +
-          "previews and thumbnails");
-      }
-      //errorToLocalize
-      else template = "<p class='empty'>No results.</p>";
-      pblock.innerHTML = (
-        "<div class='" + Klass + "'>Results for <strong>" + html +
-        "</strong>:" + template + "</div>");
+      fallback("body", "preview");
+      fallback("baseUrl", "baseurl");
+      if (!("baseUrl" in parser)) parser.baseUrl = baseUrl;
+      if ("type" in parser) parser.type = parser.type.toLowerCase();
     }
-    var params = {
-      url: url,
-      dataType: parser.type || "html",
-      success: searchParser,
-      error: function searchError(xhr) {
-        pblock.innerHTML = (
-          "<div class='" + Klass + "'><span class='error'>" +
-          xhr.status + " " + xhr.statusText + "</span></div>");
-      },
-    };
-    if (postData) {
-      params.type = "POST";
-      params.data = postData;
-    }
-    CU.previewAjax(pblock, params);
-  });
+  }
   return this.CreateCommand(options);
 }
+makeSearchCommand.query = function searchQuery(target, query, charset) {
+  var re = /%s|{QUERY}/g;
+  var fn = charset ? escape : encodeURIComponent;
+  if (charset) query = Utils.convertFromUnicode(charset, query);
+  if (typeof target === "object") {
+    var ret = {};
+    for (var key in target) ret[key] = target[key].replace(re, query);
+    return ret;
+  }
+  return target && target.replace(re, fn(query));
+};
+makeSearchCommand.execute = function searchExecute({object: {text}}) {
+  if (!text && "defaultUrl" in this)
+    Utils.openUrlInBrowser(this.defaultUrl);
+  else
+    Utils.openUrlInBrowser(
+      makeSearchCommand.query(this.url, text, this.charset),
+      makeSearchCommand.query(this.postData, text, this.charset));
+};
+makeSearchCommand.preview = function searchPreview(pblock, args) {
+  var {text, html} = args.object;
+  if (!text) return void this.previewDefault(pblock);
+
+  function put() {
+    pblock.innerHTML =
+      "<div class='search-command'>" + Array.join(arguments, "") + "</div>";
+  }
+  var {parser} = this;
+  put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
+      //ToLocalize
+      parser ? "<p class='loading'>Loading results...</p>" : "");
+  if (!parser) return;
+
+  var params = {
+    url: makeSearchCommand.query(parser.url || this.url, text, this.charset),
+    dataType: parser.type || "text",
+    success: searchParse,
+    error: function searchError(xhr) {
+      put("<em class='error'>", xhr.status, " ", xhr.statusText, "</em>");
+    },
+  };
+  if ("postData" in this) {
+    params.type = "POST";
+    params.data = makeSearchCommand.query(this.postData, text, this.charset);
+  }
+  var global = parser.__parent__;
+  global.CmdUtils.previewAjax(pblock, params);
+  function searchParse(data) {
+    if (!data) {
+      //ToLocalize
+      put("<em class='error'>Error parsing search results.</em>");
+      return;
+    }
+    var list = "", results = [], {$} = global, {escapeHtml} = Utils;
+    var keys = ["title", "body", "href", "thumbnail"];
+    if (parser.type === "json") {
+      function dig(dat, key) {
+        var path = parser[key];
+        if (typeof path === "function") return path(dat);
+        for each (let p in path && path.split(".")) dat = dat[p] || 0;
+        return dat;
+      }
+      if ("container" in parser)
+        for each (let dat in dig(data, "container")) {
+          let res = {};
+          for each (let key in keys) res[key] = dig(dat, key);
+          results.push(res);
+        }
+      else {
+        let vals = [dig(data, k) for each (k in keys)];
+        results = [keys.reduce(function (r, k, i) (r[k] = vals[i][j], r), {})
+                   for (j in vals[0])];
+      }
+      let noEscape = parser.html || "";
+      for each (let key in keys) if (!~noEscape.indexOf(key))
+        for each (let r in results) r[key] = r[key] && escapeHtml(r[key]);
+    }
+    else {
+      let $root = $(pblock.cloneNode(0));
+      //TODO: Strip in-line scripts
+      $root[0].innerHTML = data;
+      function find($_, key) let (path = parser[key])
+        !path ? $() : path.call ? path.call($_, $_) : $_.find(path);
+      if ("container" in parser)
+        find($root, "container").each(function eachContainer() {
+          var res = {}, $this = $(this);
+          for each (let k in keys) res[k] = find($this, k);
+          results.push(res);
+        });
+      else {
+        let qs = [find($root, k) for each (k in keys)];
+        results = [keys.reduce(function (r, k, i) (r[k] = qs[i].eq(j), r), {})
+                   for (j in Utils.seq(qs[0].length))];
+      }
+      function toHtml(res, key) { res[key] = res[key].html() }
+      function toAttr(res, key, lnm, anm) {
+        var $_ = res[key], atr = ($_.is(lnm) ? $_ : $_.find(lnm)).attr(anm);
+        res[key] = atr && escapeHtml(atr);
+      }
+      for each (let res in results) {
+        if (!res.href.length) res.href = res.title;
+        toHtml(res, "title");
+        toHtml(res, "body");
+        toAttr(res, "href", "a", "href");
+        toAttr(res, "thumbnail", "img", "src");
+      }
+    }
+    //TODO: Deal with XML documents
+    let i = 0, max = parser.maxResults || 4;
+    for each (let {title, href, body, thumbnail} in results) if (title) {
+      if (href) {
+        let key = i < 35 ? (i+1).toString(36) : "-";
+        title = ("<kbd>" + key + "</kbd> <a href='" + href +
+                 "' accesskey='" + key + "'>" + title + "</a>");
+      }
+      list += "<dt class='title'>" + title + "</dt>";
+      if (thumbnail)
+        list += "<dd class='thumbnail'><img src='" + thumbnail + "'/></dd>";
+      if (body)
+        list += "<dd class='body'>" + body + "</dd>";
+      if (++i >= max) break;
+    }
+    //ToLocalize
+    put(list
+        ? ("<span class='found'>Results for <strong>" + html +
+           "</strong>:</span><dl class='list'>" + list + "</dl>")
+        : "<span class='empty'>No results for " + html + ".</span>");
+    global.CmdUtils.absUrl(pblock, parser.baseUrl);
+  }
+};
 
 // === {{{ CmdUtils.makeBookmarkletCommand(options) }}} ===
 // Creates and registers a Ubiquity command based on a bookmarklet.
@@ -1378,17 +1343,13 @@ function absUrl(data, sourceUrl) {
       function absUrl_gsub(_, a, q, path) (
         a + "=" + q + uri({uri: path, base: sourceUrl}).spec + q));
     case "object": {
-      (this.__globalObject.jQuery(data)
-       .find("*").andSelf()
-       .each(function absUrl_iter() {
-         if (!("getAttribute" in this)) return;
-         var attr, path = (
-           this.getAttribute(attr = "href") ||
-           this.getAttribute(attr = "src" ) ||
-           this.getAttribute(attr = "action"));
-         if (path !== null)
-           this.setAttribute(attr, uri({uri: path, base: sourceUrl}).spec);
-       }));
+      let $data = this.__globalObject.jQuery(data);
+      for each (let name in ["href", "src", "action"])
+        $data.find("*[" + name + "]").andSelf().each(function absUrl_each(){
+          if (!("getAttribute" in this)) return;
+          var {spec} = uri({uri: this.getAttribute(name), base: sourceUrl});
+          this.setAttribute(name, spec);
+        });
       return data;
     }
     case "xml": return XML(absUrl.call(this, data.toXMLString(), sourceUrl));
