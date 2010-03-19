@@ -86,22 +86,22 @@ for each (let f in [
   // === {{{ Utils.Application }}} ===
   // Shortcut to [[https://developer.mozilla.org/en/FUEL/Application]].
   function Application()
-    Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication),
+  Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication),
 
   // === {{{ Utils.ConsoleService }}} ===
   // Shortcut to {{{nsIConsoleService}}}.
   function ConsoleService()
-    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService),
+  Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService),
 
   // === {{{ Utils.ExtensionManager }}} ===
   // Shortcut to {{{nsIExtensionManager}}}.
   function ExtensionManager()
-    Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager),
+  Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager),
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
   function IOService()
-    Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
+  Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
 
   // === {{{ Utils.UnicodeConverter }}} ===
   // Shortcut to {{{nsIScriptableUnicodeConverter}}}.
@@ -129,20 +129,20 @@ for each (let f in [
   // The chrome application name found in {{{nsIXULAppInfo}}}.
   // Example values are {{{"Firefox"}}}, {{{"Songbird"}}}, {{{"Thunderbird"}}}.
   function appName()
-    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name,
+  Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name,
 
   // === {{{ Utils.appWindowType }}} ===
   // The name of "main" application windows for the chrome application.
   // Example values are {{{"navigator:browser"}}} for Firefox/Thunderbird
   // and {{{"Songbird:Main"}}} for Songbird.
   function appWindowType()
-    ({Songbird: "Songbird:Main"})[Utils.appName] || "navigator:browser",
+  ({Songbird: "Songbird:Main"})[Utils.appName] || "navigator:browser",
 
   // === {{{ Utils.OS }}} ===
   // The platform name found in {{{nsIXULRuntime}}}.
   // See [[https://developer.mozilla.org/en/OS_TARGET]].
   function OS()
-    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
+  Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
   ]) defineLazyProperty(Utils, f);
 
@@ -178,17 +178,17 @@ function log(what) {
     try { return Utils.json.encode(o) } finally { return o }
   }
   var lead = !formatting ? log_pp(args.shift()) :
-    args.shift().replace(/%[sdifo]/g, function log_format($) {
-      if (!args.length) return $;
-      var a = args.shift();
-      switch ($) {
-        case "%s": return a;
-        case "%d":
-        case "%i": return parseInt(a);
-        case "%f": return parseFloat(a);
-      }
-      return log_pp(a);
-    });
+  args.shift().replace(/%[sdifo]/g, function log_format($) {
+    if (!args.length) return $;
+    var a = args.shift();
+    switch ($) {
+      case "%s": return a;
+      case "%d":
+      case "%i": return parseInt(a);
+      case "%f": return parseFloat(a);
+    }
+    return log_pp(a);
+  });
   Utils.reportInfo(
     args.reduce(function log_acc(msg, arg) msg + " " + log_pp(arg), lead));
 }
@@ -574,9 +574,57 @@ function getLocalUrl(url, charset) {
   return req.responseText;
 }
 
+// ==={{{ Utils.parseHtml(htmlText, callback) }}}===
+// Parses {{{htmlText}}} to a DOM document and passes it to {{{callback}}}.
+
+function parseHtml(htmlText, callback) {
+  var {document} = Utils.currentChromeWindow;
+  var iframe = document.createElement("iframe");
+  iframe.setAttribute("collapsed", true); // hide
+  iframe.setAttribute("type", "content"); // secure
+  // needed to create a docshell
+  document.documentElement.appendChild(iframe);
+  var {docShell} = iframe;
+  docShell.QueryInterface(Ci.nsIWebNavigation)
+    .stop(Ci.nsIWebNavigation.STOP_NETWORK); // stop loading about:blank
+  // turn off unneeded/unwanted/bad things
+  (docShell.allowJavascript =
+   docShell.allowAuth =
+   docShell.allowPlugins =
+   docShell.allowMetaRedirects =
+   docShell.allowSubframes =
+   docShell.allowImages = false);
+
+  // Convert the HTML text into an input stream.
+  var converter = Utils.UnicodeConverter;
+  converter.charset = "UTF-8";
+  var stream = converter.convertToInputStream(htmlText);
+  // Set up a channel to load the input stream.
+  var channel = (Cc["@mozilla.org/network/input-stream-channel;1"]
+                 .createInstance(Ci.nsIInputStreamChannel));
+  channel.setURI(Utils.IOService.newURI("about:blank", null, null));
+  channel.contentStream = stream;
+  // Load in the background so we don't trigger web progress listeners.
+  channel.QueryInterface(Ci.nsIRequest)
+    .loadFlags |= Ci.nsIRequest.LOAD_BACKGROUND;
+  // need to specify content type,
+  // so user isn't prompted to download "unknown" file type
+  var baseChannel = channel.QueryInterface(Ci.nsIChannel);
+  baseChannel.contentType = "text/html";
+  baseChannel.contentCharset = "UTF-8";
+
+  // background loads don't fire "load" events
+  listenOnce(iframe, "DOMContentLoaded", function onParsed() {
+    var doc = iframe.contentDocument;
+    iframe.parentNode.removeChild(iframe);
+    callback(doc);
+  }, true);
+  Cc["@mozilla.org/uriloader;1"].getService(Ci.nsIURILoader)
+    .openURI(channel, true, docShell);
+}
+
 // ** {{{ Utils.trim(str) }}} **
 // **//Deprecated.//** Use native {{{trim()}}} instead.
-
 Utils.trim = String.trim;
 
 // === {{{ Utils.sortBy(array, key, descending = false) }}} ===
@@ -868,7 +916,7 @@ function notify(label, value, image, priority, buttons, target) {
 }
 
 // === {{{ Utils.listenOnce(element, eventType, listener, useCapture) }}} ===
-// 
+//
 // Same as [[https://developer.mozilla.org/en/DOM/element.addEventListener]],
 // except that the {{{listener}}} will be automatically removed on its
 // first execution.
@@ -1154,7 +1202,7 @@ for (let n in gClipboard.flavors) let (name = n) {
 }
 defineLazyProperty(
   gClipboard, function service()
-    Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard));
+  Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard));
 
 // == {{{ Utils.history }}} ==
 // Contains functions that make it easy to access
@@ -1321,7 +1369,7 @@ Utils.gist = {
   //
   // {{{id}}} is an optional number that specifies target Gist.
   // The user needs to be the owner of that Gist.
-  paste: function gist_paste(files, id) { 
+  paste: function gist_paste(files, id) {
     var data = id ? ["_method=put"] : [], i = 1;
     for (let name in files) {
       for (let [k, v] in new Iterator({
