@@ -420,7 +420,7 @@ CmdUtils.makeSearchCommand({
     container: "#main > table > tbody > tr",
     title: "td + td + td > a",
     thumbnail: "td:first > a > img",
-    body: "td + td + td > *:not(a)",
+    body: "td + td + td > a ~ *",
     maxResults: 8,
   },
 });

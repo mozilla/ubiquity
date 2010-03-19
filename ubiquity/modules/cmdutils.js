@@ -869,29 +869,30 @@ function CreateAlias(options) {
 //  where the user has not provided a search string.
 // *{{{charset}}}\\
 //  A string specifying the character set of query.
+//
 // *{{{parser}}}\\
 //  Generates keyboard navigatable previews by parsing the search results.
 //  It is passed as an object containing following properties.
 //  The ones marked as //path// expect either a jQuery selector string,
 //  a JSON path string (like {{{"granma.mom.me"}}}). Each of them can also be
-//  a filter function that receivs a parent context and returns a result of
-//  same type (jQuery object or string).
+//  a filter function that receives a parent context and returns a result
+//  of the same type.
 // *{{{parser.type}}}\\
-//  A string that's passed to {{{jQuery.ajax()}}}'s {{{type}}} parameter when
-//  requesting. If {{{"json"}}}, the parser expects JSON paths.
+//  A string that's passed to {{{jQuery.ajax()}}}'s {{{dataType}}} parameter
+//  when requesting. If {{{"json"}}}, the parser expects JSON paths.
 // *{{{parser.title}}}\\
 //  //Required//. The //path// to the title of each result.
-// *{{{parser.container}}} //Recommended// //Path//\\
-//  A //path// to each container that groups each of
+// *{{{parser.container}}}\\
+//  //Recommended//. A //path// to each container that groups each of
 //  title/body/href/thumbnail result sets.
 // *{{{parser.body}}}\\
 //  A //path// to the content of each result.
-// *{{{parser.href}}}\\
-//  A //path// to the URL of each result.
-//  Should point to an {{{<a>}}} if jQuery mode.
-// *{{{parser.thumbnail}}} //Path//\\
-//  A //path// to the thumbnail URL of each result.
-//  Should point to an {{{<img>}}} if jQuery mode.
+// *{{{parser.href}}} / {{{parser.thumbnail}}}\\
+//  //Path//s to the link/thumbnail URL of each result.
+//  Should point to an {{{<a>}}}/{{{<img>}}} if jQuery mode.
+// *{{{parser.url}}} / {{{parser.postData}}}\\
+//  Specifies another versions of {{{options.url}}}/{{{options.postData}}},
+//  in the case when a different request set is used for preview.
 // *{{{parser.baseUrl}}}\\
 //  A URL string that will be the base for relative links, such that they will
 //  still work out of context. If not passed, it will be auto-generated from
@@ -899,8 +900,11 @@ function CreateAlias(options) {
 // *{{{parser.maxResults}}}\\
 //  An integer specifying the max number of results. Defaults to 4.
 // *{{{parser.html}}}\\
-//  JSON mode only. An array of strings specifying //path//s
-//  that should be treated as HTML.
+//  An array of strings specifying //path//s that should be treated as HTML.
+//  Applies only when {{{parser.type}}} is {{{"json"}}} or {{{"xml"}}}.
+// *{{{parser.log}}}\\
+//  A function to which the command logs the response data and parsed results.
+//  {{{Utils.log}}} is used if non-function is passed.
 //
 // Examples:
 // {{{
@@ -944,6 +948,7 @@ function CreateAlias(options) {
 // }}}
 
 function makeSearchCommand(options) {
+  if (!("url" in options)) options.url = options.parser.url;
   var [baseUrl, domain] = /^\w+:\/\/([^?#/]+)/(options.url) || [""];
   var [name] = [].concat(options.names || options.name);
   if (!name) name = options.name = domain;
@@ -971,6 +976,11 @@ function makeSearchCommand(options) {
       fallback("baseUrl", "baseurl");
       if (!("baseUrl" in parser)) parser.baseUrl = baseUrl;
       if ("type" in parser) parser.type = parser.type.toLowerCase();
+      parser.keys = [
+        key for each (key in ["title", "body", "href", "thumbnail"])
+        if (key in parser)];
+      if ("log" in parser && typeof parser.log !== "function")
+        parser.log = Utils.log;
     }
   }
   return this.CreateCommand(options);
@@ -1008,6 +1018,7 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
       parser ? "<p class='loading'>Loading results...</p>" : "");
   if (!parser) return;
 
+  var {__parent__: global, type, keys} = parser;
   var params = {
     url: makeSearchCommand.query(parser.url || this.url, text, this.charset),
     dataType: parser.type || "text",
@@ -1020,70 +1031,81 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
     params.type = "POST";
     params.data = makeSearchCommand.query(this.postData, text, this.charset);
   }
-  var global = parser.__parent__;
   global.CmdUtils.previewAjax(pblock, params);
   function searchParse(data) {
     if (!data) {
-      //ToLocalize
-      put("<em class='error'>Error parsing search results.</em>");
+      put("<em class='error'>Error parsing search results.</em>"); //ToLocalize
       return;
     }
-    var list = "", results = [], {$} = global, {escapeHtml} = Utils;
-    var keys = ["title", "body", "href", "thumbnail"];
-    if (parser.type === "json") {
-      function dig(dat, key) {
-        var path = parser[key];
-        if (typeof path === "function") return path(dat);
-        for each (let p in path && path.split(".")) dat = dat[p] || 0;
-        return dat;
-      }
-      if ("container" in parser)
-        for each (let dat in dig(data, "container")) {
-          let res = {};
-          for each (let key in keys) res[key] = dig(dat, key);
-          results.push(res);
-        }
-      else {
-        let vals = [dig(data, k) for each (k in keys)];
-        results = [keys.reduce(function (r, k, i) (r[k] = vals[i][j], r), {})
-                   for (j in vals[0])];
-      }
-      let noEscape = parser.html || "";
-      for each (let key in keys) if (!~noEscape.indexOf(key))
-        for each (let r in results) r[key] = r[key] && escapeHtml(r[key]);
+    if (parser.log) parser.log("SearchCommand: data =", data);
+    switch (type) {
+      case "json": return parseJson(data);
+      case "xml" : return parseDocument(data);
+      default: return Utils.parseHtml(data, parseDocument);
     }
+  }
+  function parseJson(data) {
+    // TODO: Deal with key names that include dots.
+    function dig(dat, key) {
+      var path = parser[key];
+      if (typeof path === "function") return path(dat);
+      for each (let p in path && path.split(".")) dat = dat[p] || 0;
+      return dat;
+    }
+    var results = [];
+    if ("container" in parser)
+      for each (let dat in dig(data, "container")) {
+        let res = {};
+        for each (let key in keys) res[key] = dig(dat, key);
+        results.push(res);
+      }
     else {
-      let $root = $(pblock.cloneNode(0));
-      //TODO: Strip in-line scripts
-      $root[0].innerHTML = data;
-      function find($_, key) let (path = parser[key])
-        !path ? $() : path.call ? path.call($_, $_) : $_.find(path);
-      if ("container" in parser)
-        find($root, "container").each(function eachContainer() {
-          var res = {}, $this = $(this);
-          for each (let k in keys) res[k] = find($this, k);
-          results.push(res);
-        });
-      else {
-        let qs = [find($root, k) for each (k in keys)];
-        results = [keys.reduce(function (r, k, i) (r[k] = qs[i].eq(j), r), {})
-                   for (j in Utils.seq(qs[0].length))];
-      }
-      function toHtml(res, key) { res[key] = res[key].html() }
-      function toAttr(res, key, lnm, anm) {
-        var $_ = res[key], atr = ($_.is(lnm) ? $_ : $_.find(lnm)).attr(anm);
-        res[key] = atr && escapeHtml(atr);
-      }
+      let vals = [dig(data, k) for each (k in keys)];
+      results = [keys.reduce(function (r, k, i) (r[k] = vals[i][j], r), {})
+                 for (j in vals[0])];
+    }
+    onParsed(results);
+  };
+  function parseDocument(doc) {
+    var {$} = global, results = [], $doc = $(doc);
+    function find($_, key) let (path = parser[key])
+      !path ? $() : path.call ? path.call($_, $_) : $_.find(path);
+    if ("container" in parser)
+      find($doc, "container").each(function eachContainer() {
+        var res = {}, $this = $(this);
+        for each (let k in keys) res[k] = find($this, k);
+        results.push(res);
+      });
+    else {
+      let qs = [find($doc, k) for each (k in keys)];
+      results = [keys.reduce(function (r, k, i) (r[k] = qs[i].eq(j), r), {})
+                 for (j in Utils.seq(qs[0].length))];
+    }
+    var get = type === "xml" ? "text" : "html";
+    function toCont(key) {
+      for each (let res in results) res[key] = res[key][get]();
+    }
+    function toAttr(key, lnm, anm) {
       for each (let res in results) {
-        if (!res.href.length) res.href = res.title;
-        toHtml(res, "title");
-        toHtml(res, "body");
-        toAttr(res, "href", "a", "href");
-        toAttr(res, "thumbnail", "img", "src");
+        let $_ = res[key], atr = ($_.is(lnm) ? $_ : $_.find(lnm)).attr(anm);
+        res[key] = atr && Utils.escapeHtml(atr);
       }
     }
-    //TODO: Deal with XML documents
-    let i = 0, max = parser.maxResults || 4;
+    "thumbnail" in parser && toAttr("thumbnail", "img", "src");
+    "body" in parser && toCont("body");
+    if (!("href" in parser)) for each (let r in results) r.href = r.title;
+    toAttr("href", "a", "href");
+    toCont("title");
+    onParsed(results);
+  }
+  function onParsed(results) {
+    if (parser.log) parser.log("SearchCommand: results =", results);
+    switch (parser.type) { case "json": case "xml":
+      let noEscape = parser.html || "";
+      for each (let k in keys) if (!~noEscape.indexOf(k))
+        for each (let r in results) r[k] = r[k] && Utils.escapeHtml(r[k]);
+    }
+    var list = "", i = 0, max = parser.maxResults || 4;
     for each (let {title, href, body, thumbnail} in results) if (title) {
       if (href) {
         let key = i < 35 ? (i+1).toString(36) : "-";
