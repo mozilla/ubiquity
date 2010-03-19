@@ -504,8 +504,7 @@ var AWS_SECRET = "w0WOQNS+GZcJWjrAmlK885tFi6rcrr9WOgeu6eK3";
 
 function amazon_doEscape(aString) (
   encodeURIComponent(aString)
-  .replace(/[!\'()]+/g, escape)
-  .replace(/[*]/g, "%2A"));
+  .replace(/[!\'()*]+/g, function escape0(s) escape(s, 0)));
 function amazon_signRequest(aParams) {
   var key;
   var params = {};
