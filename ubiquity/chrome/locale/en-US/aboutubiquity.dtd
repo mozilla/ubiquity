@@ -149,7 +149,7 @@
 
 <!ENTITY ubiquity.editor.ShareYourCommands "Share Your Commands">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Post your command on the <a href='&link.wildCmds;'>commands in the wild</a> wiki page so that other users can find it.">
-<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Also, sign up for the the <a href='&link.herdDash;'>herd command</a> which will then display your command on the <a href='&link.herdMain;'>dashboard</a>.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "The &ldquo;Share&rdquo; button lets you paste your commands to <a href='http://gist.github.com/'>Gist</a>, which auto detects &appTitle; codes and makes them subscribable. To browse all the commands and skins pasted to Gist, visit <a href='http://ubigist.appspot.com/'>ubigist</a>.">
 
 <!ENTITY ubiquity.editor.DevelopingUbiquity "Developing &appTitle;">
 
