@@ -980,21 +980,25 @@ function makeSearchCommand(options) {
         key for each (key in ["title", "body", "href", "thumbnail"])
         if (key in parser)];
       if ("log" in parser && typeof parser.log !== "function")
-        parser.log = Utils.log;
+        parser.log = makeSearchCommand.log;
     }
   }
   return this.CreateCommand(options);
 }
+makeSearchCommand.log = function searchLog(it, type) {
+  Utils.log("SearchCommand: " + type + " =", it);
+};
 makeSearchCommand.query = function searchQuery(target, query, charset) {
-  var re = /%s|{QUERY}/g;
-  var fn = charset ? escape : encodeURIComponent;
-  if (charset) query = Utils.convertFromUnicode(charset, query);
-  if (typeof target === "object") {
-    var ret = {};
-    for (var key in target) ret[key] = target[key].replace(re, query);
-    return ret;
+  var re = /%s|{QUERY}/g, fn = encodeURIComponent;
+  if (charset) {
+    query = Utils.convertFromUnicode(charset, query);
+    fn = escape;
   }
-  return target && target.replace(re, fn(query));
+  return (
+    typeof target === "object"
+    ? [fn(key) + "=" + fn(val)
+       for ([key, val] in new Iterator(target))].join("&")
+    : target && target.replace(re, fn(query)));
 };
 makeSearchCommand.execute = function searchExecute({object: {text}}) {
   if (!text && "defaultUrl" in this)
@@ -1027,9 +1031,10 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
       put("<em class='error'>", xhr.status, " ", xhr.statusText, "</em>");
     },
   };
-  if ("postData" in this) {
+  var pdata = parser.postData || this.postData;
+  if (pdata) {
     params.type = "POST";
-    params.data = makeSearchCommand.query(this.postData, text, this.charset);
+    params.data = makeSearchCommand.query(pdata, text, this.charset);
   }
   global.CmdUtils.previewAjax(pblock, params);
   function searchParse(data) {
@@ -1037,7 +1042,7 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
       put("<em class='error'>Error parsing search results.</em>"); //ToLocalize
       return;
     }
-    if (parser.log) parser.log("SearchCommand: data =", data);
+    if (parser.log) parser.log(data, "data");
     switch (type) {
       case "json": return parseJson(data);
       case "xml" : return parseDocument(data);
@@ -1099,7 +1104,7 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
     onParsed(results);
   }
   function onParsed(results) {
-    if (parser.log) parser.log("SearchCommand: results =", results);
+    if (parser.log) parser.log(results, "results");
     switch (parser.type) { case "json": case "xml":
       let noEscape = parser.html || "";
       for each (let k in keys) if (!~noEscape.indexOf(k))
