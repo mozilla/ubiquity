@@ -899,53 +899,12 @@ function CreateAlias(options) {
 //  {{{options.url}}} (and thus //may// be incorrect).
 // *{{{parser.maxResults}}}\\
 //  An integer specifying the max number of results. Defaults to 4.
-// *{{{parser.html}}}\\
-//  An array of strings specifying //path//s that should be treated as HTML.
-//  Applies only when {{{parser.type}}} is {{{"json"}}} or {{{"xml"}}}.
+// *{{{parser.plain}}}\\
+//  An array of strings naming //path//s that should be treated as plain text
+//  (and thus be HTML-escaped).
 // *{{{parser.log}}}\\
-//  A function to which the command logs the response data and parsed results.
-//  {{{Utils.log}}} is used if non-function is passed.
-//
-// Examples:
-// {{{
-// CmdUtils.makeSearchCommand({
-//   name: "Yahoo",
-//   url: "http://search.yahoo.com/search?p={QUERY}",
-//   parser: {container: "div.res",
-//            title: "div h3",
-//            preview: "div.abstr, div.sm-abs"}
-// });
-//
-// CmdUtils.makeSearchCommand({
-//   name: "Google",
-//   url: "http://www.google.com/search?q={QUERY}",
-//   parser: {container: "li.g.w0",
-//            title: "h3.r",
-//            preview: "div.s"}
-// });
-//
-// CmdUtils.makeSearchCommand({
-//   name: "IMDb",
-//   url: "http://www.imdb.com/find?s=all&q={QUERY}",
-//   parser: {
-//     container: "#main > table > tbody > tr",
-//     title: "td + td + td > a",
-//     thumbnail: "td:first > a > img",
-//     maxResults: 8,
-//   },
-// });
-//
-// CmdUtils.makeSearchCommand({
-//   url: "http://video.baidu.com/v?word={QUERY}",
-//   charset: "gb2312",
-//   parser: {
-//     container: "#result td",
-//     title: ".r a",
-//     thumbnail: "img",
-//     maxResults: 20,
-//   },
-// });
-// }}}
+//  A function to which the response data and parsed results are logged.
+//  If non-function, {{{makeSearchCommand.log()}}} is used.
 
 function makeSearchCommand(options) {
   if (!("url" in options)) options.url = options.parser.url;
@@ -1053,7 +1012,7 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
     // TODO: Deal with key names that include dots.
     function dig(dat, key) {
       var path = parser[key];
-      if (typeof path === "function") return path(dat);
+      if (path.call) return path.call(dat, dat);
       for each (let p in path && path.split(".")) dat = dat[p] || 0;
       return dat;
     }
@@ -1086,9 +1045,9 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
       results = [keys.reduce(function (r, k, i) (r[k] = qs[i].eq(j), r), {})
                  for (j in Utils.seq(qs[0].length))];
     }
-    var get = type === "xml" ? "text" : "html";
+    function pluck() this.innerHTML || this.textContent;
     function toCont(key) {
-      for each (let res in results) res[key] = res[key][get]();
+      for each (let r in results) r[key] = r[key].map(pluck).get().join(" ");
     }
     function toAttr(key, lnm, anm) {
       for each (let res in results) {
@@ -1105,11 +1064,8 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
   }
   function onParsed(results) {
     if (parser.log) parser.log(results, "results");
-    switch (parser.type) { case "json": case "xml":
-      let noEscape = parser.html || "";
-      for each (let k in keys) if (!~noEscape.indexOf(k))
-        for each (let r in results) r[k] = r[k] && Utils.escapeHtml(r[k]);
-    }
+    for each (let k in parser.plain)
+      for each (let r in results) r[k] = r[k] && Utils.escapeHtml(r[k]);
     var list = "", i = 0, max = parser.maxResults || 4;
     for each (let {title, href, body, thumbnail} in results) if (title) {
       if (href) {
