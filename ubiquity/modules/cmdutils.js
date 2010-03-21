@@ -1143,7 +1143,7 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
 // The URL of the bookmarklet code. Must start with {{{javascript:}}}.
 //
 // {{{options.execute}}} and {{{options.preview}}} are generated for you
-// from the URL., so all you need to provide is {{{options.url}}} and
+// from the URL, so all you need to provide is {{{options.url}}} and
 // {{{options.name}}}.
 //
 // You can choose to provide other optional properties, which work the
@@ -1152,15 +1152,16 @@ makeSearchCommand.preview = function searchPreview(pblock, args) {
 // {{{options.arguments}}}.
 
 function makeBookmarkletCommand(options) {
-  options.execute = function bookmarklet_execute() {
-    getWindow().location = options.url;
-  };
-  "preview" in options ||
-    (options.preview = function bookmarklet_preview(pblock) {
-      pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
-    });
+  options.execute = makeBookmarkletCommand.execute;
+  "preview" in options || (options.preview = makeBookmarkletCommand.preview);
   return this.CreateCommand(options);
 }
+makeBookmarkletCommand.execute = function bookmarklet_execute() {
+  getWindow().location = this.url;
+};
+makeBookmarkletCommand.preview = function bookmarklet_preview(pblock) {
+  pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
+};
 
 // == TEMPLATING ==
 
@@ -1352,34 +1353,38 @@ previewList.CSS = "" + <![CDATA[
   #keyshifter {position:absolute; top:-9999px}
   ]]>;
 
-// === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
-// Fixes relative URLs in {{{data}}} (e.g. as returned by AJAX call).
+// === {{{ CmdUtils.absUrl(data, baseUrl) }}} ===
+// Fixes relative URLs in {{{data}}} (e.g. as returned by Ajax calls).
 // Useful for displaying fetched content in command previews.
 //
 // {{{data}}} is the data containing relative URLs, which can be
 // an HTML string or a jQuery/DOM/XML object.
 //
-// {{{sourceUrl}}} is the URL used to fetch the data (that is to say;
-// the URL to which the relative paths are relative to).
+// {{{baseUrl}}} is the URL used for base
+// (that is to say; the URL that the relative paths are relative to).
 
-function absUrl(data, sourceUrl) {
+function absUrl(data, baseUrl) {
   var {uri} = Utils;
   switch (typeof data) {
     case "string": return data.replace(
-      /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
-      function absUrl_gsub(_, a, q, path) (
-        a + "=" + q + uri({uri: path, base: sourceUrl}).spec + q));
+      /<[^>]+>/g,
+      function absUrl_onTags(tag)
+      tag.replace(
+        /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/i,
+        function absUrl_onPath(_, a, q, path)
+        a + "=" + q + uri({uri: path, base: baseUrl}).spec + q));
     case "object": {
       let $data = this.__globalObject.jQuery(data);
-      for each (let name in ["href", "src", "action"])
-        $data.find("*[" + name + "]").andSelf().each(function absUrl_each(){
-          if (!("getAttribute" in this)) return;
-          var {spec} = uri({uri: this.getAttribute(name), base: sourceUrl});
+      for each (let name in ["href", "src", "action"]) {
+        let sl = "*[" + name + "]", fn = function absUrl_each() {
+          var {spec} = uri({uri: this.getAttribute(name), base: baseUrl});
           this.setAttribute(name, spec);
-        });
+        };
+        $data.filter(sl).each(fn).end().find(sl).each(fn);
+      }
       return data;
     }
-    case "xml": return XML(absUrl.call(this, data.toXMLString(), sourceUrl));
+    case "xml": return XML(absUrl.call(this, data.toXMLString(), baseUrl));
   }
   return null;
 }
