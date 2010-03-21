@@ -432,7 +432,7 @@ CmdUtils.makeSearchCommand({
   icon: "chrome://ubiquity/skin/icons/yahoo.ico",
   description: ("Searches <a href='http://search.yahoo.com/'>Yahoo!</a> " +
                 "for pages matching your words."),
-  parser : {
+  parser: {
     //TODO: Figure out some way around rate limits
     //Currently, Yahoo rate limits to 5000 queries per IP per day
     url: (
@@ -447,7 +447,8 @@ CmdUtils.makeSearchCommand({
     container: "ResultSet.Result",
     href: "Url",
     title: "Title",
-    body: "Summary",
+    // hack to fix the double-encoded result
+    body: function yahoo_summary() Utils.unescapeHtml(this.Summary),
     maxResults: 10,
   },
 });

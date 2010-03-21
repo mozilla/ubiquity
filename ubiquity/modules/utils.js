@@ -834,6 +834,21 @@ function escapeHtml(string) (
   .replace(/\"/g, "&quot;")
   .replace(/\'/g, "&#39;"));
 
+// === {{{ Utils.unescapeHtml(string) }}} ===
+// Returns a version of the {{{string}}} with all occurrences of HTML character
+// references (&spades; &#x2665; &#9827; etc.) in it decoded.
+
+function unescapeHtml(string) (
+  String.replace(string, /&#?\w+;/g, unescapeHtml.parse));
+unescapeHtml.parse = function unescapeHtml_parse(ref) {
+  var {div} = unescapeHtml_parse;
+  div.innerHTML = ref;
+  return div.textContent;
+};
+defineLazyProperty(unescapeHtml.parse, function div() (
+  Utils.hiddenWindow.document.createElementNS(
+    "http://www.w3.org/1999/xhtml", "div")));
+
 // === {{{ Utils.convertFromUnicode(toCharset, text) }}} ===
 // Encodes the given unicode text to a given character set.
 //

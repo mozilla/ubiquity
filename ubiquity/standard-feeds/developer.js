@@ -140,22 +140,15 @@ CmdUtils.CreateCommand({
   arguments: {object: noun_arb_text},
   preview: function uhe_preview(pb, {object: {html}}) {
     if (!html) return void this.previewDefault(pb);
-    pb.innerHTML = REP_WITH + "<br/><br/>" + this._unescape(html);
+    pb.innerHTML = REP_WITH + "<br/><br/>" + Utils.unescapeHtml(html);
   },
   execute: function uhe_execute({object: {html}}) {
     if (!html) return;
-    var uhtml = this._unescape(html);
-    var uuhtml = this._unescape(uhtml);
+    var uhtml = Utils.unescapeHtml(html);
+    var uuhtml = Utils.unescapeHtml(uhtml);
     if (CmdUtils.isSelected)
       CmdUtils.setSelection(uhtml, {text: uuhtml});
     else copyAndShow(uuhtml, this);
-  },
-  _unescape: function uhe_unescape(text) {
-    var div = Utils.hiddenWindow.document.createElement("div");
-    return text.replace(/&#?\w+;/g, function uhe_parse(ref) {
-      div.innerHTML = ref;
-      return div.textContent;
-    });
   },
 });
 
