@@ -108,10 +108,9 @@ function setSelection(context, content, options) {
   if (Utils.isTextBox(focusedElement)) {
     let plainText = options && options.text;
     if (!plainText) {
-      let html = (focusedElement.ownerDocument
-                  .createElementNS("http://www.w3.org/1999/xhtml", "html"));
-      html.innerHTML = "<div>" + content + "</div>";
-      plainText = html.textContent;
+      let rng = focusedElement.ownerDocument.createRange();
+      rng.selectNode(focusedElement);
+      plainText = rng.createContextualFragment(content).textContent;
     }
     let {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
     focusedElement.value = (
@@ -124,10 +123,8 @@ function setSelection(context, content, options) {
     return true;
   }
 
-  if (!focusedWindow) return false;
-
-  var sel = focusedWindow.getSelection();
-  if (!sel.rangeCount) return false;
+  var sel = focusedWindow && focusedWindow.getSelection();
+  if (!sel || !sel.rangeCount) return false;
 
   var range = sel.getRangeAt(0);
   var fragment = range.createContextualFragment(content);
