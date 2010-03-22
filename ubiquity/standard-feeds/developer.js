@@ -41,7 +41,8 @@ CmdUtils.CreateCommand({
   },
   _codes: function prettify_codes() {
     const SLCTR = "pre:not(.prettyprint), code:not(.prettyprint)";
-    var codes = CmdUtils.getSelectedNodes(SLCTR);
+    var codes = CmdUtils.getSelectedNodes(
+      function prettify_filter(node) $(node).is(SLCTR)); // For Fx3.5
     if (!codes.length)
       codes = $(context.focusedElement).closest(SLCTR).get();
     if (!codes.length)
