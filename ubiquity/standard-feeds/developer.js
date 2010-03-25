@@ -24,7 +24,7 @@ CmdUtils.CreateCommand({
     for each (let code in codes) code.className += " prettyprint";
     var doc = codes[0].ownerDocument;
     if (doc.getElementById(this._id))
-      this._onload(doc);
+      this._onload(doc.defaultView, doc);
     else {
       CmdUtils.injectCss("resource://ubiquity/scripts/prettify.css", doc)
         .id = this._id;
@@ -40,19 +40,33 @@ CmdUtils.CreateCommand({
     }
   },
   _codes: function prettify_codes() {
-    const SLCTR = "pre:not(.prettyprint), code:not(.prettyprint)";
-    var codes = CmdUtils.getSelectedNodes(
-      function prettify_filter(node) $(node).is(SLCTR)); // For Fx3.5
-    if (!codes.length)
-      codes = $(context.focusedElement).closest(SLCTR).get();
-    if (!codes.length)
-      codes = qsaa(CmdUtils.document, SLCTR);
+    var $nodes = $(CmdUtils.selectedNodes), slctr = this._selector;
+    var codes = $nodes.filter(slctr).get();
+    if (!codes.length) codes = $.unique($nodes.closest(slctr).get());
+    if (!codes.length) codes = qsaa(CmdUtils.document, slctr);
     return codes;
   },
-  _onload: function prettify_onload({location}) {
-    location.href = "javascript:prettyPrint()";
+  _onload: function prettify_onload(win, doc) {
+    win.wrappedJSObject.PR_TAB_WIDTH = 2;
+    switch (doc.contentType) {
+      case "text/html": case "application/xhtml+xml":
+      win.location = "javascript:prettyPrint()";
+      return;
+    }
+    for each (let pp in qsaa(doc, ".prettyprint")) {
+      // workaround for the view-source view's weird innerHTML behavior
+      let pre = Utils.hiddenWindow.document.createElementNS(
+        "http://www.w3.org/1999/xhtml", "pre");
+      for each (let a in Array.slice(pp.attributes))
+        pre.setAttribute(a.name, a.value);
+      pre.innerHTML = win.wrappedJSObject.prettyPrintOne(pp.innerHTML);
+      pp.parentNode.removeChild(pp);
+      doc.body.appendChild(pre);
+    }
   },
   _id: Math.random().toString(36).slice(2),
+  _selector: [e + ":not(.prettyprint)"
+              for each (e in ["pre", "code", "xmp"])].join(","),
 });
 
 CmdUtils.CreateCommand({
