@@ -93,10 +93,10 @@ var SFP = Utils.extend(SkinFeedPlugin.prototype, {
         me._feedManager.addSubscribedFeed({
           type: "ubiquity-skin",
           url: cssUrl, sourceUrl: cssUrl,
-          title: url,
+          title: pageUrl,
           sourceCode: css,
           canAutoUpdate: true,
-        }).getFeedForUrl(url).pick();
+        }).getFeedForUrl(cssUrl).pick();
         Utils.tabs.reload(/^about:ubiquity\?settings\b/);
       },
       error: Utils.log,
