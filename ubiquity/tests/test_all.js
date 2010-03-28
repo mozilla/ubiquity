@@ -611,6 +611,16 @@ function testUtilsPrefs() {
   }
 }
 
+function testUtilsEscapeUnescapeHtml() {
+  this.skipIfXPCShell();
+
+  var {escapeHtml, unescapeHtml} = Utils;
+  var html = Utils.hiddenWindow.document.documentElement.innerHTML;
+  this.assertEquals(
+    html += "&spades;'&#x2665;&#9827;",
+    unescapeHtml(unescapeHtml(escapeHtml(escapeHtml(html)))));
+}
+
 function testL10nUtilsPropertySelector() {
   var ps = LocalizationUtils.propertySelector("data:," + encodeURI(<![CDATA[
     foo=%S %S

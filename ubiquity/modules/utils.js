@@ -826,26 +826,30 @@ function signHMAC(algo, key, str) {
 // Useful when you just want to concatenate a bunch of strings into
 // an HTML fragment and ensure that everything's escaped properly.
 
-function escapeHtml(string) (
-  String(string)
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;")
-  .replace(/\"/g, "&quot;")
-  .replace(/\'/g, "&#39;"));
+function escapeHtml(s) String(s).replace(escapeHtml.re, escapeHtml.fn);
+escapeHtml.re = /[&<>\"\']/g;
+escapeHtml.fn = function escapeHtml_sub($) {
+  switch ($) {
+    case "&": return "&amp;";
+    case "<": return "&lt;";
+    case ">": return "&gt;";
+    case '"': return "&quot;";
+    case "'": return "&#39;";
+  }
+};
 
 // === {{{ Utils.unescapeHtml(string) }}} ===
 // Returns a version of the {{{string}}} with all occurrences of HTML character
-// references (&spades; &#x2665; &#9827; etc.) in it decoded.
+// references (e.g. &spades; &#x2665; &#9827; etc.) in it decoded.
 
-function unescapeHtml(string) (
-  String.replace(string, /&#?\w+;/g, unescapeHtml.parse));
-unescapeHtml.parse = function unescapeHtml_parse(ref) {
+function unescapeHtml(s) String(s).replace(unescapeHtml.re, unescapeHtml.fn);
+unescapeHtml.re = /(?:&#?\w+;)+/g;
+unescapeHtml.fn = function unescapeHtml_parse(ref) {
   var {div} = unescapeHtml_parse;
   div.innerHTML = ref;
   return div.textContent;
 };
-defineLazyProperty(unescapeHtml.parse, function div() (
+defineLazyProperty(unescapeHtml.fn, function div() (
   Utils.hiddenWindow.document.createElementNS(
     "http://www.w3.org/1999/xhtml", "div")));
 
