@@ -47,6 +47,7 @@ Cu.import("resource://ubiquity/modules/codesource.js");
 Cu.import("resource://ubiquity/modules/sandboxfactory.js");
 Cu.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
+const Global = this;
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.xhtml";
 const DEFAULT_FEED_TYPE = "commands";
 const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
@@ -219,67 +220,71 @@ function makeCodeSource(feedInfo, headerSources, footerSources) {
 
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                  headerSources, footerSources, jQuery) {
-  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
-    this.canAutoUpdate = true;
-  if (feedInfo.isBuiltIn)
-    for (let [k, v] in new Iterator(BuiltInFeedProto)) feedInfo[k] = v;
-
-  var self = this;
-  var codeSource = makeCodeSource(feedInfo, headerSources, footerSources);
-  var sandbox = {};
-  var bin = feedInfo.makeBin();
-
-  function teardown() {
-    for (let [k, v] in new Iterator(sandbox))
-      if (~k.lastIndexOf("teardown_", 0) && typeof v === 'function')
-        try { v() } catch (e) { Cu.reportError(e) }
-  }
-
-  function reset() {
-    teardown();
-    self.commands = {};
-  }
-
-  reset();
-
-  this.refresh = function DFPF_refresh(anyway) {
-    var code = codeSource.getCode();
-    if (anyway || codeSource.updated) {
-      reset();
-      sandbox = sandboxFactory.makeSandbox(codeSource);
-      sandbox.Bin = bin;
-      try {
-        sandboxFactory.evalInSandbox(code,
-                                     sandbox,
-                                     codeSource.codeSections);
-      } catch (e) {
-        //errorToLocalize
-        messageService.displayMessage({
-          text: "An exception occurred while loading code.",
-          exception: e,
-        });
-      }
-
-      for each (let cmd in sandbox.commands) {
-        let newCmd = makeCmdForObj(sandbox, cmd, feedInfo.uri);
-        self.commands[newCmd.id] = newCmd;
-      }
-
-      for each (let p in ["pageLoadFuncs", "ubiquityLoadFuncs"])
-        self[p] = sandbox[p];
-
-      feedInfo.metaData = sandbox.feed;
-
-      hub.notifyListeners("feed-change", feedInfo.uri);
-    }
+  var self = {
+    __proto__: feedInfo,
+    _hub: hub,
+    _messageService: messageService,
+    _sandboxFactory: sandboxFactory,
+    _codeSource: makeCodeSource(feedInfo, headerSources, footerSources),
+    _jQuery: jQuery,
+    _sandbox: {},
+    _bin: null,
+    commands: {},
+    canAutoUpdate: true,
   };
+  LocalUriCodeSource.isValidUri(feedInfo.srcUri) || delete self.canAutoUpdate;
 
-  this.checkForManualUpdate = function DFPF_checkForManualUpdate(cb) {
+  return Utils.extend(
+    self, DFPFeed.prototype, feedInfo.isBuiltIn && BuiltInFeedProto);
+}
+DFPFeed.prototype = {
+  constructor: DFPFeed,
+  toString: function DFPF_toString() "[object DefaultFeed]",
+
+  refresh: function DFPF_refresh(anyway) {
+    var codeSource = this._codeSource;
+    var code = codeSource.getCode();
+    if (!anyway && !codeSource.updated) return;
+
+    this.teardown();
+    this.commands = {};
+    var factory = this._sandboxFactory;
+    var sandbox = this._sandbox = factory.makeSandbox(codeSource);
+    sandbox.Bin = this._bin || (this._bin = this.makeBin());
+    try {
+      factory.evalInSandbox(code, sandbox, codeSource.codeSections);
+    } catch (e) {
+      //errorToLocalize
+      this._messageService.displayMessage({
+        text: "An exception occurred while loading a command feed.",
+        exception: e,
+      });
+    }
+
+    var {uri} = this;
+    for each (let cmd in sandbox.commands) {
+      let newCmd = makeCmdForObj(sandbox, cmd, uri);
+      this.commands[newCmd.id] = newCmd;
+    }
+    for each (let p in ["pageLoadFuncs", "ubiquityLoadFuncs"])
+      this[p] = sandbox[p];
+    this.metaData = sandbox.feed;
+    this._hub.notifyListeners("feed-change", uri);
+  },
+
+  checkForManualUpdate: function DFPF_checkForManualUpdate(cb) {
     if (LocalUriCodeSource.isValidUri(this.srcUri)) {
       cb(false);
       return;
     }
 
+    var self = this;
+    this._jQuery.ajax({
+      url: this.srcUri.spec,
+      dataType: "text",
+      success: onSuccess,
+      error: function onError() { cb(false) },
+    });
     function onSuccess(data) {
       if (data === self.getCode())
         cb(false);
@@ -290,28 +295,23 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
           updateCode: data,
         }));
     }
-    jQuery.ajax({
-      url: this.srcUri.spec,
-      dataType: "text",
-      success: onSuccess,
-      error: function onError() { cb(false) },
-    });
-  };
-
-  this.finalize = function DFPF_finalize() {
-    // Not sure exactly why, but we get memory leaks if we don't
-    // manually remove these.
-    jQuery = sandbox.jQuery = sandbox.$ = null;
-  };
-
-  this.purge = function DFPF_purge() {
-    teardown();
+  },
+  purge: function DFPF_purge() {
+    this.teardown();
     this.finalize();
     this.__proto__.purge();
-  };
-
-  this.__proto__ = feedInfo;
-}
+  },
+  teardown: function DFPF_teardown() {
+    for (let [k, v] in new Iterator(this._sandbox))
+      if (~k.lastIndexOf("teardown_", 0) && typeof v === "function")
+        try { v() } catch (e) { Cu.reportError(e) }
+  },
+  finalize: function DFPF_finalize() {
+    // Not sure exactly why, but we get memory leaks if we don't
+    // manually remove these.
+    this._jQuery = this._sandbox.jQuery = this._sandbox.$ = null;
+  },
+};
 
 function makeBuiltinGlobalsMaker(msgService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
@@ -319,44 +319,40 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/template.js");
   webJsm.importScript("resource://ubiquity/scripts/date.js");
 
-  var globalObjects = {};
+  var globalObjects = {__proto__: null};
+  var jsmExports = ["Components", "atob", "btoa"];
+  var webExports = [
+    "jQuery", "$", "Date", "Application", "DOMParser",
+    "KeyEvent", "XPathResult", "XMLHttpRequest", "XMLSerializer"];
+  function displayMessage(msg, cmd) {
+    if (Utils.classOf(msg) !== "Object") msg = {text: msg};
+    if (cmd) {
+      msg.icon  = cmd.icon;
+      msg.title = cmd.name;
+    }
+    msgService.displayMessage(msg);
+  }
 
   return function makeGlobals(codeSource) {
-    var {id} = codeSource;
-    if (!(id in globalObjects)) globalObjects[id] = {};
-
-    return {
-      XPathResult: webJsm.XPathResult,
-      XMLHttpRequest: webJsm.XMLHttpRequest,
-      jQuery: webJsm.jQuery,
-      $: webJsm.jQuery,
-      Template: webJsm.TrimPath,
-      Application: webJsm.Application,
-      Date: webJsm.Date,
-      KeyEvent: webJsm.KeyEvent,
-      Components: Components,
+    var {id} = codeSource, globals = {
       feed: {id: id, dom: codeSource.dom},
       context: {},
       commands: [],
       pageLoadFuncs: [],
       ubiquityLoadFuncs: [],
-      globals: globalObjects[id],
-      displayMessage: function displayMessage(msg, cmd) {
-        if (Utils.classOf(msg) !== "Object") msg = {text: msg};
-        if (cmd) {
-          msg.icon  = cmd.icon;
-          msg.title = cmd.name;
-        }
-        msgService.displayMessage(msg);
-      }
+      globals: globalObjects[id] || (globalObjects[id] = {}),
+      displayMessage: displayMessage,
+      Template: webJsm.TrimPath,
     };
-  }
+    for each (let key in jsmExports) globals[key] = Global[key];
+    for each (let key in webExports) globals[key] = webJsm[key];
+    return globals;
+  };
 }
 
 function makeBuiltins(languageCode, baseUri, parserVersion) {
   var basePartsUri = baseUri + "feed-parts/";
   var baseFeedsUri = baseUri + "builtin-feeds/";
-  //var baseScriptsUri = baseUri + "scripts/";
   return {
     feeds: {"Builtin Commands": baseFeedsUri + "builtincmds.js"},
     headers: [new LocalUriCodeSource(basePartsUri + "header/initial.js")],
