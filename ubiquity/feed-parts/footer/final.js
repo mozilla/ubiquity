@@ -1,65 +1,22 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Ubiquity.
- *
- * The Initial Developer of the Original Code is Mozilla.
- * Portions created by the Initial Developer are Copyright (C) 2007
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Atul Varma <atul@mozilla.com>
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
+(function finalize(me) {
+  var {hasRunOnce} = globals;
+  for (let name in new Iterator(me, true)) {
+    let _index = name.indexOf("_", 3);
+    if (_index < 0) continue;
 
-// This script is loaded into a Ubiquity sandbox once all other
-// code has been injected into it, so that it can perform any
-// necessary post-processing and other finalization on the
-// contents of the sandbox.
+    let func = me[name];
+    if (typeof func !== "function") continue;
 
-(function finalize() {
-  function findFunctionsWithPrefix(prefix) {
-    var re = RegExp("^" + prefix);
-    return [this[name] for (name in this)
-            if (re.test(name) && typeof this[name] === "function")];
+    switch (name.slice(0, _index)) {
+      case "cmd": CmdUtils.CreateCommand({
+        __proto__: func,
+        name: func.name.slice(_index + 1).replace("_", " ", "g"),
+        execute: func,
+      }); continue;
+      case "startup": hasRunOnce || func(); continue;
+      case "pageLoad": pageLoadFuncs.push(func); continue;
+      case "ubiquityLoad": ubiquityLoadFuncs.push(func); continue;
+    }
   }
-  const CMD_PREFIX = "cmd_";
-  for each (var func in findFunctionsWithPrefix(CMD_PREFIX))
-    CmdUtils.CreateCommand({
-      __proto__: func,
-      name: func.name.slice(CMD_PREFIX.length).replace(/_/g, " "),
-      execute: func,
-    });
-  var {push} = Array.prototype;
-  push.apply(pageLoadFuncs,
-             findFunctionsWithPrefix("pageLoad_"));
-  push.apply(ubiquityLoadFuncs,
-             findFunctionsWithPrefix("ubiquityLoad_"));
-
-  if (!globals.hasRunOnce) {
-    globals.hasRunOnce = true;
-    for each (var func in findFunctionsWithPrefix("startup_")) func();
-  }
-})();
+  globals.hasRunOnce = true;
+})(this);
