@@ -57,8 +57,6 @@ Cu.import("resource://ubiquity/tests/test_parser1.js");
 Cu.import("resource://ubiquity/tests/test_parser2.js");
 Cu.import("resource://ubiquity/tests/testing_stubs.js");
 
-var NLParser = NLParserMaker(1);
-
 var globalObj = this;
 
 function testXhtmlCodeSourceWorks() {
@@ -619,6 +617,23 @@ function testUtilsEscapeUnescapeHtml() {
   this.assertEquals(
     html += "&spades;'&#x2665;&#9827;",
     unescapeHtml(unescapeHtml(escapeHtml(escapeHtml(html)))));
+}
+
+function testUtilsEllipsify() {
+  this.skipIfXPCShell();
+
+  this.assertEquals(Utils.ellipsify("12345", 4), "123\u2026");
+  this.assertEquals(Utils.ellipsify("just an ellipsis", 1, "..."), "...");
+  this.assertEquals(Utils.ellipsify("nothing to ellipsify", 0), "");
+
+  var doc = Utils.hiddenWindow.document;
+  var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+  div.appendChild(doc.createTextNode("qwerty"));
+  for (let i = 3; i --> 0;) div.appendChild(div.cloneNode(true));
+  for (let i = div.textContent.length + 1; i --> 0; i -= 12) {
+    let {length} = Utils.ellipsify(div, i).textContent;
+    this.assert(length <= i, length + " <= " + i);
+  }
 }
 
 function testL10nUtilsPropertySelector() {
