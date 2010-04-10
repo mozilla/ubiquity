@@ -349,12 +349,11 @@ function onPageLoad(callback, includes, excludes) {
   var {pageLoadFuncs} = this.__globalObject;
   if (!includes && !excludes) return pageLoadFuncs.push(callback);
 
-  function enwild(a)
-    Utils.regexp.quote(String(a).replace(/[*]/g, "\0")).replace(/\0/g, ".*?");
-  [includes, excludes] = [includes || /^/, excludes].map(
-    function toRegExps(filters) [
-      Utils.classOf(f) === "RegExp" ? f : RegExp("^" + enwild(f) + "$")
-      for each (f in [].concat(filters || []))]);
+  function enwild(a) Utils.regexp.quote(a).replace(/\\[*]/g, ".*?");
+  function toRegExps(filters) [
+    Utils.classOf(f) === "RegExp" ? f : RegExp("^" + enwild(f) + "$")
+    for each (f in [].concat(filters || []))];
+  [includes, excludes] = [includes || /^/, excludes].map(toRegExps);
   return pageLoadFuncs.push(function pageLoadProxy(document) {
     var {href} = document.location;
     for each (let r in excludes) if (r.test(href)) return;

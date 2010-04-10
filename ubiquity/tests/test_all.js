@@ -507,7 +507,7 @@ function testUtilsRegexp() {
   this.assertEquals(uneval(Utils.regexp("[")),
                     uneval(/\[/));
   this.assertEquals(Utils.regexp.quote("[^.^]"),
-                    "\\[\\^\\.\\^\\]");
+                    "\\[\\^\\.\\^]");
   var words = ["foobar", "fooxar", "foozap", "fooza"]
   var re = Utils.regexp.Trie(words).toRegExp();
   for each (let word in words) this.assert(re.test(word), [re, word]);

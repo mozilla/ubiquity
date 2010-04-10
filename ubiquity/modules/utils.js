@@ -1303,7 +1303,7 @@ function regexp(pattern, flags) {
 // Returns the {{{string}}} with all regexp meta characters in it backslashed.
 
 regexp.quote = function re_quote(string) (
-  String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"));
+  String(string).replace(/[.?*+^$|()\{\[\\]/g, "\\$&"));
 
 // === {{{ Utils.regexp.Trie(strings, asPrefixes) }}} ===
 // Creates a {{{RegexpTrie}}} object that builds an efficient regexp
