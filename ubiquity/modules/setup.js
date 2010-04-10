@@ -306,20 +306,17 @@ var UbiquitySetup = {
   setupWindow: function setupWindow(window) {
     gServices.feedManager.installToWindow(window);
 
-    const PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
-
-    function onPageLoad(aEvent) {
-      var isEnabled = gPrefs.getValue(PAGE_LOAD_PREF, true);
-      if (!isEnabled)
-        return;
-
-      if (aEvent.originalTarget.location)
-        gServices.commandSource.onPageLoad(aEvent.originalTarget);
+    function onPageLoad(event) {
+      if (gPrefs.get("extensions.ubiquity.enablePageLoadHandlers", true) &&
+          event.originalTarget.location)
+        gServices.commandSource.onPageLoad(event.originalTarget);
     }
 
-    var appcontent = window.document.getElementById("appcontent");
-    if (appcontent)
-      appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
+    for each (let id in ["appcontent", "sidebar"]) {
+      let browser = window.document.getElementById(id);
+      if (browser)
+        browser.addEventListener("DOMContentLoaded", onPageLoad, true);
+    }
   },
 
   get languageCode getLanguageCode()
