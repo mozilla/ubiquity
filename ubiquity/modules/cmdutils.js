@@ -918,7 +918,7 @@ function makeSearchCommand(options) {
     options.description = L(
       "ubiquity.cmdutils.searchdescription",
       "defaultUrl" in options ? htmlName.link(options.defaultUrl) : htmlName);
-  if (!("arguments" in options) || !("argument" in options))
+  if (!("arguments" in options || "argument" in options))
     options.argument = this.__globalObject.noun_arb_text;
   if (!("execute" in options)) options.execute = makeSearchCommand.execute;
   if (!("preview" in options)) {
