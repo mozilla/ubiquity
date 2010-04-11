@@ -1885,7 +1885,7 @@ ParseQuery.prototype = {
 
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
-      if (parse.args.__count__ === 0)
+      if (Utils.isEmpty(parse.args))
         // This parse doesn't have any arguments. Complete it now.
         Utils.setTimeout(function completeNow(thisQuery, parse) {
           thisQuery.completeParse(parse);

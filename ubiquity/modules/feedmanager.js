@@ -501,7 +501,7 @@ var Bin = {
 
   // === {{{ Bin.valueOf() }}} ===
   // Returns the number of keys currently stored.
-  valueOf: function valueOf() this.__bin__.__count__,
+  valueOf: function valueOf() Utils.count(this.__bin__),
 
   toJSON: function toJSON() this.__bin__,
   toString: function toString() "[object Bin]",

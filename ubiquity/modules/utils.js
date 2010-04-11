@@ -702,7 +702,7 @@ Utils.isArray = Array.isArray || function isArray(val) {
 // Returns whether or not the {{{value}}} has no own properties.
 
 function isEmpty(val) {
-  if (val) for (var _ in new Iterator(val, true)) return false;
+  if (val) for ([] in new Iterator(val, true)) return false;
   return true;
 }
 
@@ -711,6 +711,16 @@ function isEmpty(val) {
 // See [[http://bit.ly/CkhjS#instanceof-considered-harmful]].
 
 function classOf(val) ToString.call(val).slice(8, -1);
+
+// === {{{ Utils.count(object) }}} ===
+// Returns the number of {{{object}}}'s own properties,
+// emulating (now obsolete) {{{__count__}}}. See [[http://bugzil.la/551529]].
+
+function count(obj) {
+  var num = 0;
+  if (obj) for ([] in new Iterator(obj, true)) ++num;
+  return num;
+}
 
 // === {{{ Utils.powerSet(set) }}} ===
 // Creates a [[http://en.wikipedia.org/wiki/Power_set|power set]] of
@@ -1032,8 +1042,7 @@ function BrowserTab(tabbrowser_tab) ({
   __proto__: BrowserTab.prototype,
   raw: tabbrowser_tab,
 });
-BrowserTab.prototype = {
-  constructor: BrowserTab,
+extend(BrowserTab.prototype, {
   get browser BT_getBrowser() this.raw.linkedBrowser,
   get tabbrowser BT_getTabbrowser() this.browser.getTabBrowser(),
   get uri BT_getUri() this.browser.currentURI,
@@ -1081,7 +1090,7 @@ BrowserTab.prototype = {
     tabbrowser.moveTabTo(this.raw, tabbrowser.browsers.length);
     return this;
   },
-};
+});
 
 // == {{{ Utils.tabs }}} ==
 // Iterates all tabs currently opened as {{{Utils.BrowserTab}}}.
@@ -1317,20 +1326,20 @@ regexp.quote = function re_quote(string) (
 // on initialization.
 
 regexp.Trie = function RegexpTrie(strings, asPrefixes) {
-  var me = {$: {}, __proto__: arguments.callee.prototype};
+  var me = {$: {__proto__: null}, __proto__: RegexpTrie.prototype};
   if (strings) {
     let add = asPrefixes ? "addPrefixes" : "add";
     for each (let str in strings) me[add](str);
   }
   return me;
 };
-regexp.Trie.prototype = {
-  constructor: regexp.Trie,
+extend(regexp.Trie.prototype, {
   // ** {{{ RegexpTrie#add(string) }}} **\\
   // Adds {{{string}}} to the Trie and returns self.
   add: function RegexpTrie_add(string) {
     var ref = this.$;
-    for each (let char in string) ref = ref[char] || (ref[char] = {});
+    for each (let char in string)
+      ref = ref[char] || (ref[char] = {__proto__: null});
     ref[""] = 1; // {"": 1} as terminator
     return this;
   },
@@ -1341,7 +1350,8 @@ regexp.Trie.prototype = {
   // }}}
   addPrefixes: function RegexpTrie_addPrefixes(string) {
     var ref = this.$;
-    for each (let char in string) ref = ref[char] || (ref[char] = {"": 1});
+    for each (let char in string)
+      ref = ref[char] || (ref[char] = {"": 1, __proto__: null});
     return this;
   },
   // ** {{{ RegexpTrie#toString() }}} **\\
@@ -1351,8 +1361,8 @@ regexp.Trie.prototype = {
   // Returns a regexp representation of the Trie with {{{flag}}}.
   toRegExp: function RegexpTrie_toRegExp(flag) RegExp(this, flag),
   _regexp: function RegexpTrie__regexp($) {
-    I_MISS___count__: if ("" in $) {
-      for (let k in $) if (k) break I_MISS___count__;
+    LEAF_CHECK: if ("" in $) {
+      for (let k in $) if (k) break LEAF_CHECK;
       return "";
     }
     var {quote} = regexp, alt = [], cc = [], q;
@@ -1369,7 +1379,7 @@ regexp.Trie.prototype = {
     if (q) result = cconly ? result + "?" : "(?:" + result + ")?";
     return result || "";
   },
-};
+});
 
 // == {{{ Utils.gist }}} ==
 // [[http://gist.github.com/|Gist]] related functions.
