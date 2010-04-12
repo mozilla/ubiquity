@@ -83,11 +83,8 @@ Ubiquity.prototype = {
   constructor: Ubiquity,
   toString: function U_toString() "[object Ubiquity]",
 
-  __DEFAULT_INPUT_DELAY: 50,
-  __DEFAULT_INPUT_LIMIT: 512,
-
-  __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
-  __KEYCODE_TAB  : KeyEvent.DOM_VK_TAB,
+  __KEYCODE_EXECUTE : KeyEvent.DOM_VK_RETURN,
+  __KEYCODE_COMPLETE: KeyEvent.DOM_VK_TAB,
 
   __KEYMAP_MOVE_INDICATION: {
     38: "moveIndicationUp",
@@ -127,13 +124,13 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#inputDelay }}} ===
   // Delay between the user's last keyup and parsing in milliseconds.
-  get inputDelay U_getInputDelay() this.__prefs.getValue(
-    "extensions.ubiquity.inputDelay", this.__DEFAULT_INPUT_DELAY),
+  get inputDelay U_getInputDelay()
+    this.__prefs.get("extensions.ubiquity.inputDelay"),
 
   // === {{{ Ubiquity#inputLimit }}} ===
   // Input length where Ubiquity starts to hesitate parsing. See #507.
-  get inputLimit U_getInputLimit() this.__prefs.getValue(
-    "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
+  get inputLimit U_getInputLimit()
+    this.__prefs.get("extensions.ubiquity.inputLimit"),
 
   __onmousemove: function U__onMouseMove(event) {
     this.__x = event.screenX;
@@ -141,18 +138,7 @@ Ubiquity.prototype = {
   },
 
   __onkeydown: function U__onKeyDown(event) {
-    var {keyCode} = this.__lastKeyEvent = event;
-
-    var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
-    if (move) {
-      this.__cmdManager[move](this.__makeContext());
-      return true;
-    }
-    if (keyCode === this.__KEYCODE_TAB) {
-      var {completionText} = this.__cmdManager.hilitedSuggestion || 0;
-      if (completionText) this.__textBox.value = completionText;
-      return true;
-    }
+    this.__lastKeyEvent = event;
   },
 
   __onkeyup: function U__onKeyup(event) {
@@ -168,16 +154,27 @@ Ubiquity.prototype = {
   },
 
   __onkeypress: function U__onKeyPress(event) {
-    var {keyCode, which} = event;
+    var {keyCode, which, ctrlKey, altKey} = event;
 
-    if (event.ctrlKey && event.altKey && which &&
-        this.__cmdManager.previewer.activateAccessKey(which))
-      return true;
+    if (ctrlKey && altKey && which &&
+        this.__cmdManager.previewer.activateAccessKey(which)) return true;
 
-    if (keyCode === this.__KEYCODE_ENTER) {
-      this.__processInput(true);
+    if (keyCode === this.__KEYCODE_EXECUTE) {
       this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
+      return true;
+    }
+
+    if (ctrlKey || altKey || event.metaKey) return;
+
+    if (keyCode === this.__KEYCODE_COMPLETE) {
+      var {completionText} = this.__cmdManager.hilitedSuggestion || 0;
+      if (completionText) this.__textBox.value = completionText;
+      return true;
+    }
+    var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
+    if (move) {
+      this.__cmdManager[move](this.__makeContext());
       return true;
     }
     var rate = this.__KEYMAP_SCROLL_RATE[keyCode];
@@ -272,8 +269,6 @@ Ubiquity.prototype = {
 
   // == Public Methods ==
 
-  setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {},
-
   // === {{{ Ubiquity#execute(input) }}} ===
   // Executes {{{input}}} or the highlighted suggestion.
   // If {{{input}}} is provided but empty, the current entry is used instead.
@@ -284,8 +279,8 @@ Ubiquity.prototype = {
     if (external) {
       if (input) this.__textBox.value = input;
       this.__lastValue = "";
-      this.__processInput(true, context);
     }
+    this.__processInput(true, context);
     this.__cmdManager.execute(context);
   },
 
