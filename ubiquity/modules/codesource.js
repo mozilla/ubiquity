@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -48,8 +49,8 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/xml_script_commands_parser.js");
 
-const VALID_SCHEMES_REMOTE = ["http", "https"];
-const VALID_SCHEMES_LOCAL  = ["file", "chrome", "resource", "ubiquity"];
+const VALID_SCHEMES_REMOTE = {http: 1, https: 1};
+const VALID_SCHEMES_LOCAL  = {file: 1, chrome: 1, resource: 1, ubiquity: 1};
 
 var gRPH = (Utils.IOService.getProtocolHandler("resource")
             .QueryInterface(Ci.nsIResProtocolHandler));
@@ -109,8 +110,8 @@ function RemoteUriCodeSource(feedInfo, timeoutInterval) {
   this._cache = null;
 };
 
-RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) (
-  VALID_SCHEMES_REMOTE.indexOf(Utils.uri(uri).scheme) >= 0);
+RemoteUriCodeSource.isValidUri =
+function RUCS_isValidUri(uri) Utils.uri(uri).scheme in VALID_SCHEMES_REMOTE;
 
 RemoteUriCodeSource.prototype = {
   getCode: function RUCS_getCode() {
@@ -158,8 +159,8 @@ function LocalUriCodeSource(uri) {
     try { this.uri = Utils.uri(gRPH.resolveURI(this.uri)) } catch (e) {}
 }
 
-LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) (
-  VALID_SCHEMES_LOCAL.indexOf(Utils.uri(uri).scheme) >= 0);
+LocalUriCodeSource.isValidUri =
+function LUCS_isValidUri(uri) Utils.uri(uri).scheme in VALID_SCHEMES_LOCAL;
 
 LocalUriCodeSource.prototype = {
   // The throwNoError property will turn off the
@@ -208,7 +209,7 @@ LocalUriCodeSource.prototype = {
 function XhtmlCodeSource(codeSource) {
   var dom = null;
   var codeSections = null;
-  var finalCode = null;
+  var finalCode = "";
 
   this.__defineGetter__("dom", function XCS_dom() dom);
   this.__defineGetter__("id", function XCS_id() codeSource.id);
