@@ -52,6 +52,7 @@
 
 function Ubiquity(msgPanel, textBox, cmdManager) {
   Cu.import("resource://ubiquity/modules/utils.js", this);
+  Cu.import("resource://ubiquity/modules/cmdhistory.js", this);
 
   this.__msgPanel = msgPanel;
   this.__textBox = textBox;
@@ -67,6 +68,8 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   textBox.addEventListener("keydown", this, false);
   textBox.addEventListener("keypress", this, false);
   textBox.addEventListener("keyup", this, false);
+  textBox.addEventListener("blur", this, false);
+  textBox.addEventListener("DOMMouseScroll", this, false);
 
   msgPanel.addEventListener("popupshowing", this, false);
   msgPanel.addEventListener("popupshown", this, false);
@@ -165,24 +168,39 @@ Ubiquity.prototype = {
       return true;
     }
 
-    if (ctrlKey || altKey || event.metaKey) return;
+    if (altKey || event.metaKey) return;
 
     if (keyCode === this.__KEYCODE_COMPLETE) {
-      var {completionText} = this.__cmdManager.hilitedSuggestion || 0;
-      if (completionText) this.__textBox.value = completionText;
+      if (ctrlKey) this.CommandHistory.complete(this, event.shiftKey);
+      else {
+        let {completionText} = this.__cmdManager.hilitedSuggestion || 0;
+        if (completionText) this.__textBox.value = completionText;
+      }
       return true;
     }
     var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
     if (move) {
-      this.__cmdManager[move](this.__makeContext());
+      if (ctrlKey) this.CommandHistory.go(this, keyCode - 39);
+      else this.__cmdManager[move](this.__makeContext());
       return true;
     }
+
+    if (ctrlKey) return;
+
     var rate = this.__KEYMAP_SCROLL_RATE[keyCode];
     if (rate) {
       let [x, y] = event.shiftKey ? [rate, 0] : [0, rate];
       this.__cmdManager.previewer.scroll(x, y);
       return true;
     }
+  },
+
+  __onblur: function U__onBlur() {
+    this.CommandHistory.add(this.__textBox.value);
+  },
+
+  __onDOMMouseScroll: function U__onMouseScroll(event) {
+    this.CommandHistory.go(this, event.detail > 0 ? 1 : -1);
   },
 
   __delayedProcessInput: function U__delayedProcessInput(self, context) {
@@ -229,6 +247,8 @@ Ubiquity.prototype = {
     var unfocused = this.__focusedWindow;
     if (unfocused) unfocused.focus();
     this.__focusedWindow = this.__focusedElement = null;
+
+    gBrowser.mTabBox.handleCtrlTab = this.__handleCtrlTab;
   },
 
   __onpopupshowing: function U__onShowing() {
@@ -238,8 +258,14 @@ Ubiquity.prototype = {
   },
 
   __onpopupshown: function U__onShown() {
-    this.__textBox.focus();
-    this.__textBox.select();
+    // prevent the tabbox from capturing our ctrl+tab
+    var tabox = gBrowser.mTabBox;
+    this.__handleCtrlTab = tabox.handleCtrlTab;
+    tabox.handleCtrlTab = false;
+
+    var {__textBox} = this;
+    __textBox.focus();
+    __textBox.select();
   },
 
   __onclick: function U__onClick(event) {

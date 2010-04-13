@@ -55,6 +55,7 @@ const BugReport = (
 const {prefs} = Utils;
 
 Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/cmdhistory.js");
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
@@ -172,7 +173,7 @@ CmdUtils.CreateCommand({
   },
 });
 
-(function toggleCommand(names, desc, nt, disabled, tmpl) {
+(function ToggleCommand(names, desc, nt, disabled, tmpl) {
   CmdUtils.CreateCommand({
     names: names,
     icon: "chrome://ubiquity/skin/icons/favicon.ico",
@@ -192,7 +193,7 @@ CmdUtils.CreateCommand({
         : this.description);
     }
   });
-  return arguments.callee;
+  return ToggleCommand;
 })
 (["disable command"],
  ("Disables a Ubiquity command, so that it will no longer " +
@@ -206,37 +207,6 @@ CmdUtils.CreateCommand({
  false,
  _("Enables ${name}."));
 
-var CmdHst = {
-  PREF_BIN: "extensions.ubiquity.history.bin",
-  PREF_MAX: "extensions.ubiquity.history.max",
-  DEFAULT_MAX: 42,
-  SEPARATOR: "\n",
-  add: function CH_add(str) {
-    if (!str) return this;
-    var bin = this.get(), idx = bin.indexOf(str);
-    if (~idx) bin.unshift(bin.splice(idx, 1)[0]);
-    else {
-      var max = prefs.getValue(this.PREF_MAX, this.DEFAULT_MAX);
-      if (bin.unshift(str) > max) bin.length = max;
-    }
-    return this._save();
-  },
-  get: function CH_get() {
-    if ("_bin" in this) return this._bin;
-    var a = prefs.getValue(this.PREF_BIN, "").split(this.SEPARATOR);
-    return this._bin = [h for each (h in a) if (h)];
-  },
-  set: function CH_set(arr) {
-    var bin = this.get();
-    bin.splice.apply(bin, [0, 1/0].concat(arr));
-    return this._save();
-  },
-  _save: function CH__save() {
-    prefs.setValue(this.PREF_BIN, this._bin.join(this.SEPARATOR));
-    return this;
-  },
-};
-
 CmdUtils.CreateCommand({
   names: ["command history", "vita"],
   arguments: {"object filter": noun_arb_text},
@@ -246,25 +216,25 @@ CmdUtils.CreateCommand({
     <li>Use accesskey or click to reuse.</li>
     <li>Type to filter.</li>
     <li>Execute to delete all matched histories.</li>
-    <li>Edit <a href="about:config"><code>{CmdHst.PREF_MAX}</code></a> to
-      set max number of histories.</li></ul>),
+    <li>Edit <a href="about:config"><code>{CommandHistory.PREF_MAX}</code></a
+      > to set max number of histories.</li></ul>),
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   execute: function cmdh_execute({object: {text}}) {
-    var bin = CmdHst.get();
+    var bin = CommandHistory.get();
     if (!bin.length) return;
     if (text) {
       var rem = this._filter(bin, text, true);
       if (rem.length === bin.length) return;
-      CmdHst.set(rem);
+      CommandHistory.set(rem);
       this._say(_("Deleted matched histories. Click here to undo."),
-                function cmdh__undo() { CmdHst.set(bin) });
+                function cmdh__undo() { CommandHistory.set(bin) });
     }
     else this._say(_('Type "^" to delete all.'));
   },
   preview: function cmdh_preview(pb, args) {
-    var his = this._filter(CmdHst.get(), args.object.text);
+    var his = this._filter(CommandHistory.get(), args.object.text);
     if (!his.length) {
       pb.innerHTML = "<em>" + _("No histories match.") + "</em>" + this.help;
       return;
@@ -287,56 +257,6 @@ CmdUtils.CreateCommand({
     return his;
   },
 });
-
-function ubiquityLoad_commandHistory(U) {
-  var cursor = -1, {textBox} = U;
-  function go(num){
-    var bin = CmdHst.get();
-    if (cursor < 0 && textBox.value) {
-      CmdHst.add(textBox.value);
-      cursor = 0;
-    }
-    cursor -= num;
-    if (cursor < -1 || bin.length <= cursor) cursor = -1;
-    U.preview(bin[cursor] || "");
-  }
-  function halt(event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  textBox.parentNode.addEventListener("keydown", function cmdh_onKey(ev) {
-    if (!ev.ctrlKey || ev.altKey || ev.metaKey) return;
-    switch (ev.keyCode) {
-      case 38: case 40: // UP DOWN
-      go(ev.keyCode - 39);
-      return halt(ev);
-    }
-    if (ev.keyCode === KeyEvent.DOM_VK_TAB) {
-      var text = Utils.trim(textBox.value);
-      if (!text) return;
-      var bin = CmdHst.get();
-      if (ev.shiftKey) bin = bin.slice().reverse();
-      var vi = bin.indexOf(text) + 1;
-      if (vi) bin = bin.slice(vi);
-      var keyEnd = textBox.selectionStart || text.length;
-      var re = RegExp("^" + Utils.regexp.quote(text.slice(0, keyEnd)), "i");
-      for each (var his in bin) if (re.test(his)) {
-        U.preview(his);
-        textBox.selectionStart = keyEnd;
-        textBox.selectionEnd = textBox.textLength;
-        break;
-      }
-      return halt(ev);
-    }
-  }, true);
-  textBox.addEventListener("DOMMouseScroll", function cmdh_onWheel(ev) {
-    go(ev.detail > 0 ? 1 : -1);
-  }, false);
-  textBox.addEventListener("blur", function cmdh_saveEntry() {
-    CmdHst.add(textBox.value);
-    cursor = -1;
-  }, false);
-}
 
 function startup_openUbiquityWelcomePage() {
   if (UbiquitySetup.isNewlyInstalledOrUpgraded)
