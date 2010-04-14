@@ -99,52 +99,20 @@ for each (let g in ["document", "documentInsecure",
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
-// {{{CmdUtils}}} imports and wraps the following properties/methods from
-// [[#modules/contextutils.js|ContextUtils]].
+// {{{CmdUtils}}} inherits [[#modules/contextutils.js|ContextUtils]].
+// The methods are wrapped so that the {{{context}}} argument isn't needed.
+// (i.e. {{{CmdUtils.getSelection("")}}} is equivalent to
+// {{{ContextUtils.getSelection(context, "")}}})
 
-// === {{{ CmdUtils.isSelected }}} ===
-// Whether or not the user has one or more non-collapsed selections.
-
-// === {{{ CmdUtils.getSelection() }}} ===
-// Returns a string containing the text and just the text of the user's
-// current selection, i.e. with HTML tags stripped out.
-
-// === {{{ CmdUtils.getHtmlSelection() }}} ===
-// Returns a string containing the HTML representation of the
-// user's current selection, i.e. text including tags.
-
-// === {{{ CmdUtils.getSelectedNodes(selector) }}} ===
-// Returns selected nodes as filtered by {{{selector}}},
-// which can be either a CSS string or a function.
-
-// === {{{ CmdUtils.getSelectionObject() }}} ===
-// Returns an object containing both the plain-text and HTML selections. Usage:
-// {{{
-// let {text, html} = CmdUtils.selectionObject;
-// }}}
-
-// === {{{ CmdUtils.setSelection(content, options) }}} ===
-// Replaces the current selection with new content.
-//
-// {{{content}}} is the HTML string to set as the selection.
-//
-// {{{options}}} is a dictionary; if it has a {{{text}}} property then
-// that value will be used in place of the html if we're in
-// a plain-text-only editable field.
-
-for each (let m in ["getSelection", "getHtmlSelection", "getSelectedNodes",
-                    "getSelectionObject", "getIsSelected", "setSelection"]) {
-  eval(<><![CDATA[
+eval([String(<![CDATA[
+  CmdUtils["__define" + "@"[0].toUpperCase() + "etter__"](
+    "@"[3].toLowerCase() + "@".slice(4),
     CmdUtils.@ = function @(x, y) {
       var c = this.__globalObject.context || {};
       "focusedWindow" in c && "focusedElement" in c ||
         (c = Utils.currentChromeWindow.document.commandDispatcher);
       return ContextUtils.@(c, x, y);
-    };
-    ]]></>.toString().replace(/@/g, m));
-  CmdUtils["__define" + m[0].toUpperCase() + "etter__"](
-    m[3].toLowerCase() + m.slice(4), CmdUtils[m]);
-}
+    })]]>).replace(/@/g, name) for (name in ContextUtils)].join(';'));
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
 // See [[#modules/utils.js|Utils]]{{{.log}}}.

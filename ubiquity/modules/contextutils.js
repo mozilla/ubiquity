@@ -51,47 +51,49 @@ var EXPORTED_SYMBOLS = ["ContextUtils"];
 var ContextUtils = {};
 
 for each (let f in this) if (typeof f === "function") ContextUtils[f.name] = f;
+delete ContextUtils.QueryInterface;
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-// === {{{ ContextUtils.getHtmlSelection(context) }}} ===
+// === {{{ ContextUtils.getHtmlSelection(context, joint = "<hr/>") }}} ===
+// Returns a string containing the HTML representation of the
+// user's current selection, i.e. text including tags.
+//
+// {{{joint}}} is an optional HTML string to join multiple selections.
 
-function getHtmlSelection(context) {
-  var range = cloneFirstRange(context);
-  if (!range) return "";
-
-  var div = context.focusedWindow.document.createElement("div");
-  div.appendChild(range.cloneContents());
-  range.detach();
-  // fix for #551
-  Array.forEach(div.getElementsByTagName("*"), Utils.absolutifyUrlAttribute);
-  return div.innerHTML;
+function getHtmlSelection(context, joint) {
+  var htms = [];
+  for each (let range in getRanges(context)) {
+    let fragment = range.cloneContents();
+    let div = fragment.ownerDocument.createElement("div");
+    div.appendChild(fragment);
+    // fix for #551
+    Array.forEach(div.getElementsByTagName("*"), Utils.absolutifyUrlAttribute);
+    htms.push(div.innerHTML);
+  }
+  return htms.join(joint == null ? "<hr/>" : joint);
 }
 
-// === {{{ ContextUtils.getSelection(context) }}} ===
+// === {{{ ContextUtils.getSelection(context, joint = "\n\n") }}} ===
+// Returns a string containing the text and just the text of the user's
+// current selection, i.e. with HTML tags stripped out.
+//
+// {{{joint}}} is an optional string to join multiple selections.
 
-function getSelection(context) {
+function getSelection(context, joint) {
   var {focusedElement} = context;
   if (Utils.isTextBox(focusedElement)) {
     let {selectionStart: ss, selectionEnd: se} = focusedElement;
     if (ss !== se) return focusedElement.value.slice(ss, se);
   }
-
-  var range = cloneFirstRange(context);
-  if (range) {
-    let result = range.toString();
-    range.detach();
-    return result;
-  }
-
-  return "";
+  return getRanges(context).join(joint == null ? "\n\n" : joint);
 }
 
 // === {{{ ContextUtils.setSelection(context, content, options) }}} ===
 // Replaces the current selection with {{{content}}}.
 // Returns {{{true}}} if succeeds, {{{false}}} if not.
 //
-// {{{content}}} is the HTML string.
+// {{{content}}} is the HTML string to set as the selection.
 //
 // {{{options}}} is a dictionary; if it has a {{{text}}} property then
 // that value will be used in place of the HTML if we're in
@@ -141,8 +143,8 @@ function setSelection(context, content, options) {
 
 // === {{{ ContextUtils.getSelectionObject(context) }}} ===
 // Returns an object that bundles up both the plain-text and HTML
-// selections.  If there is no html selection, the plain-text selection
-// is used for both.
+// selections into its {{{text}}} and {{{html}}} properties.
+// If there is no HTML selection, {{{html}}} will be HTML-escaped {{{text}}}.
 
 function getSelectionObject(context) {
   var selection = getSelection(context);
@@ -162,9 +164,9 @@ function getSelectionObject(context) {
 
 function getSelectedNodes(context, selector) {
   const ELEMENT = 1, TEXT = 3;
-  var nodes = [], win = context.focusedWindow, sel = win && win.getSelection();
-  if (sel) for (let i = 0, c = sel.rangeCount; i < c; ++i) {
-    let range = sel.getRangeAt(i), node = range.startContainer;
+  var nodes = [];
+  for each (let range in getRanges(context)) {
+    let node = range.startContainer;
     if (node.nodeType === TEXT &&
         /\S/.test(node.nodeValue.slice(range.startOffset)))
       nodes.push(node.parentNode);
@@ -204,10 +206,11 @@ function getIsSelected(context) (
     ? flm.selectionStart < flm.selectionEnd
     : !context.focusedWindow.getSelection().isCollapsed));
 
-// ==== {{{ ContextUtils.cloneFirstRange(context) }}} ====
-// Returns a copy of the first range in selection.
+// === {{{ ContextUtils.getRanges(context) }}} ===
+// Returns an array of all DOM ranges in selection.
 
-function cloneFirstRange(context) {
-  var win = context.focusedWindow, sel = win && win.getSelection();
-  return sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+function getRanges(context) {
+  var rngs = [], win = context.focusedWindow, sel = win && win.getSelection();
+  if (sel) for (let i = sel.rangeCount; i--;) rngs[i] = sel.getRangeAt(i);
+  return rngs;
 }
