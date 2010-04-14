@@ -155,35 +155,44 @@ function getSelectionObject(context) {
 // === {{{ ContextUtils.getSelectedNodes(context, selector) }}} ===
 // Returns all nodes in all selections.
 //
-// {{{selector}}} is an optional CSS selector string or a function
-// that filters each node.
+// {{{selector}}} is an optional node filter that can be either of:
+// * CSS selector string
+// * number represeting node type (https://developer.mozilla.org/en/nodeType)
+// * function returning boolean for each node
 
 function getSelectedNodes(context, selector) {
-  var nodes = [], win = context.focusedWindow, sel = win && win.getSelection();
-  if (!sel) return nodes;
   const ELEMENT = 1, TEXT = 3;
-  var aua = Utils.absolutifyUrlAttribute, ok = selector;
-  if (typeof ok !== "function")
-    ok = !selector ? Boolean : function gsn_ok(node) {
-      return node.nodeType === ELEMENT && node.mozMatchesSelector(selector);
-    };
-  for (let i = 0, l = sel.rangeCount; i < l; ++i) {
+  var nodes = [], win = context.focusedWindow, sel = win && win.getSelection();
+  if (sel) for (let i = 0, c = sel.rangeCount; i < c; ++i) {
     let range = sel.getRangeAt(i), node = range.startContainer;
     if (node.nodeType === TEXT &&
-        /\S/.test(node.nodeValue.slice(range.startOffset))) {
-      let pn = node.parentNode;
-      if (ok(pn)) nodes.push(aua(pn));
-    }
+        /\S/.test(node.nodeValue.slice(range.startOffset)))
+      nodes.push(node.parentNode);
     WALK: do {
-      if (ok(node)) nodes.push(aua(node));
+      nodes.push(node);
       if (node.hasChildNodes()) node = node.firstChild;
       else {
         while (!node.nextSibling) if (!(node = node.parentNode)) break WALK;
         node = node.nextSibling;
       }
-    } while (range.isPointInRange(node, 0));
+    } while (node.nodeType === TEXT || range.isPointInRange(node, 0));
   }
-  return nodes;
+  if (flm) (function run(rs, ns) {
+    for (var n, i = -1; n = ns[++i];) {
+      ~rs.indexOf(n) || rs.push(n);
+      n.hasChildNodes() && run(rs, n.childNodes);
+    }
+  })(nodes, [flm]);
+  var ok = selector;
+  switch (typeof selector) {
+    case "string":
+    ok = function matchesCss(node)
+      node.nodeType === ELEMENT && node.mozMatchesSelector(selector);
+    break;
+    case "number":
+    ok = function isType(node) node.nodeType === selector;
+  }
+  return ok ? nodes.filter(ok) : nodes;
 }
 
 // === {{{ ContextUtils.getIsSelected(context) }}} ===
