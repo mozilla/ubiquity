@@ -92,6 +92,10 @@ for each (let g in ["document", "documentInsecure",
   CmdUtils.__defineGetter__(g, this["get" + g[0].toUpperCase() + g.slice(1)]);
 }
 
+this.doAt = function doAt(code, keys) {
+  for each (let key in keys) doAt.it += (";" + code).replace(/@/g, key);
+};
+
 // == From NounUtils ==
 // {{{CmdUtils}}} inherits [[#modules/nounutils.js|NounUtils]].
 
@@ -103,7 +107,7 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 // (i.e. {{{CmdUtils.getSelection("")}}} is equivalent to
 // {{{ContextUtils.getSelection(context, "")}}})
 
-eval([String(<![CDATA[
+doAt(<![CDATA[{
   CmdUtils["__define" + "@"[0].toUpperCase() + "etter__"](
     "@"[3].toLowerCase() + "@".slice(4),
     CmdUtils.@ = function @(x, y) {
@@ -111,7 +115,8 @@ eval([String(<![CDATA[
       "focusedWindow" in c && "focusedElement" in c ||
         (c = Utils.currentChromeWindow.document.commandDispatcher);
       return ContextUtils.@(c, x, y);
-    })]]>).replace(/@/g, name) for (name in ContextUtils)].join(';'));
+    });
+}]]>, (name for (name in ContextUtils)));
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
 // See [[#modules/utils.js|Utils]]{{{.log}}}.
@@ -165,17 +170,13 @@ function getCommand(id) commandSource.getCommand(id);
 // {source: CmdUtils.makeSugg("English", null, "en"), goal: ...}
 // }}}
 
-// ToDo: If the command doesn't exist, should we notify and/or fail gracefully?
-
-function executeCommand(command, args, mods) {
-  if (typeof command === "string") command = getCommand(command);
-  return command.execute(this.__globalObject.context, args, mods);
-}
-
-function previewCommand(command, pblock, args, mods) {
-  if (typeof command === "string") command = getCommand(command);
-  return command.preview(this.__globalObject.context, pblock, args, mods);
-}
+// TODO: If the command doesn't exist, should we notify and/or fail gracefully?
+doAt(<![CDATA[{
+  CmdUtils.@Command = function @Command(command, x, y, z) {
+    if (typeof command === "string") command = getCommand(command);
+    return command.@(this.__globalObject.context, x, y, z);
+  };
+}]]>, ["execute", "preview"]);
 
 // === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
 // This function uses the Yahoo geocoding service to take a text
@@ -1161,7 +1162,7 @@ function previewAjax(pblock, options) {
 // time that it's requested and the time it displays.  If the preview
 // is cancelled, the given callback will not be called.
 
-for each (let m in ["Get", "Post"]) eval(<><![CDATA[
+doAt(<![CDATA[{
   CmdUtils.preview@ = function preview@(pblock, url, data, callback, type) {
     if (typeof data === "function") {
       callback = data;
@@ -1173,7 +1174,8 @@ for each (let m in ["Get", "Post"]) eval(<><![CDATA[
       data: data,
       success: callback,
       dataType: type});
-  }]]></>.toString().replace(/@/g, m));
+  };
+}]]>, ["Get", "Post"]);
 
 // === {{{ CmdUtils.previewCallback(pblock, callback, [abortCallback]) }}} ===
 // Creates a 'preview callback': a wrapper for a function which
@@ -1320,3 +1322,6 @@ function safeWrapper(func) function safeWrapped() {
     return e;
   }
 };
+
+eval(doAt.it);
+delete doAt;
