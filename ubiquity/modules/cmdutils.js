@@ -279,6 +279,7 @@ function injectJavascript(src, callback, document) {
   }, false);
   doc.body.appendChild(script);
 }
+CmdUtils.injectJs = injectJavascript;
 
 // === {{{ CmdUtils.loadJQuery(callback, [document]) }}} ===
 // Injects the jQuery javascript library into the current tab's document or
