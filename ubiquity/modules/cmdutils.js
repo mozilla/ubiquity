@@ -56,11 +56,12 @@ Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
 
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
-var {commandSource} = UbiquitySetup.createServices();
+var {commandSource, messageService} = UbiquitySetup.createServices();
 
 var CmdUtils = {
   toString: function toString() "[object CmdUtils]",
@@ -76,14 +77,12 @@ var CmdUtils = {
   //
   // Ubiquity 0.1.x only supports parser version 1, while
   // Ubiquity 0.5.x supports parser versions 1 and 2.
-  get parserVersion parserVersion() (
-    Utils.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
+  get parserVersion getParserVersion()
+    Utils.prefs.get("extensions.ubiquity.parserVersion", 1),
 
   // === {{{ CmdUtils.maxSuggestions }}} ===
   // The current number of max suggestions.
-  get maxSuggestions maxSuggestions() (
-    Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
-    .CommandManager.maxSuggestions),
+  get maxSuggestions getMaxSuggestions() CommandManager.maxSuggestions,
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
@@ -117,7 +116,7 @@ eval([String(<![CDATA[
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
 // See [[#modules/utils.js|Utils]]{{{.log}}}.
 
-function log() Utils.log.apply(Utils, arguments);
+CmdUtils.log = Utils.log;
 
 // === {{{ CmdUtils.getWindow() }}} ===
 // === {{{ CmdUtils.getDocument() }}} ===
@@ -169,12 +168,12 @@ function getCommand(id) commandSource.getCommand(id);
 // ToDo: If the command doesn't exist, should we notify and/or fail gracefully?
 
 function executeCommand(command, args, mods) {
-  if (typeof command === "string") command = CmdUtils.getCommand(command);
+  if (typeof command === "string") command = getCommand(command);
   return command.execute(this.__globalObject.context, args, mods);
 }
 
 function previewCommand(command, pblock, args, mods) {
-  if (typeof command === "string") command = CmdUtils.getCommand(command);
+  if (typeof command === "string") command = getCommand(command);
   return command.preview(this.__globalObject.context, pblock, args, mods);
 }
 
@@ -242,7 +241,7 @@ function injectCss(css, document) {
 
 // === {{{ CmdUtils.injectHtml(html, [document]) }}} ===
 // Injects HTML source code at the end of the current tab's document or
-// {{{document}}}. Returns the injected elements as a jQuery object.
+// {{{document}}}. Returns the injected nodes as a jQuery object.
 //
 // {{{html}}} is the HTML source code to inject, in plain text.
 
@@ -252,7 +251,7 @@ function injectHtml(html, document) {
   return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
 }
 
-// === {{{ CmdUtils.injectJavascript(src, callback, [document]) }}} ===
+// === {{{ CmdUtils.injectJavascript(src, [callback], [document]) }}} ===
 // Injects JavaScript into the current tab's document or {{{document}}},
 // and calls an optional callback function once the script has loaded.
 //
@@ -269,7 +268,9 @@ function injectJavascript(src, callback, document) {
   var doc = document || getDocument();
   var script = doc.createElement("script");
   script.type = "application/javascript;version=1.8";
-  script.src = RE_URL_INJECTABLE.test(src) ? src : "data:," + encodeURI(src);
+  script.src = (RE_URL_INJECTABLE.test(src)
+                ? src
+                : "data:;charset=utf-8," + encodeURI(src));
   script.addEventListener("load", function onInjected() {
     doc.body.removeChild(script);
     if (typeof callback === "function")
@@ -353,7 +354,7 @@ function setLastResult(result) {
   //globals.lastCmdResult = result;
 }
 
-// === {{{ CmdUtils.getGeoLocation(callback) }}} ===
+// === {{{ CmdUtils.getGeoLocation([callback]) }}} ===
 // Uses Geo-IP lookup to get the user's physical location.
 // Will cache the result.
 // If a result is already in the cache, this function works both
@@ -362,7 +363,7 @@ function setLastResult(result) {
 //
 // {{{callback}}} Optional callback function.  Will be called back
 // with a geolocation object. If specified, {{{getGeoLocation}}} returns
-// the {{{XMLHTTPRequest}}} instance instead of the geolocation object.
+// the requesting {{{XMLHttpRequest}}} instead.
 //
 // The geolocation object has the following properties:
 // {{{ city }}}, {{{ state }}}, {{{ country }}}, {{{ country_code }}},
@@ -431,7 +432,7 @@ CmdUtils.UserCode = {
 
 // == SNAPSHOT ==
 
-// === {{{ CmdUtils.getTabSnapshot(tab, options) }}} ===
+// === {{{ CmdUtils.getTabSnapshot(tab, [options]) }}} ===
 // Creates a thumbnail image of the contents of a given tab.
 //
 // {{{tab}}} is a {{{BrowserTab}}} instance.
@@ -441,7 +442,7 @@ CmdUtils.UserCode = {
 function getTabSnapshot(tab, options) (
   getWindowSnapshot(tab.document.defaultView, options));
 
-// === {{{ CmdUtils.getWindowSnapshot(win, options) }}} ===
+// === {{{ CmdUtils.getWindowSnapshot(win, [options]) }}} ===
 // Creates a thumbnail image of the contents of the given window.
 //
 // {{{window}}} is a {{{Window}}} object.
@@ -771,10 +772,8 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 // See {{{CmdUtils.CreateCommand()}}} for other properties available.
 
 function CreateAlias(options) {
-  var CU = this;
-  var {verb} = options;
-  var cmd = CU.CreateCommand(options);
-  Utils.defineLazyGetter(cmd, "arguments", function alias_lazyArgs() {
+  var {verb} = options, CU = this, cmd = CU.CreateCommand(options);
+  Utils.defineLazyProperty(cmd, function alias_lazyArgs() {
     var target = getCommand(verb) || verb;
     if (!target) return [];
     var args = target.arguments;
@@ -793,13 +792,11 @@ function CreateAlias(options) {
       args = as;
     }
     return args;
-  });
-  cmd.execute = function alias_execute(args) {
-    CU.executeCommand(verb, args);
-  };
-  cmd.preview = function alias_preview(pb, args) {
-    CU.previewCommand(verb, pb, args);
-  };
+  }, "arguments");
+  cmd.execute = function alias_execute(args, mods)
+    CU.executeCommand(verb, args, mods);
+  cmd.preview = function alias_preview(pb, args, mods)
+    CU.previewCommand(verb, pb, args, mods);
   return cmd;
 }
 
@@ -934,15 +931,14 @@ makeSearchCommand.execute = function searchExecute({object: {text}}) {
       makeSearchCommand.query(this.url, text, this.charset),
       makeSearchCommand.query(this.postData, text, this.charset));
 };
-makeSearchCommand.preview = function searchPreview(pblock, args) {
-  var {text, html} = args.object;
+makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
   if (!text) return void this.previewDefault(pblock);
 
   function put() {
     pblock.innerHTML =
       "<div class='search-command'>" + Array.join(arguments, "") + "</div>";
   }
-  var {parser} = this;
+  var {parser} = this, html = Utils.escapeHtml(text);
   put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
       //ToLocalize
       parser ? "<p class='loading'>Loading results...</p>" : "");
@@ -1179,7 +1175,7 @@ for each (let m in ["Get", "Post"]) eval(<><![CDATA[
       dataType: type});
   }]]></>.toString().replace(/@/g, m));
 
-// === {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} ===
+// === {{{ CmdUtils.previewCallback(pblock, callback, [abortCallback]) }}} ===
 // Creates a 'preview callback': a wrapper for a function which
 // first checks to see if the current preview has been canceled,
 // and if not, calls the real callback.
@@ -1211,7 +1207,7 @@ function previewCallback(pblock, callback, abortCallback) {
   };
 }
 
-// === {{{ CmdUtils.previewList(block, htmls, callback, css) }}} ===
+// === {{{ CmdUtils.previewList(block, htmls, [callback], [css]) }}} ===
 // Creates a simple clickable list in the preview block and
 // returns the list element.
 // * Activating {{{accesskey="0"}}} rotates the accesskeys
@@ -1315,14 +1311,12 @@ function absUrl(data, baseUrl) {
 // === {{{ CmdUtils.safeWrapper(func) }}} ===
 // Wraps a function so that exceptions from it are suppressed and notified.
 
-function safeWrapper(func) {
-  var {displayMessage} = this.__globalObject;
-  return function safeWrapped() {
-    try { func.apply(this, arguments) } catch (e) {
-      displayMessage({
-        //errorToLocalize
-        text: ("An exception occurred while running " + func.name + "()."),
-        exception: e});
-    }
-  };
-}
+function safeWrapper(func) function safeWrapped() {
+  try { return func.apply(this, arguments) } catch (e) {
+    messageService.displayMessage({
+      //errorToLocalize
+      text: "An exception occurred while running " + func.name + "().",
+      exception: e});
+    return e;
+  }
+};
