@@ -91,6 +91,7 @@ for each (let g in ["document", "documentInsecure",
                     "geoLocation"]) {
   CmdUtils.__defineGetter__(g, this["get" + g[0].toUpperCase() + g.slice(1)]);
 }
+delete CmdUtils.QueryInterface;
 
 this.doAt = function doAt(code, keys) {
   for each (let key in keys) doAt.it += (";" + code).replace(/@/g, key);

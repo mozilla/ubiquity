@@ -40,10 +40,10 @@ var EXPORTED_SYMBOLS = ["DbUtils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-// Make a namespace object called DbUtils, to export,
-// which contains each function in this file.
-var DbUtils = ([f for each (f in this) if (typeof f === "function")]
-               .reduce(function(o, f)(o[f.name] = f, o), {}));
+var DbUtils = {};
+
+for each (let f in this) if (typeof f === "function") DbUtils[f.name] = f;
+delete DbUtils.QueryInterface;
 
 // === {{{ DbUtils.connectLite(tableName, schemaDict, initialRows, file) }}}
 // Creates a simple DB file in the user's profile directory (if nonexistent)

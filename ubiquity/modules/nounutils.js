@@ -50,8 +50,8 @@ var EXPORTED_SYMBOLS = ["NounUtils"];
 
 var NounUtils = {};
 
-// assign each function in this file
 for each (let f in this) if (typeof f === "function") NounUtils[f.name] = f;
+delete NounUtils.QueryInterface;
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 

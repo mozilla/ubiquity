@@ -145,6 +145,7 @@ for each (let f in [
   Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
   ]) defineLazyProperty(Utils, f);
+delete Utils.QueryInterface;
 
 // === {{{ Utils.log(a, b, c, ...) }}} ===
 // One of the most useful functions to know both for development and debugging.
