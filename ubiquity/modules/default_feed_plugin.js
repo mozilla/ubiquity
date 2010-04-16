@@ -322,8 +322,9 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   var globalObjects = {__proto__: null};
   var jsmExports = ["Components", "atob", "btoa"];
   var webExports = [
-    "jQuery", "$", "Date", "Application", "DOMParser",
-    "KeyEvent", "XPathResult", "XMLHttpRequest", "XMLSerializer"];
+    "jQuery", "$", "Date", "Application",
+    "Audio", "DOMParser", "Image", "KeyEvent", "NodeFilter",
+    "XMLHttpRequest", "XMLSerializer", "XPathResult"];
   function displayMessage(msg, cmd) {
     if (Utils.classOf(msg) !== "Object") msg = {text: msg};
     if (cmd) {
