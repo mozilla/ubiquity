@@ -53,7 +53,9 @@ var ContextUtils = {};
 for each (let f in this) if (typeof f === "function") ContextUtils[f.name] = f;
 delete ContextUtils.QueryInterface;
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://ubiquity/modules/utils.js");
 
 // === {{{ ContextUtils.getHtmlSelection(context, joint = "<hr/>") }}} ===
 // Returns a string containing the HTML representation of the
@@ -63,7 +65,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function getHtmlSelection(context, joint) {
   var htms = [];
-  for each (let range in getRanges(context)) {
+  for each (let range in getSelectedRanges(context)) {
     let fragment = range.cloneContents();
     let div = fragment.ownerDocument.createElement("div");
     div.appendChild(fragment);
@@ -86,7 +88,7 @@ function getSelection(context, joint) {
     let {selectionStart: ss, selectionEnd: se} = focusedElement;
     if (ss !== se) return focusedElement.value.slice(ss, se);
   }
-  return getRanges(context).join(joint == null ? "\n\n" : joint);
+  return getSelectedRanges(context).join(joint == null ? "\n\n" : joint);
 }
 
 // === {{{ ContextUtils.setSelection(context, content, options) }}} ===
@@ -115,6 +117,10 @@ function setSelection(context, content, options) {
       plainText = rng.createContextualFragment(content).textContent;
     }
     let {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
+    let {contentViewer} = (
+      focusedWindow.top.QueryInterface(Ci.nsIInterfaceRequestor)
+      .getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIDocShell));
+    contentViewer.hide();
     focusedElement.value = (
       value.slice(0, selectionStart) + plainText +
       value.slice(focusedElement.selectionEnd));
@@ -122,6 +128,7 @@ function setSelection(context, content, options) {
     focusedElement.selectionEnd = selectionStart + plainText.length;
     focusedElement.scrollTop = scrollTop;
     focusedElement.scrollLeft = scrollLeft;
+    contentViewer.show();
     return true;
   }
 
@@ -165,7 +172,7 @@ function getSelectionObject(context) {
 function getSelectedNodes(context, selector) {
   const ELEMENT = 1, TEXT = 3;
   var nodes = [];
-  for each (let range in getRanges(context)) {
+  for each (let range in getSelectedRanges(context)) {
     let node = range.startContainer;
     if (node.nodeType === TEXT &&
         /\S/.test(node.nodeValue.slice(range.startOffset)))
@@ -206,10 +213,10 @@ function getIsSelected(context) (
     ? flm.selectionStart < flm.selectionEnd
     : !context.focusedWindow.getSelection().isCollapsed));
 
-// === {{{ ContextUtils.getRanges(context) }}} ===
+// === {{{ ContextUtils.getSelectedRanges(context) }}} ===
 // Returns an array of all DOM ranges in selection.
 
-function getRanges(context) {
+function getSelectedRanges(context) {
   var rngs = [], win = context.focusedWindow, sel = win && win.getSelection();
   if (sel) for (let i = sel.rangeCount; i--;) rngs[i] = sel.getRangeAt(i);
   return rngs;
