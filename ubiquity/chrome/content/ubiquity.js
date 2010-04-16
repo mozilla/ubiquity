@@ -68,6 +68,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   textBox.addEventListener("keydown", this, false);
   textBox.addEventListener("keypress", this, false);
   textBox.addEventListener("keyup", this, false);
+  textBox.addEventListener("focus", this, false);
   textBox.addEventListener("blur", this, false);
   textBox.addEventListener("DOMMouseScroll", this, false);
 
@@ -195,8 +196,14 @@ Ubiquity.prototype = {
     }
   },
 
+  __onfocus: function U__onFocus() {
+    // prevent the tabbox from capturing our ctrl+tab
+    gBrowser.mTabBox.handleCtrlTab = false;
+  },
+
   __onblur: function U__onBlur() {
-    this.CommandHistory.add(this.__textBox.value);
+    gBrowser.mTabBox.handleCtrlTab =
+      !this.__prefs.get("browser.ctrlTab.previews", false);
   },
 
   __onDOMMouseScroll: function U__onMouseScroll(event) {
@@ -212,6 +219,7 @@ Ubiquity.prototype = {
       self.__lastValue = input,
       context || self.__makeContext(),
       self.__onSuggestionsUpdated);
+    self.CommandHistory.add(input);
   },
 
   __processInput: function U__processInput(immediate, context) {
@@ -248,7 +256,6 @@ Ubiquity.prototype = {
     if (unfocused) unfocused.focus();
     this.__focusedWindow = this.__focusedElement = null;
 
-    gBrowser.mTabBox.handleCtrlTab = this.__handleCtrlTab;
   },
 
   __onpopupshowing: function U__onShowing() {
@@ -258,11 +265,6 @@ Ubiquity.prototype = {
   },
 
   __onpopupshown: function U__onShown() {
-    // prevent the tabbox from capturing our ctrl+tab
-    var tabox = gBrowser.mTabBox;
-    this.__handleCtrlTab = tabox.handleCtrlTab;
-    tabox.handleCtrlTab = false;
-
     var {__textBox} = this;
     __textBox.focus();
     __textBox.select();
@@ -301,11 +303,11 @@ Ubiquity.prototype = {
 
   execute: function U_execute(input) {
     var external = input != null;
-    var context = this.__makeContext(external);
     if (external) {
       if (input) this.__textBox.value = input;
       this.__lastValue = "";
     }
+    var context = this.__makeContext(external);
     this.__processInput(true, context);
     this.__cmdManager.execute(context);
   },
@@ -328,7 +330,7 @@ Ubiquity.prototype = {
   openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
       focusedElement: this.__focusedElement}) = document.commandDispatcher;
-    var xy = this.__prefs.getValue("extensions.ubiquity.openAt", "");
+    var xy = this.__prefs.get("extensions.ubiquity.openAt", "");
     if (xy) {
       let [x, y] = xy.split(",");
       this.__msgPanel.openPopupAtScreen(x, y);
