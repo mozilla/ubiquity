@@ -45,7 +45,6 @@ Cu.import("resource://ubiquity/modules/codesource.js");
 Cu.import("resource://ubiquity/modules/parser/parser.js");
 Cu.import("resource://ubiquity/modules/feedmanager.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
-Cu.import("resource://ubiquity/modules/collection.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 Cu.import("resource://ubiquity/tests/framework.js");
@@ -101,22 +100,6 @@ function testUtilsUrlWorksWithKeywordArgs() {
 
   kwargs.base = Utils.url(kwargs.base);
   this.assert(Utils.url(kwargs).spec == expected);
-}
-
-function testCompositeCollectionWorks() {
-  let a = new StringCodeSource('a', 'a');
-  let b = new StringCodeSource('b', 'b');
-  let c = new StringCodeSource('c', 'c');
-  let d = new StringCodeSource('d', 'd');
-
-  let coll_1 = new IterableCollection([a, b]);
-  let coll_2 = new IterableCollection([c, d]);
-
-  let iter = Iterator(new CompositeCollection([coll_1, coll_2]));
-  this.assert(iter.next().id == 'a');
-  this.assert(iter.next().id == 'b');
-  this.assert(iter.next().id == 'c');
-  this.assert(iter.next().id == 'd');
 }
 
 function testMixedCodeSourceWorks() {
@@ -296,27 +279,6 @@ function testCmdManagerCatchesExceptionsInCmds() {
   }
 }
 
-function testIterableCollectionWorks() {
-  var fakeCodeSource = {
-    getCode: function() { return "a = 1"; },
-    id: "http://www.foo.com/bar.js"
-  };
-
-  var coll = new IterableCollection([fakeCodeSource]);
-  var count = 0;
-  for (var cs in coll) {
-    this.assert(cs.getCode() == "a = 1");
-    this.assert(cs.id == "http://www.foo.com/bar.js");
-    count += 1;
-  }
-  this.assert(count == 1, "count must be 1.");
-}
-
-function testUtilsTrim() {
-  // Taken from http://www.somacon.com/p355.php.
-  this.assert(Utils.trim("\n  hello   ") == "hello");
-}
-
 function testUtilsSortBy() {
   var strArray = ["abc", "d", "ef", "ghij", "klm", "nop", "qrstuvw", "xyz"];
   this.assertEquals(strArray.slice().sort() + "",
@@ -452,13 +414,9 @@ function testLocalUriCodeSourceWorksWithBadFilenames() {
               "file:///truly-nonexistent",
               "resource://truly-nonexistent",
               "ubiquity:///truly-nonexistent"];
-  var self = this;
-
-  urls.forEach(
-    function(url) {
-      var lucs = new LocalUriCodeSource(url);
-      self.assertEquals(lucs.getCode(true), "");
-    });
+  urls.forEach(function(url) {
+    this.assertEquals(new LocalUriCodeSource(url).getCode(true), "");
+  }, this);
 }
 
 function testUtilsGetLocalUrlWorks() {
