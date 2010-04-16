@@ -148,7 +148,7 @@ function showArrowToSuggestionList() {
   /* TODO: for some skins, this arrow will have to approach from the
    * right instead of from the bottom.
    */
-  let panel = getGUbiq().msgPanel;
+  let {panel} = getGUbiq();
   let ubiqTop = panel.boxObject.y;
   let ubiqHeight = panel.boxObject.height;
   let ubiqBottom = ubiqTop + ubiqHeight;
@@ -175,8 +175,8 @@ function showArrowToSuggestionList() {
 function showArrowToPreview() {
   /* TODO: the bracket is much too tall.*/
   let theDiv = $("#interactive-tutorial-div");
-  // Note, msgpanel is XUL so don't try to use jQuery on it
-  let panel = getGUbiq().msgPanel;
+  // Note, panel is XUL so don't try to use jQuery on it
+  let {panel} = getGUbiq();
   let ubiqTop = panel.boxObject.y;
   let ubiqHeight = panel.boxObject.height; // too high!
 

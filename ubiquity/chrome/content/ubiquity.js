@@ -41,20 +41,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = Ubiquity =
-// Creates a Ubiquity interface and binds it to the given message
-// panel and text box.
-//
-// {{{msgPanel}}} should be a <xul:panel/>.
-//
-// {{{textBox}}} should be a <input type="text"/>.
-//
-// {{{cmdManager}}} is the {{{CommandManager}}} instance.
 
-function Ubiquity(msgPanel, textBox, cmdManager) {
+// == Ubiquity(panel, textBox, cmdManager) ==
+// Creates a Ubiquity interface and binds it to the given panel and text box.
+// * {{{panel}}} should be a <xul:panel/>.
+// * {{{textBox}}} should be a <input type="text"/>.
+// * {{{cmdManager}}} is a {{{CommandManager}}} instance.
+
+function Ubiquity(panel, textBox, cmdManager) {
   Cu.import("resource://ubiquity/modules/utils.js", this);
   Cu.import("resource://ubiquity/modules/cmdhistory.js", this);
 
-  this.__msgPanel = msgPanel;
+  this.__panel = panel;
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
   this.__needsToExecute = false;
@@ -72,10 +70,10 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   textBox.addEventListener("blur", this, false);
   textBox.addEventListener("DOMMouseScroll", this, false);
 
-  msgPanel.addEventListener("popupshowing", this, false);
-  msgPanel.addEventListener("popupshown", this, false);
-  msgPanel.addEventListener("popuphidden", this, false);
-  msgPanel.addEventListener("click", this, false);
+  panel.addEventListener("popupshowing", this, false);
+  panel.addEventListener("popupshown", this, false);
+  panel.addEventListener("popuphidden", this, false);
+  panel.addEventListener("click", this, false);
 
   var self = this;
   self.__onSuggestionsUpdated = function U__onSuggestionsUpdated() {
@@ -108,11 +106,12 @@ Ubiquity.prototype = {
 
   // == Read Only Properties ==
 
+  // === {{{ Ubiquity#panel }}} ===
+  get panel U_getPanel() this.__panel,
+  get msgPanel U_getMsgPanel() this.__panel,
+
   // === {{{ Ubiquity#textBox }}} ===
   get textBox U_getTextBox() this.__textBox,
-
-  // === {{{ Ubiquity#msgPanel }}} ===
-  get msgPanel U_getPanel() this.__msgPanel,
 
   // === {{{ Ubiquity#cmdManager }}} ===
   get cmdManager U_getCmdManager() this.__cmdManager,
@@ -123,7 +122,7 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#isWindowOpen }}} ===
   get isWindowOpen U_getIsWindowOpen()
-    this.__msgPanel.state in this.__STATES_OPEN,
+    this.__panel.state in this.__STATES_OPEN,
   __STATES_OPEN: {open: 1, showing: 1},
 
   // === {{{ Ubiquity#inputDelay }}} ===
@@ -144,7 +143,6 @@ Ubiquity.prototype = {
   __onkeydown: function U__onKeyDown(event) {
     this.__lastKeyEvent = event;
   },
-
   __onkeyup: function U__onKeyup(event) {
     var {keyCode} = this.__lastKeyEvent = event;
 
@@ -156,7 +154,6 @@ Ubiquity.prototype = {
       // https://developer.mozilla.org/En/DOM/Event/UIEvent/KeyEvent
       this.__processInput();
   },
-
   __onkeypress: function U__onKeyPress(event) {
     var {keyCode, which, ctrlKey, altKey} = event;
 
@@ -165,7 +162,7 @@ Ubiquity.prototype = {
 
     if (keyCode === this.__KEYCODE_EXECUTE) {
       this.__needsToExecute = true;
-      this.__msgPanel.hidePopup();
+      this.__panel.hidePopup();
       return true;
     }
 
@@ -200,7 +197,6 @@ Ubiquity.prototype = {
     // prevent the tabbox from capturing our ctrl+tab
     gBrowser.mTabBox.handleCtrlTab = false;
   },
-
   __onblur: function U__onBlur() {
     gBrowser.mTabBox.handleCtrlTab =
       !this.__prefs.get("browser.ctrlTab.previews", false);
@@ -221,7 +217,6 @@ Ubiquity.prototype = {
       self.__onSuggestionsUpdated);
     self.CommandHistory.add(input);
   },
-
   __processInput: function U__processInput(immediate, context) {
     clearTimeout(this.__previewTimerID);
     if (immediate)
@@ -257,13 +252,11 @@ Ubiquity.prototype = {
     this.__focusedWindow = this.__focusedElement = null;
 
   },
-
   __onpopupshowing: function U__onShowing() {
     this.__cmdManager.refresh();
     this.__lastValue = "";
     this.__processInput(true);
   },
-
   __onpopupshown: function U__onShown() {
     var {__textBox} = this;
     __textBox.focus();
@@ -333,19 +326,19 @@ Ubiquity.prototype = {
     var xy = this.__prefs.get("extensions.ubiquity.openAt", "");
     if (xy) {
       let [x, y] = xy.split(",");
-      this.__msgPanel.openPopupAtScreen(x, y);
+      this.__panel.openPopupAtScreen(x, y);
     }
     else {
       // This is a temporary workaround for #43.
       var anchor = document.getElementById("content").selectedBrowser;
-      this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
+      this.__panel.openPopup(anchor, "overlap", 0, 0, false, true);
     }
   },
 
   // === {{{ Ubiquity#closeWindow() }}} ===
 
   closeWindow: function U_closeWindow() {
-    this.__msgPanel.hidePopup();
+    this.__panel.hidePopup();
   },
 
   // === {{{ Ubiquity#toggleWindow() }}} ===
