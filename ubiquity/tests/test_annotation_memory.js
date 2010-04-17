@@ -1,18 +1,17 @@
-Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/tests/framework.js");
+var EXPORTED_SYMBOLS = ["TestAnnotationMemory"];
 
-EXPORTED_SYMBOLS = ["TestAnnotationMemory"];
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://ubiquity/modules/annotation_memory.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/tests/framework.js");
 
 function TestAnnotationMemory(test) {
   return new AnnotationService(getTempConnection(test));
 }
 
 function getTempDbFile() {
-  var Ci = Components.interfaces;
-  var dirSvc = Components.classes["@mozilla.org/file/directory_service;1"]
-                         .getService(Ci.nsIProperties);
-  var file = dirSvc.get("TmpD", Ci.nsIFile);
+  var file = Utils.DirectoryService.get("TmpD", Ci.nsIFile);
   file.append("testdb.sqlite");
   file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0x600);
   return file;
@@ -51,21 +50,21 @@ function testMemoryPersists() {
     annSvc = new AnnotationService(connection);
   }
 
-  var url = Utils.url("http://www.foo.com");
-  annSvc.setPageAnnotation(url, "perm", "foo");
+  var uri = Utils.uri("http://www.foo.com");
+  annSvc.setPageAnnotation(uri, "perm", "foo");
   this.assertEquals(annSvc.getPagesWithAnnotation("perm").length, 1);
 
-  annSvc.setPageAnnotation(url, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
+  annSvc.setPageAnnotation(uri, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
   this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 1);
 
   reopenDb();
 
   this.assertEquals(annSvc.getPagesWithAnnotation("perm").length, 1);
-  annSvc.removePageAnnotation(url, "perm");
+  annSvc.removePageAnnotation(uri, "perm");
 
   this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 0);
-  annSvc.setPageAnnotation(url, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
-  annSvc.removePageAnnotation(url, "temp");
+  annSvc.setPageAnnotation(uri, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
+  annSvc.removePageAnnotation(uri, "temp");
   this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 0);
 
   reopenDb();
@@ -78,10 +77,9 @@ function testMemoryPersists() {
 
 function testGetPagesWithAnnotation() {
   var annSvc = new AnnotationService(getTempConnection(this));
-
-  var url = Utils.url("http://www.foo.com");
+  var uri = Utils.uri("http://www.foo.com");
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
-  annSvc.setPageAnnotation(url, "blah", "foo");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
   var results = annSvc.getPagesWithAnnotation("blah");
   this.assertEquals(results.length, 1);
   this.assertEquals(results[0].spec, "http://www.foo.com/");
@@ -89,25 +87,22 @@ function testGetPagesWithAnnotation() {
 
 function testPageHasAnnotation() {
   var annSvc = new AnnotationService(getTempConnection(this));
-
-  var url = Utils.url("http://www.foo.com");
-  annSvc.setPageAnnotation(url, "blah", "foo");
-  this.assertEquals(annSvc.pageHasAnnotation(url, "blah"), true);
+  var uri = Utils.uri("http://www.foo.com");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
+  this.assertEquals(annSvc.pageHasAnnotation(uri, "blah"), true);
 }
 
 function testGetPageAnnotation() {
   var annSvc = new AnnotationService(getTempConnection(this));
-
-  var url = Utils.url("http://www.foo.com");
-
-  annSvc.setPageAnnotation(url, "blah", "foo");
-  this.assertEquals(annSvc.getPageAnnotation(url, "blah"), "foo");
+  var uri = Utils.uri("http://www.foo.com");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
+  this.assertEquals(annSvc.getPageAnnotation(uri, "blah"), "foo");
 }
 
 function testRemovePageAnnotation() {
   var annSvc = new AnnotationService(getTempConnection(this));
-
   var uri = Utils.uri("http://www.foo.com");
+
   annSvc.setPageAnnotation(uri, "blah", "foo");
   annSvc.removePageAnnotation(uri, "blah");
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);

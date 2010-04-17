@@ -91,9 +91,7 @@ var Editor = {
     executable.followLinks = true;
     executable.initWithPath(isOSX ? "/usr/bin/open" : editor);
     if (executable.exists()) {
-      var file = (Cc["@mozilla.org/file/directory_service;1"]
-                  .getService(Ci.nsIProperties)
-                  .get("TmpD", Ci.nsIFile));
+      var file = Utils.DirectoryService.get("TmpD", Ci.nsIFile);
       file.append("ubiquity.tmp.js");
       file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
 

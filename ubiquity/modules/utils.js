@@ -53,7 +53,13 @@ const ToString = Object.prototype.toString;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Utils = {
-  toString: function toString() "[object UbiqUtils]",
+  toString: function toString() "[object UbiquityUtils]",
+
+  NS_MATHML: "http://www.w3.org/1998/Math/MathML",
+  NS_XHTML: "http://www.w3.org/1999/xhtml",
+  NS_SVG: "http://www.w3.org/2000/svg",
+  NS_EM: "http://www.mozilla.org/2004/em-rdf#",
+  NS_XUL: "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
 
   // === {{{ Utils.currentChromeWindow }}} ===
   // A reference to the application chrome window that currently has focus.
@@ -93,6 +99,11 @@ for each (let f in [
   function ConsoleService()
   Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService),
 
+  // === {{{ Utils.DirectoryService }}} ===
+  // Shortcut to {{{nsIDirectoryService}}}.
+  function DirectoryService()
+  Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties),
+
   // === {{{ Utils.ExtensionManager }}} ===
   // Shortcut to {{{nsIExtensionManager}}}.
   function ExtensionManager()
@@ -103,17 +114,23 @@ for each (let f in [
   function IOService()
   Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
 
+  // === {{{ Utils.UnescapeHTML }}} ===
+  // Shortcut to {{{nsIScriptableUnescapeHTML}}}.
+  function UnescapeHTML()
+  Cc["@mozilla.org/feed-unescapehtml;1"]
+  .getService(Ci.nsIScriptableUnescapeHTML),
+
   // === {{{ Utils.UnicodeConverter }}} ===
   // Shortcut to {{{nsIScriptableUnicodeConverter}}}.
-  function UnicodeConverter() (
-    Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-    .getService(Ci.nsIScriptableUnicodeConverter)),
+  function UnicodeConverter()
+  Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+  .getService(Ci.nsIScriptableUnicodeConverter),
 
   // === {{{ Utils.WindowMediator }}} ===
   // Shortcut to {{{nsIWindowMediator}}}.
-  function WindowMediator() (
-    Cc["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Ci.nsIWindowMediator)),
+  function WindowMediator()
+  Cc["@mozilla.org/appshell/window-mediator;1"]
+  .getService(Ci.nsIWindowMediator),
 
   // ** {{{ Utils.json }}} **
   // **//Deprecated.//** A cached {{{nsIJSON}}} instance.
@@ -121,9 +138,9 @@ for each (let f in [
 
   // === {{{ Utils.hiddenWindow }}} ===
   // Returns the application's global hidden window.
-  function hiddenWindow() (
-    Cc["@mozilla.org/appshell/appShellService;1"]
-    .getService(Ci.nsIAppShellService).hiddenDOMWindow),
+  function hiddenWindow()
+  Cc["@mozilla.org/appshell/appShellService;1"]
+  .getService(Ci.nsIAppShellService).hiddenDOMWindow,
 
   // === {{{ Utils.appName }}} ===
   // The chrome application name found in {{{nsIXULAppInfo}}}.
@@ -847,16 +864,7 @@ escapeHtml.fn = function escapeHtml_sub($) {
 // Returns a version of the {{{string}}} with all occurrences of HTML character
 // references (e.g. &spades; &#x2665; &#9827; etc.) in it decoded.
 
-function unescapeHtml(s) String(s).replace(unescapeHtml.re, unescapeHtml.fn);
-unescapeHtml.re = /(?:&#?\w+;)+/g;
-unescapeHtml.fn = function unescapeHtml_parse(ref) {
-  var {div} = unescapeHtml_parse;
-  div.innerHTML = ref;
-  return div.textContent;
-};
-defineLazyProperty(unescapeHtml.fn, function div() (
-  Utils.hiddenWindow.document.createElementNS(
-    "http://www.w3.org/1999/xhtml", "div")));
+function unescapeHtml(s) Utils.UnescapeHTML.unescape(s);
 
 // === {{{ Utils.convertFromUnicode(toCharset, text) }}} ===
 // Encodes the given unicode text to a given character set.

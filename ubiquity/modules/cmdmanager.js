@@ -57,15 +57,11 @@ const DEFAULT_MAX_SUGGESTIONS = 5;
 const PREF_MAX_SUGGESTIONS = "extensions.ubiquity.maxSuggestions";
 const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
-
-const NS_XHTML = "http://www.w3.org/1999/xhtml";
-const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-
+const {NS_XHTML, NS_XUL} = Utils;
 const DEFAULT_HELP = (
   '<div class="default" xmlns="' + NS_XHTML + '">' +
   L("ubiquity.cmdmanager.defaulthelp") +
   '</div>');
-
 const NULL_QUERY = {suggestionList: [], finished: true, hasResults: false};
 
 var gDomNodes = {};

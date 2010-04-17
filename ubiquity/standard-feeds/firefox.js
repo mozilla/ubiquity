@@ -512,9 +512,7 @@ CmdUtils.CreateCommand({
         this.blur();
       }, false);
     }
-    var file = (
-      Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties)
-      .get("ProfD", Ci.nsIFile));
+    var file = Utils.DirectoryService.get("ProfD", Ci.nsIFile);
     file.append("extensions");
     file.append(data.id);
     if (file.exists() && file.isDirectory()) {
@@ -548,7 +546,7 @@ CmdUtils.CreateCommand({
     em.gExtensionsView.selectItem(em.document.getElementById(self._urn(id)));
   },
   _extraData: function ve__extraData(id) {
-    const PREFIX_NS_EM = "http://www.mozilla.org/2004/em-rdf#";
+    const {NS_EM} = Utils;
     var rdfs =
       Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);
     var {datasource} = Utils.ExtensionManager;
@@ -559,7 +557,7 @@ CmdUtils.CreateCommand({
     };
     for (let key in data) {
       let target = datasource.GetTarget(
-        itemResource, rdfs.GetResource(PREFIX_NS_EM + key), true);
+        itemResource, rdfs.GetResource(NS_EM + key), true);
       if (target instanceof Ci.nsIRDFLiteral) data[key] = target.Value;
     }
     data.disabled = data.isDisabled === "true";

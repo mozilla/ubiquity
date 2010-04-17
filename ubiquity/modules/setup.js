@@ -188,9 +188,7 @@ var UbiquitySetup = {
     Utils.IOService.newFileURI(this.__getExtDir()).spec,
 
   isInstalledAsXpi: function isInstalledAsXpi() {
-    let profileDir = (Cc["@mozilla.org/file/directory_service;1"]
-                      .getService(Ci.nsIProperties)
-                      .get("ProfD", Ci.nsIFile));
+    let profileDir = Utils.DirectoryService.get("ProfD", Ci.nsIFile);
     let extDir = this.__getExtDir();
     return profileDir.contains(extDir, false);
   },
