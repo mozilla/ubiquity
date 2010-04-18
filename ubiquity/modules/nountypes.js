@@ -385,38 +385,41 @@ var noun_type_url = {
   noExternalCalls: true,
   cacheTime: 0,
   default: function nt_url_default() {
-    var {window} = CmdUtils, {href} = window.location;
+    var {window} = CmdUtils;
+    var {location: {href}, document: {activeElement}} = window;
     if (/^https:\/\/www\.google\.[a-z.]+\/reader\/view\b/.test(href))
-      try { href = window.wrappedJSObject.getPermalink().url } catch(e) {}
-    return CmdUtils.makeSugg(href, null, null, 0.5);
+      try { href = window.wrappedJSObject.getPermalink().url } catch ([]) {}
+    var suggs = [CmdUtils.makeSugg(href, null, null, .5)];
+    if (activeElement && activeElement.href)
+      suggs.unshift(CmdUtils.makeSugg(activeElement.href, null, null, .7));
+    return suggs;
   },
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
     text = text.trim();
     if (!text || /\s/.test(text)) return [];
 
     var score = 1;
-    if (/^[\w.-]+:\/{0,2}/.test(text))
+    // has scheme?
+    if (/^[\w.-]+:\/{0,2}(?=.)/.test(text)) {
       var {lastMatch: scheme, rightContext: postScheme} = RegExp;
-    else {
+      if (postScheme.indexOf(".") < 0) score *= 0.9;
+    }
+    // has TLD?
+    else if (text.indexOf(".") > 0 && /\b[a-z]{2,}\b/i.test(text)) {
       var scheme = "http://", postScheme = text;
       if (selectionIndices)
         selectionIndices =
           [i + scheme.length for each (i in selectionIndices)];
       score *= 0.9;
     }
-    if (postScheme) {
-      let segments = postScheme.split(/[/?#]/, 2);
-      // if it's just a domain name-looking thing, lower confidence
-      if (segments.length === 1) score *= 0.9;
+    else return [];
 
-      let domain = segments[0];
-      // if the domain doesn't have any dots in it, lower confidence
-      if (domain.indexOf(".") < 0) score *= 0.9;
-
-      // LDH charcodes include "Letters, Digits, and Hyphen".
-      // We'll throw in . @ : too.
-      if (/^(?![A-Za-z\d-.@:]+$)/.test(domain)) score *= 0.9;
-    }
+    var [domain, path] = postScheme.split(/[/?#]/, 2);
+    // if it's just a domain name-looking thing, lower confidence
+    if (path == null) score *= 0.9;
+    // LDH charcodes include "Letters, Digits, and Hyphen".
+    // We'll throw in . @ : too.
+    if (/^(?![A-Za-z\d-.@:]+$)/.test(domain)) score *= 0.9;
 
     var fakeRequest = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
