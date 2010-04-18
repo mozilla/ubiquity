@@ -169,7 +169,7 @@ Ubiquity.prototype = {
     if (altKey || event.metaKey) return;
 
     if (keyCode === this.__KEYCODE_COMPLETE) {
-      if (ctrlKey) this.CommandHistory.complete(this, event.shiftKey);
+      if (ctrlKey) this.CommandHistory.complete(event.shiftKey, this);
       else {
         let {completionText} = this.__cmdManager.hilitedSuggestion || 0;
         if (completionText) this.__textBox.value = completionText;
@@ -178,7 +178,7 @@ Ubiquity.prototype = {
     }
     var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
     if (move) {
-      if (ctrlKey) this.CommandHistory.go(this, keyCode - 39);
+      if (ctrlKey) this.CommandHistory.go(keyCode - 39, this);
       else this.__cmdManager[move](this.__makeContext());
       return true;
     }
@@ -200,10 +200,12 @@ Ubiquity.prototype = {
   __onblur: function U__onBlur() {
     gBrowser.mTabBox.handleCtrlTab =
       !this.__prefs.get("browser.ctrlTab.previews", false);
+
+    this.CommandHistory.add(this.__textBox.value);
   },
 
   __onDOMMouseScroll: function U__onMouseScroll(event) {
-    this.CommandHistory.go(this, event.detail > 0 ? 1 : -1);
+    this.CommandHistory.go(event.detail > 0 ? 1 : -1, this);
   },
 
   __delayedProcessInput: function U__delayedProcessInput(self, context) {
@@ -215,7 +217,6 @@ Ubiquity.prototype = {
       self.__lastValue = input,
       context || self.__makeContext(),
       self.__onSuggestionsUpdated);
-    self.CommandHistory.add(input);
   },
   __processInput: function U__processInput(immediate, context) {
     clearTimeout(this.__previewTimerID);
@@ -251,6 +252,7 @@ Ubiquity.prototype = {
     if (unfocused) unfocused.focus();
     this.__focusedWindow = this.__focusedElement = null;
 
+    this.CommandHistory.cursor = -1;
   },
   __onpopupshowing: function U__onShowing() {
     this.__cmdManager.refresh();

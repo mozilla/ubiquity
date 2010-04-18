@@ -62,7 +62,7 @@ function save() {
   Utils.prefs.set(PREF_BIN, _bin.join(SEPARATOR));
   return this;
 }
-function go(U, num) {
+function go(num, U) {
   var {textBox} = U = U || Utils.currentChromeWindow.gUbiquity;
   var bin = get();
   if (cursor < 0 && textBox.value) {
@@ -74,13 +74,13 @@ function go(U, num) {
   U.preview(bin[cursor] || "");
   return this;
 }
-function complete(U, rev) {
+function complete(rev, U) {
   var {textBox} = U = U || Utils.currentChromeWindow.gUbiquity;
   var {value: txt, selectionStart: pos} = textBox, bin = get();
   if (rev) bin = bin.slice().reverse();
   pos -= txt.length - (txt = txt.trimLeft()).length;
   var key = txt.slice(0, pos), re = RegExp("^" + Utils.regexp.quote(key), "i");
-  for (let h, i = bin.indexOf(txt) + 1; h = bin[i++];) if (re.test(h)) {
+  for (let h, i = bin.indexOf(txt); h = bin[++i];) if (re.test(h)) {
     U.preview(h);
     textBox.setSelectionRange(key.length, textBox.textLength);
     return true;
