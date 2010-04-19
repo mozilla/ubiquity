@@ -46,9 +46,8 @@ var EXPORTED_SYMBOLS = ["Utils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 const {nsISupportsString, nsITransferable} = Ci;
-
-const LogPrefix = "Ubiquity: ";
-const ToString = Object.prototype.toString;
+const LOG_PREFIX = "Ubiquity: ";
+const TO_STRING = Object.prototype.toString;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -88,7 +87,8 @@ var Utils = {
 };
 
 for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
-for each (let f in [
+delete Utils.QueryInterface;
+[
   // === {{{ Utils.Application }}} ===
   // Shortcut to [[https://developer.mozilla.org/en/FUEL/Application]].
   function Application()
@@ -161,8 +161,7 @@ for each (let f in [
   function OS()
   Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
-  ]) defineLazyProperty(Utils, f);
-delete Utils.QueryInterface;
+  ].reduce(defineLazyProperty, Utils);
 
 // === {{{ Utils.log(a, b, c, ...) }}} ===
 // One of the most useful functions to know both for development and debugging.
@@ -185,15 +184,15 @@ function log(what) {
   var {Firebug} = Utils.currentChromeWindow;
   if (Firebug && Firebug.Console.isEnabled() &&
       Firebug.toggleBar(true, "console")) {
-    if (formatting) args[0] = LogPrefix + what;
-    else args.unshift(LogPrefix);
+    if (formatting) args[0] = LOG_PREFIX + what;
+    else args.unshift(LOG_PREFIX);
     Firebug.Console.logFormatted(args);
     return;
   }
 
   function log_pp(o) {
-    try { return uneval(o) } catch (e) {}
-    try { return Utils.json.encode(o) } finally { return o }
+    try { var p = uneval(o) } catch ([]) {}
+    return p && p !== "({})" && (p !== "null" || o === null) ? p : o;
   }
   var lead = !formatting ? log_pp(args.shift()) :
   args.shift().replace(/%[sdifo]/g, function log_format($) {
@@ -272,7 +271,7 @@ function reportWarning(aMessage, stackFrameNumber) {
 // in to this function.
 
 function reportInfo(message) {
-  Utils.ConsoleService.logStringMessage(LogPrefix + message);
+  Utils.ConsoleService.logStringMessage(LOG_PREFIX + message);
 }
 
 // ** {{{ Utils.encodeJson(object) }}} **
@@ -713,7 +712,7 @@ function uniq(array, key, strict) {
 // Returns whether or not the {{{value}}} is an {{{Array}}} instance.
 
 Utils.isArray = Array.isArray || function isArray(val) {
-  return val != null && ToString.call(val) === "[object Array]";
+  return val != null && TO_STRING.call(val) === "[object Array]";
 };
 
 // === {{{ Utils.isEmpty(value) }}} ===
@@ -728,7 +727,7 @@ function isEmpty(val) {
 // Returns the internal {{{[[Class]]}}} property of the {{{value}}}.
 // See [[http://bit.ly/CkhjS#instanceof-considered-harmful]].
 
-function classOf(val) ToString.call(val).slice(8, -1);
+function classOf(val) TO_STRING.call(val).slice(8, -1);
 
 // === {{{ Utils.count(object) }}} ===
 // Returns the number of {{{object}}}'s own properties,
@@ -973,11 +972,12 @@ function listenOnce(element, eventType, listener, useCapture) {
 // after the first access.
 
 function defineLazyProperty(obj, func, name) {
-  if (name == null) name = func.name;
+  if (typeof name !== "string") name = func.name;
   obj.__defineGetter__(name, function lazyProperty() {
     delete obj[name];
     return obj[name] = func.call(obj);
   });
+  return obj;
 }
 
 // === {{{ Utils.extend(target, object1, [objectN ...]) }}} ===
@@ -1243,7 +1243,6 @@ Utils.history = {
   // === {{{ Utils.history.visitsToDomain(domain) }}} ===
   // Returns the number of times the user has visited
   // the given {{{domain}}} string.
-
   visitsToDomain: function history_visitsToDomain(domain) {
     var hs = (Cc["@mozilla.org/browser/nav-history-service;1"]
               .getService(Ci.nsINavHistoryService));
@@ -1270,7 +1269,6 @@ Utils.history = {
   // {{{query}}} is the query string.
   //
   // {{{callback}}} is the function called when the search is complete.
-
   search: function history_search(query, callback) {
     var awesome = (Cc["@mozilla.org/autocomplete/search;1?name=history"]
                    .getService(Ci.nsIAutoCompleteSearch));
