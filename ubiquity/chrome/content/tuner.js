@@ -64,37 +64,31 @@ var tunerInterface = {
 
     this.parser.flushNounCache();
     var fakeQuery = this.fakeQuery;
-    (function(){
-      Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-      fakeQuery._detectionTracker = new NounTypeDetectionTracker(fakeQuery);
-    })();
-    
+    fakeQuery._detectionTracker = new NounTypeDetectionTracker(fakeQuery);
+
     var nounTypeIdsToCheck = this._allNounTypeIds;
-    
+
     $('#suggs tbody tr').remove();
     for (let id in nounTypeIdsToCheck) {
       initialDisplay(this.parser._nounTypes[id]);
     }
-    
+
     var formatScore = function(x) {
       return x ? Math.round(x*100)/100 : '?';
     }
-    
+
     var displayScore = function(x) {
-      if (fakeQuery._detectionTracker.getRequestCount())
-        return;
-        
       for (let id in tunerInterface.parser._nounCache.cacheSpace[x]) {
         let suggs = tunerInterface.parser._nounCache.getSuggs(x,id);
-        
+
         if (!suggs || !suggs.length)
           continue;
-        
+
         let sugg = suggs.pop();
         $(id+' td.sugg').text(sugg.text);
         $(id+' .scoreval').text(formatScore(sugg.score));
         $(id+' .scorebar').css('width', Math.min(sugg.score * 500,500));
-        
+
         while (sugg = suggs.pop()) {
         // Swapped instances of &nbsp; with &#160; for it to show up under xhtml -L
           $('<tr>'
@@ -104,17 +98,17 @@ var tunerInterface = {
               +'<span class="scoreval">'+formatScore(sugg.score)+'</span></td>'
             +'</tr>').insertAfter($(id));
         }
-        
+
       }
     }
-    
+
     this.parser.detectNounType(this.fakeQuery,input,nounTypeIdsToCheck,
                                displayScore);
   }
 }
 
 function initialDisplay(nountype) {
-  var el = 
+  var el =
     $('<tr id="'+nountype.id.replace('#','')+'"><td class="id">'+nountype.id+'</td><td class="sugg">&#160;</td><td class="score"><div class="scorebar" style="width:0px;">&#160;</div> <span class="scoreval"></span></td></tr>');
   $('#suggs tbody').append(el);
 }
@@ -150,12 +144,12 @@ $(document).ready(function(){
   if (UbiquitySetup.parserVersion != 2) {
     $('#parser2').show();
   }
-  
+
   function run() {
     tunerInterface.startTime = new Date().getTime();
     tunerInterface.run();
   }
-  
+
   $('.input').keyup(function autoRun(e){
     if ($('#autorun')[0].checked) {
       var input = $('.input').val();
@@ -165,5 +159,4 @@ $(document).ready(function(){
     else if (e.keyCode === KeyEvent.DOM_VK_RETURN) run();
   });
   $('#run').click(run);
-  
 });
