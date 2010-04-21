@@ -476,7 +476,8 @@ function openUrlInBrowser(urlString, postData) {
     if (openPref === 3) {
       let tab = browser.addTab(
         urlString, null, null, postInputStream, false, false);
-      let fore = !gPrefBranch.getBoolPref("browser.tabs.loadInBackground");
+      let fore = !gPrefBranch.getBoolPref(
+        "browser.tabs.loadDivertedInBackground");
       let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
       if (fore ^ shiftKey) browser.selectedTab = tab;
       return BrowserTab(tab);
