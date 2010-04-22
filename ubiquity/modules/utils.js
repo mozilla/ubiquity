@@ -864,7 +864,9 @@ escapeHtml.fn = function escapeHtml_sub($) {
 // Returns a version of the {{{string}}} with all occurrences of HTML character
 // references (e.g. &spades; &#x2665; &#9827; etc.) in it decoded.
 
-function unescapeHtml(s) Utils.UnescapeHTML.unescape(s);
+function unescapeHtml(s) (
+  String(s).replace(unescapeHtml.re, Utils.UnescapeHTML.unescape));
+unescapeHtml.re = /(?:&#?\w+;)+/g;
 
 // === {{{ Utils.convertFromUnicode(toCharset, text) }}} ===
 // Encodes the given unicode text to a given character set.

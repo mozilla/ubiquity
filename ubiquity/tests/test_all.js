@@ -573,7 +573,7 @@ function testUtilsEscapeUnescapeHtml() {
   var {escapeHtml, unescapeHtml} = Utils;
   var html = Utils.hiddenWindow.document.documentElement.innerHTML;
   this.assertEquals(
-    html += "&spades;'&#x2665;&#9827;",
+    html += " \n &spades; '\r &#x2665;&#9827;  \t",
     unescapeHtml(unescapeHtml(escapeHtml(escapeHtml(html)))));
 }
 
