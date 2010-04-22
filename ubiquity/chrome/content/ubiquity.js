@@ -172,7 +172,8 @@ Ubiquity.prototype = {
       if (ctrlKey) this.CommandHistory.complete(event.shiftKey, this);
       else {
         let {completionText} = this.__cmdManager.hilitedSuggestion || 0;
-        if (completionText) this.__textBox.value = completionText;
+        if (completionText)
+          this.__textBox.value = this.__lastValue = completionText;
       }
       return true;
     }
@@ -297,14 +298,16 @@ Ubiquity.prototype = {
   // If {{{input}}} is provided but empty, the current entry is used instead.
 
   execute: function U_execute(input) {
+    var cmdMan = this.__cmdManager;
     var external = input != null;
     if (external) {
       if (input) this.__textBox.value = input;
       this.__lastValue = "";
+      cmdMan.hilitedIndex = 0;
     }
     var context = this.__makeContext(external);
-    this.__processInput(true, context);
-    this.__cmdManager.execute(context);
+    if (cmdMan.hilitedIndex < 1) this.__processInput(true, context);
+    cmdMan.execute(context);
   },
 
   // === {{{ Ubiquity#preview(input, immediate) }}} ===

@@ -384,4 +384,6 @@ CommandManager.prototype = {
   get suggestions CM_suggestions() this.__activeQuery.suggestionList,
   get hilitedSuggestion CM_hilitedSuggestion()
     this.__activeQuery.suggestionList[this.__hilitedIndex],
+  get hilitedIndex CM_getHilitedIndex() this.__hilitedIndex,
+  set hilitedIndex CM_setHilitedIndex(i) this.__hilitedIndex = i,
 };
