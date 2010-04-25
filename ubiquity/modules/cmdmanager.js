@@ -85,7 +85,7 @@ function CommandManager(cmdSource, msgService, parser,
   this.__msgService = msgService;
   this.__hilitedIndex = 0;
   this.__lastInput = "";
-  this.__lastHilitedIndex = -1;
+  this.__lastSuggestion = null;
   this.__queuedExecute = null;
   this.__lastAsyncSuggestionCb = Boolean;
   this.__nlParser = parser;
@@ -262,14 +262,11 @@ CommandManager.prototype = {
   },
 
   _renderPreview: function CM__renderPreview(context) {
-    var hindex = this.__hilitedIndex;
-    if (hindex === this.__lastHilitedIndex) return;
-
-    var activeSugg = this.suggestions[hindex];
-    if (!activeSugg) return;
+    var activeSugg = this.hilitedSuggestion;
+    if (!activeSugg || activeSugg === this.__lastSuggestion) return;
 
     var self = this;
-    this.__lastHilitedIndex = hindex;
+    this.__lastSuggestion = activeSugg;
     this.__previewer.queuePreview(
       activeSugg.previewUrl,
       activeSugg.previewDelay,
@@ -298,7 +295,7 @@ CommandManager.prototype = {
     this.__activeQuery = NULL_QUERY;
     this.__hilitedIndex = 0;
     this.__lastInput = "";
-    this.__lastHilitedIndex = -1;
+    this.__lastSuggestion = null;
     this.__queuedExecute = null;
   },
 
