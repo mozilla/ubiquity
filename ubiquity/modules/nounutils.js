@@ -271,10 +271,9 @@ function mixNouns(label) {
   if (!Utils.isArray(nouns))
     nouns = Array.slice(arguments, gotLabel ? 1 : 0);
   function mixer(key) function suggestMixed() {
-    var suggsList = [
-      let (val = noun[key]) (
-        typeof val === "function" ? val.apply(noun, arguments) : val)
-      for each (noun in nouns)];
+    var val, suggsList = [
+      typeof val === "function" ? val.apply(noun, arguments) : val
+      for each (noun in nouns) if ((val = noun[key])) ];
     return suggsList.concat.apply([], suggsList); // flatten
   };
   return {
