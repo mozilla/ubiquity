@@ -123,12 +123,11 @@ var LocalizationUtils = {
   },
 
   getFeedGlobals:
-  function LU_getFeedGlobals(feedUrl) feedGlobalsDict[feedUrl] || [],
+  function LU_getFeedGlobals(feedUrl)
+    feedGlobalsDict[feedUrl] || (feedGlobalsDict[feedUrl] = []),
 
-  registerFeedGlobal: function LU_registerFeedGlobal(feedUrl, key) {
-    (feedGlobalsDict[feedUrl] || (feedGlobalsDict[feedUrl] = [])).push(key);
-    return this;
-  },
+  registerFeedGlobal: function LU_registerFeedGlobal(feedUrl, key)
+    LocalizationUtils.getFeedGlobals(feedUrl).push(key),
 
   // === {{{ LocalizationUtils.localizeCommand(cmd, langCode) }}} ===
   //

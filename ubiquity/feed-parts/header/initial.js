@@ -48,11 +48,13 @@ var _ = (function prepareGettext({LocalizationUtils}, {UbiquitySetup}) {
     : x);
 
   var {languageCode} = UbiquitySetup;
-  if (!LocalizationUtils.loadLocalPo(feed.id, languageCode))
+  if (!LocalizationUtils.loadLocalPo(feed.id, languageCode)) {
+    LocalizationUtils.getFeedGlobals(feed.id).splice(0, 1/0);
     return function registerTemplate(x, data) {
       "l10n" in context || LocalizationUtils.registerFeedGlobal(feed.id, x);
       return renderTemplate(x, data);
     };
+  }
 
   var feedKey = LocalizationUtils.getLocalFeedKey(feed.id, languageCode);
   return function gettext(x, data) {
