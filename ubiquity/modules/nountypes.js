@@ -822,37 +822,35 @@ function getYahooContacts(callback) {
 }
 
 // === {{{ noun_type_geolocation }}} ===
-// **//FIXME//**
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, html}}} : user input / "city,( state,) country"
+// * {{{data}}} : null / geoLocation
+//   (as returned by [[#modules/cmdutils.js|CmdUtils]].getGeoLocation())
 
 var noun_type_geolocation = {
   label: "geolocation",
   rankLast: true,
-  "default": function nt_geoloc_default() {
-    var location = CmdUtils.getGeoLocation();
-    if (!location) return false;
-    var fullLocation = ((location.city ? location.city + ", " : "") +
-                        location.country);
-    return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
+  default: function nt_geoloc_default(loc) {
+    if (!(loc = loc || CmdUtils.geoLocation)) return null;
+    var {city, state, country: text} = loc;
+    if (state && state !== city) text = state + ", " + text;
+    if (city) text = city + ", " + text;
+    return CmdUtils.makeSugg(text, null, loc);
   },
   suggest: function nt_geoloc_suggest(text, html, callback, selectionIndices) {
     // LONGTERM TODO: try to detect whether fragment is anything like
     // a valid location or not, and don't suggest anything
     // for input that's not a location.
-    function addAsyncGeoSuggestions(location) {
-      callback([CmdUtils.makeSugg(location.city + ", " + location.country),
-                CmdUtils.makeSugg(location.city),
-                CmdUtils.makeSugg(location.country)]);
-    }
+    var suggs = [CmdUtils.makeSugg(text, null, null, 0.3, selectionIndices)];
     // TODO: we should try to build this "here" handling into something like
     // magic words (anaphora) handling in Parser 2: make it localizable.
-    var suggs = [CmdUtils.makeSugg(text, null, null, 0.3, selectionIndices)];
-    if (/^\s*here\s*$/i.test(text))
-      suggs.push(CmdUtils.getGeoLocation(addAsyncGeoSuggestions));
+    if (/^\s*here\s*$/i.test(text)) {
+      let me = this;
+      suggs.push(CmdUtils.getGeoLocation(function nt_geoloc_async(loc) {
+        callback(me.default(loc));
+      }));
+    }
     return suggs;
-  }
+  },
 };
 
 // === {{{ noun_type_lang_google }}} ===
