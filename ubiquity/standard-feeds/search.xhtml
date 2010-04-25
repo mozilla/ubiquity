@@ -94,49 +94,42 @@ ${matchMessage}
 
 <div id="weather-search">
   <style>
-  .mainimg { float: left; }
-  .weather{ font-family: arial, helvetica; color:white;}
-  .forecast { clear: both; }
-  .forecast img { width: 70px; }
-  .temp { font-size: 60px; }
-  .high { color: red; }
-  .low { color: blue; }
+  .mainimg { float: left }
+  .weather { font-family: arial, helvetica, sans-serif }
+  .forecast { clear: both }
+  .forecast th, .forecast td { text-align: center }
+  .forecast .icon { text-align: right }
+  .forecast img { width: 75% }
+  .temp { font-size: 60px }
+  .high { color: #f66 }
+  .low  { color: #66f }
   </style>
   <div class="weather">
     ${weatherMessage}<br />
-    {if w.showImg}<img class='mainimg' src='${w.img}'/>{/if}
-    <div class="temp">
-      {if w.temp_units === "fahrenheit"}
-        ${w.tempf}&#xb0;F
-      {else}
-        ${w.tempc}&#xb0;C
-      {/if}
-      <br/>
-    </div>
+    {if w.img}<img class="mainimg" src="${w.img}"/>{/if}
+    <div class="temp">${w.temp}</div>
     <div class="extra">
       ${w.condition}<br/>
       ${w.wind}<br/>
       ${w.humidity}<br/>
     </div>
-    <div class="forecast">
-      <table>
-      <tr>{for day in w.forecast}
-        <td>{if day.showImg}<img src='${day.img}'/>{/if}</td>
-      {/for}</tr>
-      <tr>{for day in w.forecast}
-        <th>${day.label}</th>
-      {/for}</tr>
-      <tr>{for day in w.forecast}
-        <td>${day.condition}</td>
-      {/for}</tr>
-      <tr>{for day in w.forecast}
-        <td class='high'>${day.high}</td>
-      {/for}</tr>
-      <tr>{for day in w.forecast}
-        <td class='low'>${day.low}</td>
-      {/for}</tr>
-      </table>
-    </div>
+    <table class="forecast">
+    <tr>{for day in w.forecast}
+      <td class="icon">{if day.img}<img src="${day.img}"/>{/if}</td>
+    {/for}</tr>
+    <tr>{for day in w.forecast}
+      <th class="label">${day.label}</th>
+    {/for}</tr>
+    <tr>{for day in w.forecast}
+      <td class="condition">${day.condition}</td>
+    {/for}</tr>
+    <tr>{for day in w.forecast}
+      <td class="high">${day.high}</td>
+    {/for}</tr>
+    <tr>{for day in w.forecast}
+      <td class="low">${day.low}</td>
+    {/for}</tr>
+    </table>
   </div>
 </div>
 
@@ -923,10 +916,10 @@ CmdUtils.CreateCommand({
 // WEATHER COMMANDS
 // -----------------------------------------------------------------
 
-var Temperature_Units = ["fahrenheit", "celsius"];
+var TEMPERATURE_UNITS = ["fahrenheit", "celsius"];
 
 var noun_type_temperature_unit = CmdUtils.NounType("temperature unit",
-                                                   Temperature_Units);
+                                                   TEMPERATURE_UNITS);
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
@@ -1000,109 +993,102 @@ CmdUtils.CreateCommand({
     name: "mitcho (Michael Yoshitaka Erlewine)",
     email: "mitcho@mitcho.com",
   },
+  contributor: "satyr",
   arguments: {
-    location: noun_type_geo_town,
+    location: {
+      __proto__: noun_type_geo_town,
+      default: noun_type_geolocation.default,
+    },
     format: noun_type_temperature_unit,
   },
   icon: "chrome://ubiquity/skin/icons/wunderground.ico",
-  description: "Checks the weather for a given location. It detects your " +
-               "current location as a default.",
-  help: "Try issuing &quot;weather near chicago&quot;.  It works with " +
-        "zip-codes, too.  You can add 'in celsius' or 'in farenheit' to " +
-        "specify the temperature scale.",
+  description: ("Checks the weather for a given location. It detects your " +
+                "current location as a default."),
+  help: ("Try issuing &quot;weather near chicago&quot;.  It works with " +
+         "zip-codes, too.  You can add 'in celsius' or 'in farenheit' to " +
+         "specify the temperature scale."),
   execute: function weather_execute({location: {text, data}}) {
     Utils.openUrlInBrowser(
       "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=" +
       encodeURIComponent(formatLatLon(data) || text));
   },
   preview: function weather_preview(pblock, {
-    location: {text, data}, format: {text: temp_units}}) {
+    location: {text, data}, format: {text: tempUnit}}) {
     if (!text) {
       pblock.innerHTML = _("Gets the weather for a zip code/city.");
       return;
     }
 
-    pblock.innerHTML = _("Weather for ${location}", {location: text}) + "...";
+    pblock.innerHTML = _("Weather for ${location} ...", {location: text});
 
-    var query = formatLatLon(data) || text;
-    var user_location = CmdUtils.getGeoLocation();
+    var userLocation = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
-    if (!temp_units) temp_units = (
-      user_location && /^(?:U[SM]|BZ)$/.test(user_location.country_code)
-      ? "fahrenheit"
-      : "cersius");
-    var xmls = {}, param = {query: query};
+    tempUnit = tempUnit || TEMPERATURE_UNITS[
+      +!(userLocation && /^(?:U[SM]|BZ)$/.test(userLocation.country_code))];
+    var xmls = {}, param = {query: formatLatLon(data) || text};
+    ["WXCurrentObXML", "ForecastXML"].forEach(function (api) {
+      CmdUtils.previewGet(
+        pblock, "http://api.wunderground.com/auto/wui/geo/" + api, param,
+        function (x) { xmls[api] = x; weather_tryToPreview(); }, "xml");
+    });
     function weather_tryToPreview() {
-      var {WXCurrentObXML: weatherObj, ForecastXML: forecastObj} = xmls;
-      if (!weatherObj || !forecastObj) return;
+      var {WXCurrentObXML: weatherXml, ForecastXML: forecastXml} = xmls;
+      if (!weatherXml || !forecastXml) return;
 
-      var city = weatherObj.find("observation_location > full").text();
-      var country = weatherObj.find("observation_location > country").text();
-      var condition = weatherObj.find("weather").text();
-
-      var imgSrc = yahooWeatherImage(condition);
+      function qstc(xml, selector) {
+        try{
+        return xml.querySelector(selector).textContent;
+        } catch(e) { Utils.reportInfo(e.stack) }
+      }
 
       //change wind speed to kmh based on geolocation
-      var wind_text = weatherObj.find("wind_string").text().split("at");
-      var wind_speed = parseFloat(weatherObj.find("wind_mph").text());
-      var wind_units = "mph";
+      var windText = qstc(weatherXml, "wind_string");
+      var windSpeed = parseFloat(qstc(weatherXml, "wind_mph"));
+      var windUnit = "mph";
       //http://en.wikipedia.org/wiki/Si_units
-      //UK uses mph
-      if (user_location &&
-          /^(?:U[SM]|LR|MM|GB)$/.test(user_location.country_code)) {
-        wind_units = "km/h";
-        wind_speed = wind_speed * 1.6;
+      if (userLocation) switch (userLocation.country_code) {
+        case "US": case "UM": case "LR": case "MM": case "GB":
+        break;
+        case "JP":
+        windUnit = "m/s";
+        windSpeed *= .45;
+        break;
+        default:
+        windUnit = "km/h";
+        windSpeed *= 1.6;
       }
-      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
+      var [tempChar] = tempUnit, condition = qstc(weatherXml, "weather");
       var weather = {
         condition: condition,
-        temp_units: temp_units,
-        tempc: weatherObj.find("temp_c").text(),
-        tempf: weatherObj.find("temp_f").text(),
-        humidity: weatherObj.find("relative_humidity").text(),
-        wind: wind,
-        img: imgSrc,
-        showImg: (imgSrc != null),
+        temp: (qstc(weatherXml, "temp_" + tempChar) +
+               "&#xB0;" + tempChar.toUpperCase()),
+        humidity: qstc(weatherXml, "relative_humidity"),
+        wind: /^\D+/(windText) + windSpeed.toFixed(1) + windUnit,
+        img: yahooWeatherImage(condition),
         forecast: []
       };
 
-      var today = true;
-      forecastObj.find("simpleforecast forecastday").each(function (i, day) {
-        var day = jQuery(day);
-        var label = _("${month}/${day}", {
-          month: day.find("month").text(),
-          day: day.find("day").text(),
-        });
-        if (today) {
-          label = _("today");
-          today = false;
-        }
-        var condition = day.find("conditions").text();
-        var imgSrc = yahooWeatherImage(condition);
+      $("simpleforecast > forecastday", forecastXml).each(function (i) {
+        var condition = qstc(this, "conditions");
         weather.forecast.push({
-          label: label,
+          label: i ? _("${month}/${day}", {
+            month: qstc(this, "month"),
+            day: qstc(this, "day"),
+          }) : _("today"),
           condition: condition,
-          img: imgSrc,
-          showImg: (imgSrc != null),
-          high: day.find("high > " + temp_units).text(),
-          low: day.find("low > " + temp_units).text(),
+          img: yahooWeatherImage(condition),
+          high: qstc(this, "high > " + tempUnit),
+          low: qstc(this, "low > " + tempUnit),
         });
       });
 
-      //city may be like "Kansai, "
-      var loc = city.replace(/,\s*$/, "") + ", " + country;
+      var loc = qstc(weatherXml, "display_location > full");
       pblock.innerHTML = CmdUtils.renderTemplate(
         feed.dom.getElementById("weather-search").innerHTML, {
           w: weather, location: loc,
           weatherMessage: _("Weather for ${location}", {location: loc}),
         });
     }
-    var xmls = {}, param = {query: query};
-    ["WXCurrentObXML", "ForecastXML"].forEach(function (api) {
-      CmdUtils.previewGet(
-        pblock, "http://api.wunderground.com/auto/wui/geo/" + api, param,
-        function (x) { xmls[api] = $(x); weather_tryToPreview(); }, "xml");
-    });
   }
 });
 
