@@ -62,12 +62,12 @@ var Utils = {
 
   // === {{{ Utils.currentChromeWindow }}} ===
   // A reference to the application chrome window that currently has focus.
-  get currentChromeWindow getCurrentChromeWindow()
+  get currentChromeWindow()
     Utils.WindowMediator.getMostRecentWindow(Utils.appWindowType),
 
   // === {{{ Utils.chromeWindows }}} ===
   // An array of application chrome windows currently opened.
-  get chromeWindows getChromeWindows() {
+  get chromeWindows() {
     var wins = [];
     var enum = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
     while (enum.hasMoreElements()) wins.push(enum.getNext());
@@ -76,12 +76,12 @@ var Utils = {
 
   // === {{{ Utils.currentTab }}} ===
   // A reference to the focused tab as {{{Utils.BrowserTab}}}.
-  get currentTab getCurrentTab()
+  get currentTab()
     BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   // === {{{ Utils.currentTabs }}} ===
   // An array of tabs within the current chrome window.
-  get currentTabs getCurrentTabs() gTabs.from(Utils.currentChromeWindow),
+  get currentTabs() gTabs.from(Utils.currentChromeWindow),
 
   __globalObject: this,
 };
@@ -785,7 +785,7 @@ extend(Sequence.prototype, {
   },
   __noSuchMethod__:
   function seq_pass(name, args) args[name].apply(this.toJSON(), args),
-  get length seq_getLength() (this.end - this.lead) / this.step + 1 | 0,
+  get length() (this.end - this.lead) / this.step + 1 | 0,
   toJSON: function seq_toJSON() [x for (x in this)],
   toString: function seq_toString()
     "[object Sequence(" + this.lead + "," + this.end + "," + this.step + ")]",
@@ -1055,20 +1055,20 @@ function BrowserTab(tabbrowser_tab) ({
   raw: tabbrowser_tab,
 });
 extend(BrowserTab.prototype, {
-  get browser BT_getBrowser() this.raw.linkedBrowser,
-  get tabbrowser BT_getTabbrowser() this.browser.getTabBrowser(),
-  get uri BT_getUri() this.browser.currentURI,
-  get title BT_getTitle() this.browser.contentTitle,
-  get window BT_getWindow() this.browser.contentWindow,
-  get document BT_getDocument() this.browser.contentDocument,
-  get icon BT_getIcon() this.raw.image,
-  get index BT_getIndex() {
+  get browser() this.raw.linkedBrowser,
+  get tabbrowser() this.browser.getTabBrowser(),
+  get uri() this.browser.currentURI,
+  get title() this.browser.contentTitle,
+  get window() this.browser.contentWindow,
+  get document() this.browser.contentDocument,
+  get icon() this.raw.image,
+  get index() {
     var {browser} = this, {mTabs} = browser.getTabBrowser();
     for (let i = 0, l = mTabs.length; i < l; ++i)
       if (mTabs[i].linkedBrowser === browser) return i;
     return -1;
   },
-  get chromeWindow BT_getChromeWindow() {
+  get chromeWindow() {
     var {tabbrowser} = this;
     for each (let win in Utils.chromeWindows)
       if (win.gBrowser === tabbrowser) return win;
@@ -1119,7 +1119,7 @@ var gTabs = Utils.tabs = {
 
   // === {{{ Utils.tabs.length }}} ===
   // The total number of opened tabs.
-  get length tabs_getLength() {
+  get length() {
     var num = 0;
     for each (var win in Utils.chromeWindows) if ("gBrowser" in win)
       num += win.gBrowser.mTabs.length;

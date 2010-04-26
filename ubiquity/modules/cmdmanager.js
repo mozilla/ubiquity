@@ -372,15 +372,15 @@ CommandManager.prototype = {
     if (hilitedSuggestion) this.__nlParser.strengthenMemory(hilitedSuggestion);
   },
 
-  get parser CM_parser() this.__nlParser,
-  get lastInput CM_lastInput() this.__lastInput,
-  get previewer CM_previewer() this.__previewer,
+  get parser() this.__nlParser,
+  get lastInput() this.__lastInput,
+  get previewer() this.__previewer,
 
-  get maxSuggestions CM_maxSuggestions() CommandManager.maxSuggestions,
-  get hasSuggestions CM_hasSuggestions() this.__activeQuery.hasResults,
-  get suggestions CM_suggestions() this.__activeQuery.suggestionList,
-  get hilitedSuggestion CM_hilitedSuggestion()
+  get maxSuggestions() CommandManager.maxSuggestions,
+  get hasSuggestions() this.__activeQuery.hasResults,
+  get suggestions() this.__activeQuery.suggestionList,
+  get hilitedSuggestion()
     this.__activeQuery.suggestionList[this.__hilitedIndex],
-  get hilitedIndex CM_getHilitedIndex() this.__hilitedIndex,
-  set hilitedIndex CM_setHilitedIndex(i) this.__hilitedIndex = i,
+  get hilitedIndex() this.__hilitedIndex,
+  set hilitedIndex(i) this.__hilitedIndex = i,
 };

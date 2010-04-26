@@ -107,32 +107,32 @@ Ubiquity.prototype = {
   // == Read Only Properties ==
 
   // === {{{ Ubiquity#panel }}} ===
-  get panel U_getPanel() this.__panel,
-  get msgPanel U_getMsgPanel() this.__panel,
+  get panel() this.__panel,
+  get msgPanel() this.__panel,
 
   // === {{{ Ubiquity#textBox }}} ===
-  get textBox U_getTextBox() this.__textBox,
+  get textBox() this.__textBox,
 
   // === {{{ Ubiquity#cmdManager }}} ===
-  get cmdManager U_getCmdManager() this.__cmdManager,
+  get cmdManager() this.__cmdManager,
 
   // === {{{ Ubiquity#lastKeyEvent }}} ===
   // The last captured key event on the {{{textBox}}}.
-  get lastKeyEvent U_getLastKeyEvent() this.__lastKeyEvent,
+  get lastKeyEvent() this.__lastKeyEvent,
 
   // === {{{ Ubiquity#isWindowOpen }}} ===
-  get isWindowOpen U_getIsWindowOpen()
+  get isWindowOpen()
     this.__panel.state in this.__STATES_OPEN,
   __STATES_OPEN: {open: 1, showing: 1},
 
   // === {{{ Ubiquity#inputDelay }}} ===
   // Delay between the user's last keyup and parsing in milliseconds.
-  get inputDelay U_getInputDelay()
+  get inputDelay()
     this.__prefs.get("extensions.ubiquity.inputDelay"),
 
   // === {{{ Ubiquity#inputLimit }}} ===
   // Input length where Ubiquity starts to hesitate parsing. See #507.
-  get inputLimit U_getInputLimit()
+  get inputLimit()
     this.__prefs.get("extensions.ubiquity.inputLimit"),
 
   __onmousemove: function U__onMouseMove(event) {

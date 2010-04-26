@@ -105,20 +105,20 @@ var SFP = Utils.extend(SkinFeedPlugin.prototype, {
 
   // === {{{ SkinFeedPlugin.skins }}} ===
   // Installed {{{SkinFeed}}}s as array.
-  get skins SFP_getSkins() [
+  get skins() [
     feed for each (feed in this._feedManager.getSubscribedFeeds())
     if (feed.type === "ubiquity-skin")],
 
   // === {{{ SkinFeedPlugin.customSkin }}} ===
-  get customSkin SFP_getCurrentSkin()
+  get customSkin()
     this._feedManager.getFeedForUrl(URL_CUSTOM),
 
   // === {{{ SkinFeedPlugin.defaultSkin }}} ===
-  get defaultSkin SFP_getCurrentSkin()
+  get defaultSkin()
     this._feedManager.getFeedForUrl(URL_DEFAULT),
 
   // === {{{ SkinFeedPlugin.currentSkin }}} ===
-  get currentSkin SFP_getCurrentSkin() (
+  get currentSkin() (
     this._feedManager.getFeedForUrl(Utils.prefs.get(PREF_SKIN, URL_DEFAULT)) ||
     this.defaultSkin),
 
@@ -170,7 +170,7 @@ function SkinFeed(baseFeed, eventHub, msgService) Utils.extend({
 Utils.extend(SkinFeed.prototype, {
   // === {{{ SkinFeed#css }}} ===
   // CSS code of this skin. Settable if custom.
-  get css SF_getCss() {
+  get css() {
     var code = this._codeSource.getCode();
     if (this._codeSource.updated) this._dataCache = null;
     return code;
@@ -178,12 +178,12 @@ Utils.extend(SkinFeed.prototype, {
 
   // === {{{ SkinFeed#dataUri }}} ===
   // Data URI object used to register this skin.
-  get dataUri SF_getDataUri()
+  get dataUri()
     Utils.uri("data:text/css,/*ubiquity-skin*/" + encodeURI(this.css)),
 
   // === {{{ SkinFeed#metaData }}} ===
   // Contents of the meta data block ({{{ =skin= ~ =/skin= }}}).
-  get metaData SF_getMetaData() {
+  get metaData() {
     if (this._dataCache) return this._dataCache;
     var {css} = this, data = {name: this.title};
     var [, block] = /=skin=\s*([^]+)\s*=\/skin=/(css) || 0;

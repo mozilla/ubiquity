@@ -107,13 +107,13 @@ ParserQuery.prototype = {
   },
 
   // Read-only properties:
-  get finished PQ_finished() {
+  get finished() {
     for each (let req in this.requests)
       if ((req.readyState || 4) !== 4) return false;
     return true;
   },
-  get hasResults PQ_hasResults() !!this._suggestionList.length,
-  get suggestionList PQ_getSuggestionList() this._suggestionList,
+  get hasResults() !!this._suggestionList.length,
+  get suggestionList() this._suggestionList,
 
   // The handler that makes this a listener for partiallyParsedSentences.
   onNewParseGenerated: function PQ_onNewParseGenerated() {
@@ -282,7 +282,7 @@ function ParsedSentence(
   this.frequencyMatchScore = 0;
 }
 ParsedSentence.prototype = {
-  get completionText PS_getCompletionText() {
+  get completionText() {
     // Returns plain text that we should set the input box to if user hits
     // the key to autocomplete to this sentence.
     var {matchedName: sentence, args} = this._verb;
@@ -304,7 +304,7 @@ ParsedSentence.prototype = {
     return sentence + " ";
   },
   // text formatted sentence for display in popup menu
-  get displayText PS_getDisplayText() {
+  get displayText() {
     var {matchedName: sentence, args} = this._verb;
     for (let x in (this.fromNounFirstSuggestion
                    ? this._argSuggs
@@ -318,7 +318,7 @@ ParsedSentence.prototype = {
     return sentence;
   },
   // html formatted sentence for display in suggestion list
-  get displayHtml PS_getDisplayHtml() {
+  get displayHtml() {
     var {escapeHtml} = Utils;
     var {matchedName, args} = this._verb;
     var html = '<span class="verb">' + escapeHtml(matchedName) + "</span> ";
@@ -343,9 +343,9 @@ ParsedSentence.prototype = {
     return html;
   },
 
-  get icon PS_getIcon() this._verb.cmd.icon,
-  get previewUrl PS_getPreviewUrl() this._verb.cmd.previewUrl,
-  get previewDelay PS_getPreviewDelay() this._verb.cmd.previewDelay,
+  get icon() this._verb.cmd.icon,
+  get previewUrl() this._verb.cmd.previewUrl,
+  get previewDelay() this._verb.cmd.previewDelay,
 
   execute: function PS_execute(context) {
     return this._verb.execute(context, this._argSuggs);
@@ -379,7 +379,7 @@ ParsedSentence.prototype = {
     return arg in this._argSuggs;
   },
 
-  get hasFilledArgs PS_hasFilledArgs() {
+  get hasFilledArgs() {
     /* True if suggestion has at least one filled argument.
      False if verb has no arguments to fill, or if it has arguments but
      none of them are filled. */
@@ -452,7 +452,7 @@ ParsedSentence.prototype = {
     return newSentences;
   },
 
-  get score PS_getScore() {
+  get score() {
     if (!this.argMatchScore) {
       // argument match score starts at 1 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
@@ -684,7 +684,7 @@ PartiallyParsedSentence.prototype = {
     return alternates;
   },
 
-  get fromNounFirstSuggestion PPS_fromNounFirstSuggestion() !this._matchScore,
+  get fromNounFirstSuggestion() !this._matchScore,
 };
 
 function Verb(cmd, roleMap) {
@@ -748,9 +748,9 @@ function Verb(cmd, roleMap) {
   this.argCount = [0 for (_ in args)].length;
 }
 Verb.prototype = {
-  get name V_name() this.cmd.names[0],
-  get icon V_icon() this.cmd.icon,
-  get disabled V_disabled() this.cmd.disabled,
+  get name() this.cmd.names[0],
+  get icon() this.cmd.icon,
+  get disabled() this.cmd.disabled,
 
   execute: function V_execute(context, argumentValues) {
     return (

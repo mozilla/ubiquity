@@ -56,7 +56,7 @@ Gettext.prototype.get_lang_refs = function () [];
 var LocalizationUtils = {
   GETTEXT: new Gettext(),
 
-  get loadedPo LU_loadedPo() loadedPo,
+  get loadedPo() loadedPo,
 
   isLocalizableLang: function LU_isLocalizableLang(langCode)
     DefaultLanguageCodes.indexOf(langCode) < 0,

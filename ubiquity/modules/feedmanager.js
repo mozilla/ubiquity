@@ -319,7 +319,7 @@ Feed.prototype = {
   // === {{{Feed#viewSourceUri}}} ===
   // Returns the {{{nsIURI}}} for the feed's source code. If the source
   // code only exists as cached data, this may be a data URI.
-  get viewSourceUri Feed_getViewSourceUri() (
+  get viewSourceUri() (
     this.canAutoUpdate
     ? this.srcUri
     : Utils.uri("data:," + escape(this.getCode()))),
@@ -329,18 +329,18 @@ Feed.prototype = {
   // same as the {{{rel}}} attribute contained in a HTML page's
   // {{{<link>}}} tag, and determines what feed plugin is used to load
   // and process the feed. Read-only.
-  get type Feed_getType()
+  get type()
     this._annSvc.getPageAnnotation(this.uri, FEED_TYPE_ANNO, DEFAULT_FEED_TYPE),
 
   // === {{{Feed#title}}} ===
   // The human-readable name for the feed. Read-only.
-  get title Feed_getTitle()
+  get title()
     this._annSvc.getPageAnnotation(this.uri, FEED_TITLE_ANNO, this.uri.spec),
 
   // === {{{Feed#date}}} ===
   // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
   // Read-only.
-  get date Feed_getDate()
+  get date()
     new Date(this._annSvc.getPageAnnotation(this.uri, FEED_DATE_ANNO, 0)),
 
   // === {{{Feed#isBuiltIn}}} ===
@@ -348,19 +348,19 @@ Feed.prototype = {
   // as a built-in feed. See the documentation for
   // {{{FeedManager#addSubscribedFeed()}}} for more
   // information. Read-only.
-  get isBuiltIn Feed_getIsBuiltIn()
+  get isBuiltIn()
     this._annSvc.pageHasAnnotation(this.uri, FEED_BUILTIN_ANNO),
 
   // === {{{Feed#isSubscribed}}} ===
   // Whether the feed is currently being subscribed to or not. Read-only.
-  get isSubscribed Feed_getIsSubscribed()
+  get isSubscribed()
     this._annSvc.pageHasAnnotation(this.uri, FEED_SUBSCRIBED_ANNO),
 
   // === {{{Feed#canAutoUpdate}}} ===
   // Whether or not the latest version of the feed's source code should
   // be fetched from the network. See
   // {{{FeedManager#addSubscribedFeed()}}} for more information. Read-only.
-  get canAutoUpdate Feed_getCanAutoUpdate()
+  get canAutoUpdate()
     this._annSvc.getPageAnnotation(
       this.uri, FEED_AUTOUPDATE_ANNO, "") === "true",
 

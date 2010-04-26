@@ -62,7 +62,7 @@ function PreviewBrowser(browser, defaultUrl) {
 }
 
 PreviewBrowser.prototype = {
-  get isActive PB_isActive() this.__isActive,
+  get isActive() this.__isActive,
 
   _onPreviewBrowserLoadUrl: function PB__onPreviewBrowserLoadUrl() {
     var cb = this.__previewBrowserUrlLoadedCallback;

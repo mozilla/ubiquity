@@ -203,9 +203,9 @@ var UbiquitySetup = {
     gWebJsModule = new WebJsModule(callback);
   },
 
-  get isResetScheduled getIsResetScheduled()
+  get isResetScheduled()
     gPrefs.get(RESET_SCHEDULED_PREF, false),
-  set isResetScheduled setIsResetScheduled(value)
+  set isResetScheduled(value)
     gPrefs.set(RESET_SCHEDULED_PREF, value),
 
   __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
@@ -317,13 +317,13 @@ var UbiquitySetup = {
     }
   },
 
-  get languageCode getLanguageCode()
+  get languageCode()
     gPrefs.getValue("extensions.ubiquity.language", "en"),
 
-  get parserVersion getParserVersion()
+  get parserVersion()
     gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
 
-  get version getVersion()
+  get version()
     Utils.ExtensionManager.getItemForID("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {

@@ -136,7 +136,7 @@ var PrefKeysProto = {
     return this._lastKeysOk = true;
   },
 
-  get keyCombo PK_getKeyCombo() {
+  get keyCombo() {
     var keyCode = gPrefs.getValue(this.KEYCODE_PREF,
                                   this.KEYCODE_DEFAULT);
     return [
@@ -147,7 +147,7 @@ var PrefKeysProto = {
       : ""];
   },
 
-  get keyComboText PK_getKeyComboText() this.keyCombo.join("+"),
+  get keyComboText() this.keyCombo.join("+"),
 }
 
 function isModifier(keyCode) keyCode in PrefKeys.MODIFIER2TEXT;
