@@ -77,8 +77,7 @@ var CmdUtils = {
   //
   // Ubiquity 0.1.x only supports parser version 1, while
   // Ubiquity 0.5.x supports parser versions 1 and 2.
-  get parserVersion()
-    Utils.prefs.get("extensions.ubiquity.parserVersion", 1),
+  get parserVersion() Utils.prefs.get("extensions.ubiquity.parserVersion", 1),
 
   // === {{{ CmdUtils.maxSuggestions }}} ===
   // The current number of max suggestions.
@@ -342,7 +341,7 @@ function onPageLoad(callback, includes, excludes) {
 // the chrome window associated with it.
 
 function onUbiquityLoad(callback) {
-  this.__globalObject.ubiquityLoadFuncs.push(callback);
+  return this.__globalObject.ubiquityLoadFuncs.push(callback);
 }
 
 // ** {{{ CmdUtils.setLastResult(result) }}} **
@@ -643,14 +642,15 @@ function retrieveLogins(name) [
 // based off the URL from which the feed is being retrieved.
 
 function CreateCommand(options) {
-  var me = this;
   var global = this.__globalObject;
   var command = {
     __proto__: options,
     proto: options,
+    global: global,
     previewDefault: CreateCommand.previewDefault,
   };
 
+  var me = this;
   function toNounType(obj, key) {
     var val = obj[key];
     if (!val) return;
@@ -697,9 +697,9 @@ function CreateCommand(options) {
     else if (!Utils.isArray(args)) {
       // arguments: {role: noun, ...}
       // arguments: {"role label": noun, ...}
-      let a = [];
+      let a = [], re = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/;
       for (let key in args) {
-        let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
+        let [role, label] = re(key) || 0;
         if (role) a.push({role: role, label: label, nountype: args[key]});
       }
       args = a;
@@ -708,47 +708,45 @@ function CreateCommand(options) {
     command.arguments = args;
   }
   { let {execute, preview} = options;
-    if (typeof execute !== "function") {
-      let uri;
-      try { uri = global.Utils.url(execute) } catch(e) {}
-      command.execute = uri ? function executeOpen() {
-        Utils.focusUrlInBrowser(uri.spec);
-      } : function executeDisplay() {
-        //errorToLocalize
-        global.displayMessage(execute || "No action defined.");
-      };
-    }
-    if (preview == null)
+    if (typeof execute !== "function")
+      command.execute = CreateCommand.executeDefault;
+    if (typeof preview !== "function") {
+      if (preview != null) command.previewHtml = String(preview);
       command.preview = CreateCommand.previewDefault;
-    else if (typeof preview !== "function") {
-      // wrap it in a function that does what you'd expect it to.
-      command.preview = function previewHtml(pblock) {
-        pblock.innerHTML = this._previewString;
-      };
-      command._previewString = String(preview);
     }
   }
 
   if ("previewUrl" in options && !options.__lookupGetter__("previewUrl"))
-    // Call our "patched" Utils.url(), which has the ability
+    // Call our "patched" Utils.uri(), which has the ability
     // to base a relative URL on the current feed's URL.
-    command.previewUrl = global.Utils.url(options.previewUrl);
+    command.previewUrl = global.Utils.uri(options.previewUrl);
 
   global.commands.push(command);
   return command;
 }
+CreateCommand.executeDefault = function executeDefault() {
+  var {proto: {execute}, global} = this, uri;
+  try { uri = global.Utils.uri(execute) } catch ([]) {}
+  if (uri) return Utils.focusUrlInBrowser(uri.spec);
+
+  if (execute == null) execute = "No action defined."; //ToLocalize
+  global.displayMessage(execute, this);
+};
 CreateCommand.previewDefault = function previewDefault(pb) {
   var html = "";
-  if ("description" in this)
-    html += '<div class="description">' + this.description + '</div>';
-  if ("help" in this)
-    html += '<p class="help">' + this.help + '</p>';
-  if (!html)
-    html = ('Executes the <b class="name">' +
-            Utils.escapeHtml(this.name) + '</b> command.');
-  html = '<div class="default">' + html + '</div>';
-  if (pb) pb.innerHTML = html;
-  return html;
+  if ("previewHtml" in this) html = this.previewHtml;
+  else {
+    if ("description" in this)
+      html += '<div class="description">' + this.description + '</div>';
+    if ("help" in this)
+      html += '<p class="help">' + this.help + '</p>';
+    if (!html)
+      //ToLocalize
+      html = ('Executes the <b class="name">' +
+              Utils.escapeHtml(this.name) + '</b> command.');
+    html = '<div class="default">' + html + '</div>';
+  }
+  return (pb || 0).innerHTML = html;
 };
 
 // == COMMAND ALIAS CREATION ==
@@ -941,13 +939,13 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
     pblock.innerHTML =
       "<div class='search-command'>" + Array.join(arguments, "") + "</div>";
   }
-  var {parser} = this, html = Utils.escapeHtml(text);
+  var {parser, global} = this, html = Utils.escapeHtml(text);
   put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
       //ToLocalize
       parser ? "<p class='loading'>Loading results...</p>" : "");
   if (!parser) return;
 
-  var {__parent__: global, type, keys} = parser;
+  var {type, keys} = parser;
   var params = {
     url: makeSearchCommand.query(parser.url || this.url, text, this.charset),
     dataType: parser.type || "text",

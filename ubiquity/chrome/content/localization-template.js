@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -47,13 +48,16 @@ function displayTemplate(feedUri, feedKey) {
       "",
       'msgid ""',
       'msgstr ""',
-      '"Project-Id-Version: Ubiquity 0.5\\n"',
+      '"Project-Id-Version: Ubiquity ' + UbiquitySetup.version + '\\n"',
       '"POT-Creation-Date: ' + potCreationDate(new Date) + '\\n"',
       "\n\n"].join("\n");
 
+    po += "#. [Globals]\n";
     for each (let gKey in LocalizationUtils.getFeedGlobals(feedUri))
       po += potMsgs("", gKey);
 
+    po += ("#. [Commands]\n" +
+           "#. For *.names, use | to separate multiple name values.\n");
     for each (let cmd in feed.commands)
       po += cmdTemplate(cmd);
 
@@ -66,41 +70,36 @@ var localizableProperties = ["names", "help", "description"];
 var contexts = ["preview", "execute"];
 
 function cmdTemplate(cmd) {
-  var po = "\n#. " + cmd.referenceName + " command:\n";
+  var po = "\n#. " + cmd.referenceName + "\n";
   for each (let key in localizableProperties)
     po += cmdPropertyLine(cmd, key);
   for each (let key in contexts) {
     var fn = cmd.proto[key];
     if (typeof fn === "function")
-      po += cmdInlineLine(cmd, fn + "", key);
+      po += cmdInlineLine(cmd, fn.toSource(-1), key);
   }
   return po;
 }
 
 function cmdPropertyLine(cmd, property) {
   if (!(property in cmd)) return "";
-  var help = (property === "names"
-              ? "#. use | to separate multiple name values:\n"
-              : "");
+
   var value = cmd[property];
   if (typeof value.join === "function") value = value.join("|");
-  return help + potMsgs(cmd.referenceName + "." + property, value);
+  return potMsgs(cmd.referenceName + "." + property, value);
 }
 
 function cmdInlineLine(cmd, cmdCode, context) {
-  if (context === "preview" && "_previewString" in cmd)
-    return cmdPreviewString(cmd);
+  if (context === "preview" && "previewHtml" in cmd)
+    return potMsgs(cmd.referenceName + ".preview",
+                   cmd.previewHtml);
 
-  var inlineChecker = /\W_\(("[^\\\"]*(?:\\.[^\\\"]*)*")/g;
-  inlineChecker.lastIndex = 0;
-  var po = "";
-  while (inlineChecker.test(cmdCode))
+  var po = "", underScores = /\b_\(("[^\\\"]+(?:\\.[^\\\"]*)*")/g;
+  underScores.lastIndex = "function ()".length;
+  while (underScores.test(cmdCode))
     po += potMsgs(cmd.referenceName + "." + context, JSON.parse(RegExp.$1));
   return po;
 }
-
-function cmdPreviewString(cmd) potMsgs(cmd.referenceName + ".preview",
-                                       cmd._previewString);
 
 function potMsgs(context, id) (
   (context && 'msgctxt "' + quoteString(context) + '"\n') +

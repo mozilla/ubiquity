@@ -147,12 +147,11 @@ var LocalizationUtils = {
       if (val) cmd[key] = val;
     }
 
-    if (cmd._previewString) {
-      let context = cmd.referenceName + ".preview";
-      let key = cmd._previewString;
-      let rv =
-        LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
-      if (rv !== key) cmd._previewString = rv;
+    if ("previewHtml" in cmd) {
+      let key = cmd.previewHtml;
+      let rv = LocalizationUtils.getLocalizedStringFromContext(
+        feedKey, cmd.referenceName + ".preview", key);
+      if (rv !== key) cmd.previewHtml = rv;
     }
 
     cmd.name = cmd.names[0];
