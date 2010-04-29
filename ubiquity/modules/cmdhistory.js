@@ -43,7 +43,8 @@ const SEPARATOR = "\n";
 
 var CommandHistory = this, cursor = -1, _bin = null;
 
-function get() _bin || (_bin = Utils.prefs.get(PREF_BIN).split(SEPARATOR));
+function get() _bin || (
+  _bin = Utils.prefs.get(PREF_BIN).split(SEPARATOR).filter(Boolean));
 function set(arr) {
   _bin = arr;
   return save();
