@@ -2,7 +2,8 @@
 // HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
-Cu.import("resource://gre/modules/utils.js");
+try { Cu.import("resource://gre/modules/PlacesUtils.jsm") }
+catch ([]) { Cu.import("resource://gre/modules/utils.js") }
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
@@ -312,7 +313,6 @@ CmdUtils.CreateCommand({
 // TAGGING COMMANDS
 // -----------------------------------------------------------------
 
-// command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   names: ["tag"],
   description: "Adds tags to describe the current page.",

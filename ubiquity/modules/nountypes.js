@@ -55,7 +55,8 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
-Cu.import("resource://gre/modules/utils.js");
+try { Cu.import("resource://gre/modules/PlacesUtils.jsm") }
+catch ([]) { Cu.import("resource://gre/modules/utils.js") }
 
 var {commandSource, skinService} = UbiquitySetup.createServices();
 
@@ -253,7 +254,7 @@ var noun_type_tag = {
     [CmdUtils.makeSugg(tag, null, [tag], .3)
      for each (tag in PlacesUtils.tagging.allTags)],
   suggest: function nt_tag_suggest(text) {
-    // can accept multiple tags, seperated by commas
+    // can accept multiple tags, separated by commas
     var tags = text.split(/(?:\s*,\s*)+/).filter(/\S/);
     if (!tags.length) return tags;
 
