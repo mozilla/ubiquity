@@ -407,13 +407,12 @@ ParsedSentence.prototype = {
       let missingArg = args[argName];
       let noun = missingArg.type;
       let {nounCache} = this._query;
-      let defaultValue = missingArg.default;
+      let defaultValue = missingArg.default || nounCache[noun.id];
       if (!defaultValue) {
-        defaultValue = nounCache[noun.id] || (nounCache[noun.id] = (
-          (typeof noun.default === "function"
-           ? noun.default()
-           : noun.default) ||
-          nounCache[""]));
+        let val = noun.default;
+        if (typeof val === "function") val = val.call(noun);
+        defaultValue = nounCache[noun.id] =
+          val && val.length !== 0 ? val : nounCache[""];
       }
 
       let numDefaults = defaultValue.length;
