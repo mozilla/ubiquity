@@ -27,10 +27,12 @@ function changeEditor() {
   var $ediv = $("#editor-div").empty();
   if (bespin) {
     let [iframe] = $("<iframe/>", {
-      src: "chrome://ubiquity/content/bespin.html",
+      src: "resource://ubiquity/chrome/content/bespin.html",
       style: "width: 100%; height: 100%; border:0",
     }).appendTo($ediv);
-    addEventListener("message", onBespin, false);
+    Utils.listenOnce(iframe, "load", function onBespinFrameLoad(){
+      this.contentWindow.addEventListener("message", onBespin, false);
+    });
   }
   else {
     editor = document.createElement("textarea");
@@ -42,17 +44,18 @@ function changeEditor() {
   }
 }
 function onBespin(ev) {
-  var [win] = frames;
-  editor = (win.wrappedJSObject || win)[ev.data];
+  var {source, data} = ev;
+  editor = (source.wrappedJSObject || source)[data];
   editor.value = PrefCommands.getCode();
-  editor.element.addEventListener("keyup", updateCode, false);
+  editor.addEventListener("textChange", updateCode);
   focusEditor();
 }
 function focusEditor() {
   if ("focus" in editor) editor.focus();
   else {
-    editor.getPath("pane.applicationView.centerView.textView").focus();
-    editor.get("pane").becomeKeyPane();
+    let {scrollX, scrollY} = self;
+    editor.setFocus(true);
+    scrollTo(scrollX, scrollY);
   }
 }
 function updateCode() {

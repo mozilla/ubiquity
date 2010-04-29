@@ -7,14 +7,11 @@
 <div id="bespin" style="width:100%;height:500px"></div>
 <script src="BespinEmbedded.compressed.js"></script>
 <script>
-if (!this.console) var {console} = Application;
 function onBespinLoad() {
-  var node = document.getElementById("bespin");
-  bespin = tiki.require("Embedded").useBespin(node, {
-    syntax: "js",
-    settings: {tabstop: 2},
-  });
-  parent.postMessage("bespin", "*");
+  self.bespin = tiki.require("embedded").useBespin(
+    document.getElementById("bespin"),
+    {syntax: "js", settings: {tabstop: 2}});
+  postMessage("bespin", "*");
 }
 </script>
 </body>
