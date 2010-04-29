@@ -9,7 +9,7 @@ var Utils = {
 Utils.uri = Utils.url = function uri(obj, defaultUri) {
   try {
     return this.__proto__.uri(obj, defaultUri);
-  } catch (e if (typeof obj !== "string" &&
+  } catch (e if (typeof obj === "string" &&
                  e.result === Cr.NS_ERROR_MALFORMED_URI)) {
     return this.__proto__.uri({uri: obj, base: feed.id}, defaultUri);
   }
