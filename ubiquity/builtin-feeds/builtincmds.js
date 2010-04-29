@@ -62,19 +62,19 @@ XML.prettyPrinting = XML.ignoreWhitespace = false;
 CmdUtils.CreateCommand({
   names: ["help", "about", "?"],
   icon: "chrome://ubiquity/skin/icons/help.png",
-  description: "" + (
+  description: String(
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
   argument: noun_type_command,
   preview: function help_preview(pblock, {object: {data}}) {
-    pblock.innerHTML = data ? data.previewDefault() : this.description;
+    (data || this).previewDefault(pblock);
   },
   execute: function help_execute({object: {data}}) {
     if (data)
       Utils.openUrlInBrowser(CmdList + "#" + data.id);
     else
       Utils.focusUrlInBrowser(Help);
-  }
+  },
 });
 
 CmdUtils.CreateCommand({
@@ -91,66 +91,67 @@ CmdUtils.CreateCommand({
     }),
     noun_type_awesomebar),
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "" + (
+  description: String(
     <>Opens one of the Ubiquity documentation/settings pages.</>),
   preview: function open_preview(pb, {object: {text, data}}) {
     if (!data) return void this.previewDefault(pb);
 
     pb.innerHTML = (
       typeof data === "string"
-      ? _("Opens the Ubiquity ${goal} page.", {goal: text})
-      : (<div class="open"><img src={data.favicon}
-            /> {data.title}<p><code>{data.url}</code></p></div>));
+      ? _("Opens the Ubiquity ${goal} page.", {goal: text.link(data)})
+      : (<div id="open"><img src={data.favicon}
+         /> {data.title}<p><code>{data.url}</code></p></div>));
   },
   execute: function open_execute({object: {data}}) {
     Utils.openUrlInBrowser(data ? data.url || data : Settings);
-  }
+  },
 });
 
 CmdUtils.CreateCommand({
-  names: ["write ubiquity commands",
-          "edit ubiquity commands",
-          "hack ubiquity"],
+  names: ["write Ubiquity commands",
+          "edit Ubiquity commands",
+          "hack Ubiquity",
+          "Command Editor"],
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
-  description: "" + (
+  description: String(
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
-  execute: Editor
+  execute: Editor,
 });
 
 CmdUtils.CreateCommand({
-  names: ["list ubiquity commands"],
+  names: ["list Ubiquity commands", "Command List"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
-  description: "" + (
+  description: String(
     <>Opens <a href={CmdList}>the list</a>
       of all Ubiquity commands available and what they all do.</>),
-  execute: CmdList
+  execute: CmdList,
 });
 
 CmdUtils.CreateCommand({
-  names: ["change ubiquity settings",
-          "change ubiquity preferences"],
+  names: ["change Ubiquity settings",
+          "change Ubiquity preferences"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "" + (
+  description: String(
     <>Takes you to the <a href={Settings}>settings</a> page,
-      where you can change your skin, key combinations, etc.</>),
-  execute: Settings
+    where you can change your skin, key combinations, etc.</>),
+  execute: Settings,
 });
 
 CmdUtils.CreateCommand({
   names: ["get support"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "" + (
+  description: String(
     <>Takes you to the <a href={Support}>support</a> page,
     where you can report bugs, get troubleshooting help, etc.</>),
-  execute: Support
+  execute: Support,
 });
 
 CmdUtils.CreateCommand({
   names: ["report bug"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "" + (
+  description: String(
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
-  execute: BugReport
+  execute: BugReport,
 });
 
 CmdUtils.CreateCommand({
@@ -211,7 +212,7 @@ CmdUtils.CreateCommand({
   names: ["command history", "vita"],
   arguments: {"object filter": noun_arb_text},
   description: "Accesses your command history.",
-  help: "" + (
+  help: String(
     <ul style="list-style-image:none">
     <li>Use accesskey or click to reuse.</li>
     <li>Type to filter.</li>
