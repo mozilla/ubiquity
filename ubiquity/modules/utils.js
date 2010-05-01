@@ -1424,11 +1424,11 @@ Utils.gist = {
     if (search.length > 1)
       try { return decodeURIComponent(search).slice(1) } catch (e) {}
 
-    var name = "gist:" + /\d+/(pathname), sep = " \u2013 ";
+    var name = "gist:" + /\w+/(pathname), sep = " \u2013 ";
 
     var desc = document.getElementById("gist-text-description");
     if (desc && /\S/.test(desc.textContent))
-      return name + sep + desc.textContent;
+      return name + sep + desc.textContent.trim();
 
     var info = document.querySelector(".file .info");
     if (info) return name + sep + info.textContent.trim().slice(0, -2);
