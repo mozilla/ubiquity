@@ -317,14 +317,14 @@ CmdUtils.CreateCommand({
     else
       Utils.openUrlInBrowser(
         "http://translate.google.com/translate" +
-        Utils.paramsToString({u: CmdUtils.window.location, sl: sl, tl: tl}));
+        Utils.paramsToString({u: this._getUrl(), sl: sl, tl: tl}));
   },
   preview: function translate_preview(pblock, {object: {html}, goal, source}) {
     var defaultLang;
     var toLang = goal.text || (defaultLang = this._getDefaultLang()).name;
     var limitExceeded = html.length > GTRANSLATE_LIMIT;
     if (!html || limitExceeded) {
-      var ehref = Utils.escapeHtml(CmdUtils.getWindow().location);
+      var ehref = Utils.escapeHtml(this._getUrl());
       pblock.innerHTML = (
         _("Translates ${url} into <b>${toLang}</b>.",
           {url: ehref.link(ehref), toLang: toLang}) +
@@ -359,6 +359,7 @@ CmdUtils.CreateCommand({
                 noun_type_lang_google.getLangName(code = "en"));
     return {name: name, code: code};
   },
+  _getUrl: function translate_getUrl() noun_type_url.default()[0].text,
   _translate: googleTranslate,
 });
 
