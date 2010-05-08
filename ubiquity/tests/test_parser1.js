@@ -916,7 +916,8 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
 }
 
 function testEnParserRecursiveParse() {
-  var {recursiveParse} = EnParser.__parent__;
+  var {recursiveParse} =
+    Cu.import("resource://ubiquity/modules/parser/original/locale_en.js", null);
   var {assertEquals} = this;
   function pp(olist) [JSON.stringify(o) for each (o in olist)].sort() + "";
   function parse(input, hasObj, preps)
