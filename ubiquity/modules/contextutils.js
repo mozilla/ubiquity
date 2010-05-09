@@ -116,19 +116,9 @@ function setSelection(context, content, options) {
       rng.selectNode(focusedElement);
       plainText = rng.createContextualFragment(content).textContent;
     }
-    let {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
-    let {contentViewer} = (
-      focusedWindow.top.QueryInterface(Ci.nsIInterfaceRequestor)
-      .getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIDocShell));
-    contentViewer.hide();
-    focusedElement.value = (
-      value.slice(0, selectionStart) + plainText +
-      value.slice(focusedElement.selectionEnd));
-    focusedElement.selectionStart = selectionStart;
-    focusedElement.selectionEnd = selectionStart + plainText.length;
-    focusedElement.scrollTop = scrollTop;
-    focusedElement.scrollLeft = scrollLeft;
-    contentViewer.show();
+    focusedElement.QueryInterface(Ci.nsIDOMNSEditableElement)
+      .editor.QueryInterface(Ci.nsIPlaintextEditor).insertText(plainText);
+    focusedElement.selectionStart -= plainText.length;
     return true;
   }
 
