@@ -341,15 +341,26 @@ var noun_type_awesomebar = {
 var noun_type_extension = {
   label: "name",
   noExternalCalls: true,
-  suggest: function nt_ext_suggest(text) CmdUtils.grepSuggs(text, this._list),
+  suggest: function nt_ext_suggest(text, html, cb) {
+    if (this._list.length) return CmdUtils.grepSuggs(text, this._list);
+
+    var fakeReq = {readyState: 2};
+    ("AddonManager" in Utils
+     ? Utils.AddonManager.getAllAddons(setList)
+     : setList(Utils.ExtensionManager.getItemList(2, {})));
+    function setList(exts) {
+      var {escapeHtml} = Utils;
+      this._list = [
+        let (h = escapeHtml(ext.name)) {
+          text: ext.name, data: ext, html: h, summary: h}
+        for each(ext in exts)];
+      fakeReq.readyState = 4;
+      cb(CmdUtils.grepSuggs(text, this._list));
+    }
+    return [fakeReq];
+  },
+  _list: [],
 };
-Utils.defineLazyProperty(noun_type_extension, function _list() {
-  var {escapeHtml} = Utils;
-  return [
-    let (h = escapeHtml(ext.name)) {
-      text: ext.name, data: ext, html: h, summary: h}
-    for each (ext in Utils.ExtensionManager.getItemList(2, {}))];
-});
 
 // === {{{ noun_type_common_URI_scheme }}} ===
 // Suggests common URI schemes, which are the IANA-registered ones
@@ -646,7 +657,7 @@ var noun_type_bookmarklet = {
     for (var i = root.childCount; i--;) {
       var node = root.getChild(i);
       if (/^javascript:/.test(node.uri) &&
-         !bookmarks.getKeywordForBookmark(node.itemId))
+          !bookmarks.getKeywordForBookmark(node.itemId))
         list.push(CmdUtils.makeSugg(node.title, null, node.uri));
     }
     root.containerOpen = false;
@@ -689,7 +700,7 @@ var noun_type_date = {
     return [this._sugg(date, score)];
   },
   _sugg: function nt_date__sugg(date, score)
-    CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date, score)
+    CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date, score),
 };
 
 var noun_type_time = {
@@ -711,7 +722,7 @@ var noun_type_time = {
     return [this._sugg(date, score)];
   },
   _sugg: function nt_time__sugg(date, score)
-    CmdUtils.makeSugg(date.toString("hh:mm:ss tt"), null, date, score)
+    CmdUtils.makeSugg(date.toString("hh:mm:ss tt"), null, date, score),
 };
 
 var noun_type_date_time = {
@@ -803,7 +814,7 @@ function getYahooContacts(callback) {
     prog: "ymdc",
     tags: "short",
     attrs: "1",
-    xf: "sf,mf"
+    xf: "sf,mf",
   };
   return jQuery.get(url, params, function (data) {
     var contacts = [];
@@ -1166,14 +1177,14 @@ function getRestaurants(query, callback, selectionIndices) {
       for each (let business in allBusinesses) {
         if (business.name.indexOf(queryToMatch) !== -1 ||
             queryToMatch.indexOf(business.name) !== -1) {
-              callback([CmdUtils.makeSugg(query, null, null, .9,
-                                          selectionIndices)]);
-              return;
+          callback([CmdUtils.makeSugg(query, null, null, .9,
+                                      selectionIndices)]);
+          return;
         }
         else {
           for each (let category in business.categories) {
             if (category.name.indexOf(queryToMatch) !== -1 ||
-              queryToMatch.indexOf(category.name) !== -1) {
+                queryToMatch.indexOf(category.name) !== -1) {
               callback([CmdUtils.makeSugg(query, null, null, .9,
                                           selectionIndices)]);
               return;
@@ -1269,7 +1280,7 @@ for (let [old, now] in new Iterator({
   commands: noun_type_command,
   emailservice: noun_type_email_service,
   searchengine: noun_type_search_engine,
-  async_address: noun_type_geo_address
+  async_address: noun_type_geo_address,
 })) {
   let sym = "noun_type_" + old;
   this[sym] = now;

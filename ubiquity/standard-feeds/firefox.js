@@ -478,7 +478,7 @@ CmdUtils.CreateCommand({
   preview: function ve_preview(pb, {object: {data}}) {
     if (!data) return void this.previewDefault(pb);
 
-    var xdata = this._extraData(data.id);
+    var xdata = this._extraData(data.id) || data;
     XML.prettyPrinting = XML.ignoreWhitespace = false;
     var div = <div class="extension"><style><![CDATA[
       .disabled {opacity:0.7}
@@ -527,6 +527,11 @@ CmdUtils.CreateCommand({
   },
   _urn: function ve__urn(id) "urn:mozilla:item:" + id,
   _open: function ve__open(self, id) {
+    if ("AddonManager" in Utils) {
+      Utils.focusUrlInBrowser("about:addons");
+      //TODO: how do you select it in the new view?
+      return;
+    }
     const Pane = "extensions";
     var em = Utils.WindowMediator.getMostRecentWindow("Extension:Manager");
     if (em) {
@@ -546,6 +551,8 @@ CmdUtils.CreateCommand({
     em.gExtensionsView.selectItem(em.document.getElementById(self._urn(id)));
   },
   _extraData: function ve__extraData(id) {
+    if ("AddonManager" in Utils) return null;
+
     const {NS_EM} = Utils;
     var rdfs =
       Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);

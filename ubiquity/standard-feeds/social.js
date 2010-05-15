@@ -196,7 +196,6 @@ CmdUtils.CreateCommand({
  * TODO: implement modifier to support private posting
  * TODO: handle error codes from delicious, not just HTTP itself
  */
-var uext = Application.extensions.get("ubiquity@labs.mozilla.com");
 var cookie_mgr = (
   Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager));
 

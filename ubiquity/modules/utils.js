@@ -106,8 +106,11 @@ delete Utils.QueryInterface;
 
   // === {{{ Utils.ExtensionManager }}} ===
   // Shortcut to {{{nsIExtensionManager}}}.
-  function ExtensionManager()
-  Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager),
+  function ExtensionManager() {
+    try { return (Cc["@mozilla.org/extensions/manager;1"]
+                  .getService(Ci.nsIExtensionManager)); }
+    catch ([]) {}
+  },
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
@@ -162,6 +165,9 @@ delete Utils.QueryInterface;
   Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
   ].reduce(defineLazyProperty, Utils);
+
+try { Cu.import("resource://gre/modules/AddonManager.jsm", Utils); }
+catch ([]) {}
 
 // === {{{ Utils.log(a, b, c, ...) }}} ===
 // One of the most useful functions to know both for development and debugging.

@@ -102,15 +102,6 @@ var UbiquitySetup = {
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
 
-  __getExtDir: function __getExtDir() {
-    let extMgr = (Cc["@mozilla.org/extensions/manager;1"]
-                  .getService(Ci.nsIExtensionManager));
-    let loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
-    let extDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
-
-    return extDir;
-  },
-
   __modifyUserAgent: function __modifyUserAgent() {
     // This is temporary code to fix old versions of Ubiquity that
     // modified the User-Agent string without uninstalling cleanly.
@@ -184,13 +175,12 @@ var UbiquitySetup = {
     }
   },
 
-  getBaseUri: function getBaseUri()
-    Utils.IOService.newFileURI(this.__getExtDir()).spec,
+  getBaseUri: function getBaseUri() this.baseUrl,
 
   isInstalledAsXpi: function isInstalledAsXpi() {
     let profileDir = Utils.DirectoryService.get("ProfD", Ci.nsIFile);
-    let extDir = this.__getExtDir();
-    return profileDir.contains(extDir, false);
+    let profileUrl = Utils.IOService.newFileURI(profileDir).spec;
+    return !this.baseUrl.lastIndexOf(profileUrl, 0);
   },
 
   preload: function preload(callback) {
@@ -200,7 +190,21 @@ var UbiquitySetup = {
     }
 
     this.__maybeReset();
-    gWebJsModule = new WebJsModule(callback);
+
+    const ID = "ubiquity@labs.mozilla.com", ME = this;
+    ("AddonManager" in Utils
+     ? Utils.AddonManager.getAddonByID(ID, setAddonInfo)
+     : setAddonInfo(Utils.ExtensionManager.getItemForID(ID)));
+    function setAddonInfo(addon) {
+      ME.version = addon.version;
+      ME.baseUrl = (
+        "getResourceURL" in addon
+        ? addon.getResourceURL("")
+        : Utils.IOService.newFileURI(Utils.ExtensionManager
+                                     .getInstallLocation(ID)
+                                     .getItemLocation(ID)).spec);
+      gWebJsModule = new WebJsModule(callback);
+    }
   },
 
   get isResetScheduled()
@@ -322,9 +326,6 @@ var UbiquitySetup = {
 
   get parserVersion()
     gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
-
-  get version()
-    Utils.ExtensionManager.getItemForID("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {
   var disabledCommands = JSON.parse(gPrefs.getValue(prefName, "{}"));
