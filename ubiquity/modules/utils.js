@@ -1139,7 +1139,8 @@ var gTabs = Utils.tabs = {
     name == null
     ? [t for (t in gTabs)]
     : [t for (t in gTabs)
-       if (let (d = t.document) d.title === name || d.URL === name)]),
+       if (let (d = t.document)
+           d.title === name || d.location.href === name)]),
 
   // === {{{ Utils.tabs.search(matcher, maxResults) }}} ===
   // Searches for tabs by title or URL and returns an array of tab references.
@@ -1154,7 +1155,7 @@ var gTabs = Utils.tabs = {
     if (maxResults == null) maxResults = 1/0;
     for (let tab in gTabs) {
       let {document} = tab;
-      let match = matcher(document.title) || matcher(document.URL);
+      let match = matcher(document.title) || matcher(document.location.href);
       if (!match) continue;
       tab.match = match;
       if (results.push(tab) >= maxResults) break;

@@ -170,8 +170,8 @@ CmdUtils.CreateCommand({
         html: html,
         _MODIFIERS: {asList: this._lister} });
   },
-  _lister: function clatab__lister({document}) "" + (
-    <li>{document.title}<br/><code><small>{document.URL}</small></code></li>),
+  _lister: function clatab__lister({document: d})
+    String(<li>{d.title}<br/><code>{d.location.href}</code></li>),
 });
 
 CmdUtils.CreateCommand({
@@ -336,7 +336,7 @@ CmdUtils.CreateCommand({
   execute: function tag_execute({object: {text, data}}) {
     var doc = CmdUtils.getDocument();
     var {tagging, bookmarks} = PlacesUtils;
-    var currentURI = Utils.url(doc.URL);
+    var currentURI = doc.documentURIObject;
 
     if (!bookmarks.isBookmarked(currentURI)) {
       // create unfiled bookmark
