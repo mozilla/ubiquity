@@ -110,12 +110,10 @@ function setSelection(context, content, options) {
   }
 
   if (Utils.isTextBox(focusedElement)) {
-    let plainText = options && options.text;
-    if (!plainText) {
-      let rng = focusedElement.ownerDocument.createRange();
-      rng.selectNode(focusedElement);
-      plainText = rng.createContextualFragment(content).textContent;
-    }
+    let plainText = String(
+      options && options.text ||
+      (focusedElement.ownerDocument.createRange()
+       .createContextualFragment("<_>" + content + "</_>").textContent));
     focusedElement.QueryInterface(Ci.nsIDOMNSEditableElement)
       .editor.QueryInterface(Ci.nsIPlaintextEditor).insertText(plainText);
     focusedElement.selectionStart -= plainText.length;
@@ -176,6 +174,7 @@ function getSelectedNodes(context, selector) {
       }
     } while (node.nodeType === TEXT || range.isPointInRange(node, 0));
   }
+  var flm = context.focusedElement;
   if (flm) (function run(rs, ns) {
     for (var n, i = -1; n = ns[++i];) {
       ~rs.indexOf(n) || rs.push(n);
