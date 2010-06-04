@@ -183,10 +183,10 @@ CmdUtils.CreateCommand({
 
 function gmailChecker(callback, service) {
   var url = "https://mail.google.com/mail/feed/atom";
-  if(service == "googleapps"){
+  if (service === "googleapps") {
     url = "https://mail.google.com/a/" + getGmailAppsDomain() + "/feed/atom";
   }
-  jQuery.get(url, null, function(atom) {
+  jQuery.get(url, null, function checkGmail(atom) {
     var emailDetails = {};
     var firstEntry = jQuery("entry:first", atom);
     if (firstEntry.length)
@@ -208,34 +208,39 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/email_open.png",
   description: ("Displays your most recent incoming email. Requires a " +
                 '<a href="http://mail.google.com">Gmail</a> account.'),
-  preview: function(pBlock, arguments) {
-    var provider = (arguments.source && arguments.source.text) ?
-                     arguments.source.text : "";
-    pBlock.innerHTML = _("Displays your most recent incoming email...");
+  preview: function gle_preview(pBlock, args) {
     // Checks if user is authenticated first
     // if not, do not ajaxGet, as this triggers authentication prompt
-    if (Utils.getCookie(".mail.google.com", "GX")) {
-      gmailChecker(function(emailDetails) {
-        if (emailDetails.lastEmail)
-          pBlock.innerHTML = _("Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>",emailDetails);
-        else
-          pBlock.innerHTML = _("<b>You have no new mail!</b>");
-      }, provider);
-    } else {
-      pBlock.innerHTML = _("You are not logged in!<br />Press enter to log in.");
+    if (Utils.getCookie(".mail.google.com", "GX") ||
+        Utils.getCookie("mail.google.com", "S")) {
+      pBlock.innerHTML = _("Displays your most recent incoming email...");
+      let cb = function gle_preview_check(emailDetails) {
+        pBlock.innerHTML = _(
+          emailDetails.lastEmail
+          ? ('Last unread e-mail: <a href="${lastEmail.href}"> ' +
+             '<p><b>${lastEmail.author}</b> says: ' +
+             '<b>${lastEmail.subject}</b></p> ' +
+             '<p>${lastEmail.summary}</p></a>')
+          : "<b>You have no new mail!</b>",
+          emailDetails);
+      };
+      gmailChecker(CmdUtils.previewCallback(pBlock, cb), args.source.text);
     }
+    else pBlock.innerHTML =
+      _("You are not logged in!<br />Press enter to log in.");
   },
-  execute: function(arguments) {
-    var provider = (arguments.source && arguments.source.text) ?
-                     arguments.source.text : "";
+  execute: function gle_execute(args) {
     var me = this;
-    gmailChecker(function(emailDetails) {
-      if (emailDetails.lastEmail)
-        displayMessage(_("You have new email! ${lastEmail.author} says: ${lastEmail.subject}",emailDetails), me);
-      else
-        displayMessage(_("You have no new mail."), me);
-    }, provider);
-  }
+    gmailChecker(function gle_execute_check(emailDetails) {
+      displayMessage(
+        emailDetails.lastEmail
+        ? _("You have new email! ${lastEmail.author} says:" +
+            " ${lastEmail.subject}",
+            emailDetails)
+        : _("You have no new mail."),
+        me);
+    }, args.source.text);
+  },
 });
 
 CmdUtils.CreateCommand({
@@ -245,12 +250,12 @@ CmdUtils.CreateCommand({
                 "from your contacts list given their name. "),
   help: "Execute the command to copy the address to your clipboard.",
   argument: noun_type_contact,
-  execute: function({object: {text}}) {
+  execute: function gea_execute({object: {text}}) {
     if (!text) return;
     Utils.clipboard.text = text;
     displayMessage(text, this);
   },
-  preview: function(pbl, args) {
+  preview: function gea_preview(pbl, args) {
     pbl.innerHTML = args.object.html || this.previewDefault();
   },
 });
