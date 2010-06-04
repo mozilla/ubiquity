@@ -88,7 +88,7 @@ var noun_arb_text = {
 // * {{{data}}} :
 
 var noun_type_email_service = CmdUtils.NounType("email service",
-                                                "googleapps gmail yahoo",
+                                                "googleapps gmail",
                                                 "gmail");
 
 // === {{{ noun_type_email }}} ===
