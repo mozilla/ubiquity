@@ -2,7 +2,7 @@
 // DEVELOPER COMMANDS
 // -----------------------------------------------------------------
 
-var {slice} = Array, gXS = Utils.hiddenWindow.XMLSerializer();
+var {slice} = Array, gXS = XMLSerializer();
 function qsaa(lm, sl) slice(lm.querySelectorAll(sl));
 function qstc(lm, sl) (lm = lm.querySelector(sl)) ? lm.textContent : "";
 function qsxs(lm, sl) (
@@ -101,9 +101,9 @@ CmdUtils.CreateCommand({
     var sel = context.focusedWindow.getSelection();
     if (sel.isCollapsed) return void this.previewDefault(pb);
 
-    XML.prettyPrinting = true;
-    XML.prettyIndent = 2;
-    XML.ignoreWhitespace = XML.ignoreComments = false;
+    XML.prettyIndent = 1;
+    XML.prettyPrinting = XML.ignoreWhitespace = true;
+    XML.ignoreComments = false;
     var pretties = [];
     var re_ns = / xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"(?=\/?>)/g;
     for (let i = 0, c = sel.rangeCount; i < c; ++i) {
@@ -111,8 +111,13 @@ CmdUtils.CreateCommand({
       if (xml) pretties.push(
         XML("<_>" + xml + "</_>").*.toXMLString().replace(re_ns, ""));
     }
-    pb.innerHTML = ('<pre id="selection-source">' +
-                    pretties.map(Utils.escapeHtml).join("<hr/>"));
+    pb.innerHTML = (
+      '<link rel="stylesheet"' +
+      ' href="resource://ubiquity/scripts/prettify.css">'+
+      '<script onload="prettyPrint()"></script>'+
+      '<pre id="selection-source" class="prettyprint lang-htm">' +
+      pretties.map(Utils.escapeHtml).join("<hr/>"));
+    pb.querySelector('script').src = "resource://ubiquity/scripts/prettify.js";
   },
 });
 
