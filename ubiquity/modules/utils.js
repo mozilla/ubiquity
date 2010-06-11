@@ -102,20 +102,19 @@ delete Utils.QueryInterface;
   // === {{{ Utils.DirectoryService }}} ===
   // Shortcut to {{{nsIDirectoryService}}}.
   function DirectoryService()
-  Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties),
-
-  // === {{{ Utils.ExtensionManager }}} ===
-  // Shortcut to {{{nsIExtensionManager}}}.
-  function ExtensionManager() {
-    try { return (Cc["@mozilla.org/extensions/manager;1"]
-                  .getService(Ci.nsIExtensionManager)); }
-    catch ([]) {}
-  },
+  Cc["@mozilla.org/file/directory_service;1"]
+  .getService(Ci.nsIProperties),
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
   function IOService()
   Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
+
+  // === {{{ Utils.PromptService }}} ===
+  // Shortcut to {{{nsIPromptService}}}.
+  function PromptService()
+  Cc["@mozilla.org/embedcomp/prompt-service;1"]
+  .getService(Ci.nsIPromptService),
 
   // === {{{ Utils.UnescapeHTML }}} ===
   // Shortcut to {{{nsIScriptableUnescapeHTML}}}.
@@ -140,7 +139,7 @@ delete Utils.QueryInterface;
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
   // === {{{ Utils.hiddenWindow }}} ===
-  // Returns the application's global hidden window.
+  // The application's global hidden window.
   function hiddenWindow()
   Cc["@mozilla.org/appshell/appShellService;1"]
   .getService(Ci.nsIAppShellService).hiddenDOMWindow,
@@ -163,6 +162,15 @@ delete Utils.QueryInterface;
   // See [[https://developer.mozilla.org/en/OS_TARGET]].
   function OS()
   Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
+
+  // === {{{ Utils.ExtensionManager }}} ===
+  // Shortcut to {{{nsIExtensionManager}}}.
+  // //Deprecated// for Firefox 3.7a5pre or later.
+  function ExtensionManager() {
+    try { return (Cc["@mozilla.org/extensions/manager;1"]
+                  .getService(Ci.nsIExtensionManager)); }
+    catch ([]) {}
+  },
 
   ].reduce(defineLazyProperty, Utils);
 
