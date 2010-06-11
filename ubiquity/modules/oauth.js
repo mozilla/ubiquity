@@ -1,3 +1,6 @@
+const EXPORTED_SYMBOLS = ["OAuth"];
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
 /*
  * Copyright 2008 Netflix, Inc.
  *
@@ -30,10 +33,6 @@
    Examples include Google Gadgets, and Microsoft Vista Sidebar.
    For those platforms, this library should come in handy.
 */
-
-// The HMAC-SHA1 signature method calls b64_hmac_sha1, defined by
-// http://pajhome.org.uk/crypt/md5/sha1.js
-
 /* An OAuth message is represented as an object like this:
    {method: "GET", action: "http://server.com/path", parameters: ...}
 
@@ -88,7 +87,7 @@ OAuth.setProperties(OAuth, // utility functions
         if (s == null) {
             return "";
         }
-        if (s instanceof Array) {
+        if (Utils.isArray(s)) {
             var e = "";
             for (var i = 0; i < s.length; ++s) {
                 if (e != "") e += '&';
@@ -126,7 +125,7 @@ OAuth.setProperties(OAuth, // utility functions
         if (typeof parameters != "object") {
             return OAuth.decodeForm(parameters + "");
         }
-        if (parameters instanceof Array) {
+        if (Utils.isArray(parameters)) {
             return parameters;
         }
         var list = [];
@@ -144,7 +143,7 @@ OAuth.setProperties(OAuth, // utility functions
         if (typeof parameters != "object") {
             return OAuth.getParameterMap(OAuth.decodeForm(parameters + ""));
         }
-        if (parameters instanceof Array) {
+        if (Utils.isArray(parameters)) {
             var map = {};
             for (var p = 0; p < parameters.length; ++p) {
                 var key = parameters[p][0];
@@ -158,7 +157,7 @@ OAuth.setProperties(OAuth, // utility functions
     }
 ,
     getParameter: function getParameter(parameters, name) {
-        if (parameters instanceof Array) {
+        if (Utils.isArray(parameters)) {
             for (var p = 0; p < parameters.length; ++p) {
                 if (parameters[p][0] == name) {
                     return parameters[p][1]; // first value wins
@@ -208,7 +207,7 @@ OAuth.setProperties(OAuth, // utility functions
 ,
     setParameter: function setParameter(message, name, value) {
         var parameters = message.parameters;
-        if (parameters instanceof Array) {
+        if (Utils.isArray(parameters)) {
             for (var p = 0; p < parameters.length; ++p) {
                 if (parameters[p][0] == name) {
                     if (value === undefined) {
@@ -271,7 +270,7 @@ OAuth.setProperties(OAuth, // utility functions
     }
 ,
     addToURL: function addToURL(url, parameters) {
-        newURL = url;
+        var newURL = url;
         if (parameters != null) {
             var toAdd = OAuth.formEncode(parameters);
             if (toAdd.length > 0) {
@@ -296,21 +295,6 @@ OAuth.setProperties(OAuth, // utility functions
             }
         }
         return header;
-    }
-,
-    /** Correct the time using a parameter from the URL from which the last script was loaded. */
-    correctTimestampFromSrc: function correctTimestampFromSrc(parameterName) {
-        parameterName = parameterName || "oauth_timestamp";
-        var scripts = document.getElementsByTagName('script');
-        if (scripts == null || !scripts.length) return;
-        var src = scripts[scripts.length-1].src;
-        if (!src) return;
-        var q = src.indexOf("?");
-        if (q < 0) return;
-        parameters = OAuth.getParameterMap(OAuth.decodeForm(src.substring(q+1)));
-        var t = parameters[parameterName];
-        if (t == null) return;
-        OAuth.correctTimestamp(t);
     }
 ,
     /** Generate timestamps starting with the given value. */
@@ -539,13 +523,18 @@ OAuth.SignatureMethod.registerMethodClass(["PLAINTEXT", "PLAINTEXT-Accessor"],
 OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
     OAuth.SignatureMethod.makeSubclass(
         function getSignature(baseString) {
-            b64pad = '=';
-            var signature = b64_hmac_sha1(this.key, baseString);
-            return signature;
+            return Utils.signHMAC("SHA1", this.key, baseString);
         }
     ));
 
-try {
-    OAuth.correctTimestampFromSrc();
-} catch(e) {
-}
+// usage: jQuery.ajax(OAuth.completeAjaxSettings(settings, accessor))
+OAuth.completeAjaxSettings = function completeAjaxSettings(settings, accessor) {
+  var message = {
+    method: settings.type,
+    action: settings.url,
+    parameters: settings.data,
+  };
+  OAuth.completeRequest(message, accessor);
+  settings.data = message.parameters;
+  return settings;
+};
