@@ -1,12 +1,14 @@
-﻿/* TODO
+﻿Cu.import("resource://ubiquity/modules/oauth.js");
+
+/* TODO
 From Abi:
 	I think the ones I most often use would be to check the current status
 	of a specific friend (or maybe, the last 3 statuses). The ability to
 	check your friends timeline as a whole would also be nice.
 */
 
-// max of 140 chars is recommended, but it really allows 160...
-// but that gets truncated on some displays? grr
+// http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0update
+// "Statuses over 140 characters will cause a 403 error from the API"
 const TWITTER_STATUS_MAXLEN = 140;
 
 // TODO should there also be a "share" overlord verb with
@@ -14,77 +16,123 @@ const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
   names: ["twitter", "tweet", "share using twitter"],
-  description:
-  "Sets your Twitter status to a message of at most 160 characters.",
+  description: (
+    "Sets your Twitter status to a message of at most " +
+    TWITTER_STATUS_MAXLEN + " characters."),
   help: ("You'll need a <a href=\"http://twitter.com\">Twitter account</a>," +
-         " obviously.  If you're not already logged in" +
-         " you'll be asked to log in."),
+         " obviously.  If the account isn't already authorized," +
+         " you'll be asked for password."),
   icon: "chrome://ubiquity/skin/icons/twitter.ico",
-  arguments: [{role: "object", label: "status", nountype: noun_arb_text},
-              {role: "alias", nountype: noun_type_twitter_user}],
+  arguments: [
+    {role: "object", label: _("status"), nountype: noun_arb_text},
+    {role: "alias",  label: _("user"),   nountype: noun_type_twitter_user}],
   preview: function twitter_preview(previewBlock, args) {
     var statusText = args.object.text;
-    var usernameText = args.alias.text;
+    if (!statusText) return void this.previewDefault(previewBlock);
+
+    var username = args.alias.text || (Bin.twitterLastLogin() || 0).username;
+    var remaining = TWITTER_STATUS_MAXLEN - statusText.length;
     var previewTemplate = (
-      "<div class='twitter'>"+
-      _("Updates your Twitter status ${username} to:") + "<br/>" +
-      "<b class='status'>${status}</b><br/><br/>" +
-      _("Characters remaining: <b>${chars}</b>") +
+      _("Updates Twitter status of ${username} to:") +
+        "<p><strong class='status'>${status}</strong></p>" +
+      _("Characters remaining: ${chars}") +
+      (remaining >= 0 ? "" :
+       "<br/><strong class='warning'>" +
+       _("The last ${truncate} characters will be truncated!",
+         {truncate: "<b class='truncate'>" + -remaining + "</b>"}) +
+       "</strong>") +
       "<p><small>" +
       _("tip: tweet @mozillaubiquity for help") +
-      "</small></p></div>");
-    var previewData = {
-      status: args.object.html,
-      username: usernameText && _("(For user <b>${usernameText}</b>)",
-                                  {usernameText: args.alias.html}),
-      chars: TWITTER_STATUS_MAXLEN - statusText.length,
-    };
+      "</small></p>");
 
-    var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-
-    if (previewData.chars < 0)
-      previewHTML += (
-        "<strong>" +
-        _("The last <b>${truncate}</b> characters will be truncated!",
-          {truncate: -previewData.chars}) +
-        "</strong>");
-
-    previewBlock.innerHTML = previewHTML;
+    previewBlock.innerHTML = (
+      "<div class='twitter'>" +
+      CmdUtils.renderTemplate(previewTemplate, {
+        status: Utils.escapeHtml(statusText),
+        username: ("<b class='username'>" +
+                   (username ? Utils.escapeHtml(username) : "??") + "</b>"),
+        chars: "<b class='remaining'>" + remaining + "</b>",
+      }) +
+      "</div>");
   },
-  execute: function twitter_execute(args) {
-    var statusText = args.object.text;
-    if (!statusText.length) {
-      this._show(_("requires a status to be entered"));
-      return;
-    }
-
+  execute: function twitter_execute({object: {text}, alias}) {
     var me = this;
-    var login = args.alias.data || {};
-    jQuery.ajax({
-      type: "POST",
-      url: "https://twitter.com/statuses/update.json",
-      data: {
-        //dont cut the input since sometimes, the user selects a big url,
-        //and the total lenght is more than 140, but bit.ly takes care of that
-        status: statusText,
-        source: "ubiquity",
-      },
-      dataType: "json",
-      error: function twitter_error() {
-        me._show(_("error - status not updated"));
-      },
-      success: function twitter_success() {
-        me._show(/^d /.test(statusText)
-                 ? _("direct message sent")
-                 : _("status updated"));
-      },
-      username: login.username,
-      password: login.password,
+    if (!text) return me._show(_("requires a status to be entered"));
+
+    var login = alias.data || Bin.twitterLastLogin() || {};
+    me._auth(login, function twitter_tweet(username, key, secret) {
+      me._post({
+        url: "https://twitter.com/statuses/update.json",
+        data: {status: text = text.slice(0, TWITTER_STATUS_MAXLEN)},
+        dataType: "json",
+        success: function twitter_success(res) {
+          me._show(
+            text, username, text === res.text && function twitter_onclick() {
+              Utils.openUrlInBrowser(
+                "http://twitter.com/" + username + "/status/" + res.id);
+            });
+        },
+        error: function twitter_error(xhr) {
+          me._show(_("error - status not updated") + " / " +
+                   xhr.status + " " + xhr.statusText,
+                   username);
+        },
+      }, {token: key, tokenSecret: secret});
+      Bin.twitterLastLogin({username: username, password: "dummy"});
     });
   },
-  _show: function twitter__show(txt) {
-    displayMessage(txt, this);
-  }
+  _show: function twitter_show(text, user, cb) {
+    var title = this.name;
+    if (user) title += " \u2013 " + user;
+    displayMessage({icon: this.icon, title: title, text: text, onclick: cb});
+  },
+  _post: function twitter_post(settings, accessor) {
+    settings.type = "POST";
+    accessor.consumerKey    = "C6h2HUUjmOcqXTtPRYqAVg";
+    accessor.consumerSecret = "AYNHPfkpm5lL3uPKXRCuzGFYItA8EOWlrkajyEBOd6s";
+    return $.ajax(OAuth.completeAjaxSettings(settings, accessor));
+  },
+  _auth: function twitter_auth({username, password}, cb) {
+    username = username && username.toLowerCase();
+    for each (let saved in CmdUtils.retrieveLogins("TwitterOAuth")) {
+      if (saved.username !== username) continue;
+      let [key, secret] = saved.password.split(" ");
+      return cb.call(this, username, key, secret);
+    }
+    const APIURL = "https://api.twitter.com/oauth/access_token";
+    if (!username || !password) {
+      let un = {value: username || ""};
+      let pw = {value: password || ""};
+      let ok = Utils.PromptService.promptUsernameAndPassword(
+        context.chromeWindow, this.name, APIURL, un, pw, null, {});
+      if (!ok || !un.value || !pw.value) return;
+      username = un.value.toLowerCase();
+      password = pw.value;
+    }
+    var me = this;
+    this._post({
+      url: APIURL,
+      data: {
+        x_auth_mode: "client_auth",
+        x_auth_username: username,
+        x_auth_password: password,
+      },
+      success: function twitter_xAuth_success(res) {
+        var {oauth_token, oauth_token_secret} = Utils.urlToParams(res);
+        CmdUtils.savePassword({
+          name: "TwitterOAuth",
+          username: username,
+          password: oauth_token + " " + oauth_token_secret,
+        });
+        cb.call(me, username, oauth_token, oauth_token_secret);
+      },
+      error: function twitter_xAuth_error(xhr) {
+        var status = xhr.status + " " + xhr.statusText;
+        Cu.reportError("Twitter xAuth for " + username + ": " + status);
+        me._show(status, username);
+      },
+    }, {});
+  },
 });
 
 // TODO this should take arguments -- url (defaulting to current page)

@@ -576,8 +576,8 @@ var noun_type_twitter_user = {
 
     var suggs = CmdUtils.grepSuggs(text, this.logins());
 
-    // only letters, numbers, and underscores are allowed in twitter usernames.
-    if (/^\w+$/.test(text)) suggs.push(CmdUtils.makeSugg(text, null, {}, .4));
+    if (/^\w+$/.test(text) && suggs.every(function(s) s.text !== text))
+      suggs.push(CmdUtils.makeSugg(text, null, {username: text}, .4));
 
     if (foundAt) suggs = [
       { __proto__: s,
