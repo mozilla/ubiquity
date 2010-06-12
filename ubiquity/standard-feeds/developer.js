@@ -114,10 +114,11 @@ CmdUtils.CreateCommand({
     pb.innerHTML = (
       '<link rel="stylesheet"' +
       ' href="resource://ubiquity/scripts/prettify.css">'+
-      '<script onload="prettyPrint()"></script>'+
       '<pre id="selection-source" class="prettyprint lang-htm">' +
       pretties.map(Utils.escapeHtml).join("<hr/>"));
-    pb.querySelector('script').src = "resource://ubiquity/scripts/prettify.js";
+    var script = pb.appendChild(pb.ownerDocument.createElement("script"));
+    script.setAttribute("onload", "prettyPrint()");
+    script.src = "resource://ubiquity/scripts/prettify.js";
   },
 });
 
