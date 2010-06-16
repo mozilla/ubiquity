@@ -830,7 +830,7 @@ function computeCryptoHash(algo, str) {
   return hexHash;
 }
 
-// === {{{ Utils.signHMAC(algo, key, str) }}} ===
+// === {{{ Utils.signHmac(algo, key, str) }}} ===
 // Computes and returns a cryptographicly signed hash for a string given an
 // algorithm. It is derived from a given key.
 //
@@ -842,7 +842,7 @@ function computeCryptoHash(algo, str) {
 //
 // {{{str}}} is the string to be hashed.
 
-function signHMAC(algo, key, str) {
+function signHmac(algo, key, str) {
   var converter = Utils.UnicodeConverter;
   converter.charset = "UTF-8";
   var data = converter.convertToByteArray(str, {});
@@ -853,9 +853,9 @@ function signHMAC(algo, key, str) {
                    .keyFromString(Ci.nsIKeyObject.HMAC, key));
   crypto.init(Ci.nsICryptoHMAC[algo], keyObject);
   crypto.update(data, data.length);
-  var hash = crypto.finish(true);
-  return hash;
+  return crypto.finish(true);
 }
+Utils.signHMAC = signHmac;
 
 // === {{{ Utils.escapeHtml(string) }}} ===
 // Returns a version of the {{{string}}} safe for insertion into HTML.

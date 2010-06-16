@@ -523,7 +523,7 @@ OAuth.SignatureMethod.registerMethodClass(["PLAINTEXT", "PLAINTEXT-Accessor"],
 OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
     OAuth.SignatureMethod.makeSubclass(
         function getSignature(baseString) {
-            return Utils.signHMAC("SHA1", this.key, baseString);
+            return Utils.signHmac("SHA1", this.key, baseString);
         }
     ));
 

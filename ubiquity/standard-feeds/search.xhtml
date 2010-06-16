@@ -513,7 +513,7 @@ function amazon_signRequest(aParams) {
   var paramString = paramArray.join("&");
   var sigBaseString =
     "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
-  var signature = Utils.signHMAC("SHA256", AWS_SECRET, sigBaseString);
+  var signature = Utils.signHmac("SHA256", AWS_SECRET, sigBaseString);
   return ("http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" +
           paramString + "&Signature=" + amazon_doEscape(signature));
 }
