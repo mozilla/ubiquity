@@ -1019,7 +1019,9 @@ CmdUtils.CreateCommand({
       return;
     }
 
-    pblock.innerHTML = _("Weather for ${location} ...", {location: text});
+    const W4L = _("Weather for ${location}");
+    pblock.innerHTML = (CmdUtils.renderTemplate(W4L, {location: text}) +
+                        " " + Utils.prefs.get("intl.ellipsis", "..."));
 
     var userLocation = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
@@ -1086,7 +1088,7 @@ CmdUtils.CreateCommand({
       pblock.innerHTML = CmdUtils.renderTemplate(
         feed.dom.getElementById("weather-search").innerHTML, {
           w: weather, location: loc,
-          weatherMessage: _("Weather for ${location}", {location: loc}),
+          weatherMessage: _(W4L, {location: loc}),
         });
     }
   }
