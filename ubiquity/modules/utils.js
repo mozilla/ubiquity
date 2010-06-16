@@ -653,30 +653,38 @@ function parseHtml(htmlText, callback) {
 // **//Deprecated.//** Use native {{{trim()}}} instead.
 Utils.trim = String.trim;
 
-// === {{{ Utils.sortBy(array, key, descending = false) }}} ===
-// Sorts an array by specified {{{key}}} and returns it. e.g.:
+// === {{{ Utils.sort(array, key, descending = false) }}} ===
+// Sorts an {{{array}}} without implicit string conversion and returns it,
+// optionally performing Schwartzian Transformation
+// by specified {{{key}}}. e.g.:
 // {{{
-// sortBy(["abc", "d", "ef"], "length") //=> ["d", "ef", "abc"]
-// sortBy([1, 2, 3], function (x) -x)   //=> [3, 2, 1]
+// [42, 16, 7].sort() //=> [16, 42, 7]
+// sort([42, 16, 7])  //=> [7, 16, 42]
+// sort(["abc", "d", "ef"], "length") //=> ["d", "ef", "abc"]
+// sort([1, 2, 3], function (x) -x)   //=> [3, 2, 1]
 // }}}
 //
 // {{{array}}} is the target array.
 //
-// {{{key}}} is either a string specifying the key property,
+// {{{key}}} is an optional string specifying the key property
 // or a function that maps each of {{{array}}}'s item to a sort key.
 //
 // Sorts descending if {{{descending}}}.
 
-function sortBy(array, key, descending) {
-  var pluck = typeof key === "function" ? key : function pluck(x) x[key];
-  var sortee = ([{key: pluck(v), val: v} for each (v in array)]
-                .sort(descending ? sortBy.dSorter : sortBy.aSorter));
-  for (let i in sortee) array[i] = sortee[i].val;
+function sort(array, key, descending) {
+  array.forEach(function transform(v, i, a) a[i] = {key: this(v), val: v},
+                typeof key === "function" ? key :
+                (key != null
+                 ? function pry(x) x[key]
+                 : function idt(x) x));
+  // Because our Monkey uses Merge Sort, "swap the values if plus" works.
+  array.sort(descending
+             ? function dsc(a, b) a.key < b.key
+             : function asc(a, b) a.key > b.key);
+  array.forEach(function mrofsnart(v, i, a) a[i] = v.val);
   return array;
 }
-// Because our Monkey uses Merge Sort, "swap the values if plus" works.
-sortBy.aSorter = function byKeyAsc(a, b) a.key > b.key;
-sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
+Utils.sortBy = Utils.sort;
 
 // === {{{ Utils.uniq(array, key, strict = false) }}} ===
 // Removes duplicates from an array by comparing string versions of them

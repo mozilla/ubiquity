@@ -207,7 +207,7 @@ function maybeRemindCommand(document, commandsByDomain) {
   if (reminderPeriod > 1 &&
       Utils.history.visitsToDomain(domain) % reminderPeriod) return;
 
-  var cmd = Utils.sortBy(commands, Math.random)[0];
+  var cmd = Utils.sort(commands, Math.random)[0];
   new SuggestionMemory("main_parser").getScore("", cmd.id) ||
     showEnabledCommandNotification(document, cmd.name);
 }

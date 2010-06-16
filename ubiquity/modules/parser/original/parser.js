@@ -155,7 +155,7 @@ ParserQuery.prototype = {
         sugg._verb.cmd.id);
       sugg.frequencyMatchScore = pow(.1, 1 / (freq + 1));
     }
-    Utils.sortBy(this._suggestionList, "score", "v");
+    Utils.sort(this._suggestionList, "score", true);
   },
 };
 
@@ -261,9 +261,9 @@ Parser.prototype = {
   _sortGenericVerbCache: function P__sortGenericVerbCache() {
     var suggMemory = this._suggestionMemory;
     if (!suggMemory) return;
-    Utils.sortBy(
+    Utils.sort(
       this._rankedVerbsThatUseGenericNouns,
-      function minusSMScore(v) -suggMemory.getScore("", v.cmd.id));
+      function bySMScore(v) suggMemory.getScore("", v.cmd.id), true);
   },
 };
 

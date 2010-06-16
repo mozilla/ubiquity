@@ -118,7 +118,7 @@ function changeExternalCallSettings() {
 function loadSkinList() {
   var {skins, currentSkin} = skinService;
   var $list = $("#skin-list").empty(), id = -1;
-  for each (let skin in Utils.sortBy(skins, function(s) s.uri.spec))
+  for each (let skin in Utils.sort(skins, function (s) s.uri.spec))
     $list.append(createSkinElement(skin, ++id, skin === currentSkin));
   if (currentSkin === skinService.customSkin) openSkinEditor();
 }
