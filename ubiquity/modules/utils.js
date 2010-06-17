@@ -1194,12 +1194,13 @@ var gTabs = Utils.tabs = {
 };
 
 // == {{{ Utils.clipboard }}} ==
-// Contains functions related to clipboard.
+// Provides clipboard access.
 
 var gClipboard = Utils.clipboard = {
   flavors: {
     text: "text/unicode",
     html: "text/html",
+    image: "image/png",
   },
 
   // === {{{ Utils.clipboard.get(flavor) }}} ===
@@ -1215,13 +1216,18 @@ var gClipboard = Utils.clipboard = {
       flavor = flavors[flavor] || flavor;
       if (!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
         return "";
-      var trans = (Cc["@mozilla.org/widget/transferable;1"]
-                   .createInstance(nsITransferable));
+      var data = {}, trans = (Cc["@mozilla.org/widget/transferable;1"]
+                              .createInstance(nsITransferable));
       trans.addDataFlavor(flavor);
       service.getData(trans, kGlobalClipboard);
-      var data = {};
       trans.getTransferData(flavor, data, {});
-      return data.value.QueryInterface(nsISupportsString).data;
+      if (~flavor.lastIndexOf("text/", 0))
+        return data.value.QueryInterface(nsISupportsString).data;
+      var bis = (Cc["@mozilla.org/binaryinputstream;1"]
+                 .createInstance(Ci.nsIBinaryInputStream));
+      bis.setInputStream(data.value.QueryInterface(Ci.nsIInputStream));
+      return "data:" + flavor + ";base64," +
+        btoa(String.fromCharCode.apply(0, bis.readByteArray(bis.available())));
     }
     return (
       arguments.length > 1
@@ -1237,6 +1243,10 @@ var gClipboard = Utils.clipboard = {
     var trans = (Cc["@mozilla.org/widget/transferable;1"]
                  .createInstance(nsITransferable));
     for (let [flavor, data] in new Iterator(dict)) {
+      if (~flavor.lastIndexOf("image/", 0)) {
+        gClipboard.image = data;
+        return;
+      }
       let ss = (Cc["@mozilla.org/supports-string;1"]
                 .createInstance(nsISupportsString));
       ss.data = data = String(data);
@@ -1246,20 +1256,40 @@ var gClipboard = Utils.clipboard = {
     service.setData(trans, null, service.kGlobalClipboard);
   },
 };
+defineLazyProperty(gClipboard, function service() {
+  return Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
+});
 // === {{{ Utils.clipboard.text }}} ===
 // === {{{ Utils.clipboard.html }}} ===
 // Gets or sets the clipboard text or html.
+// === {{{ Utils.clipboard.image }}} ===
+// Gets or sets the clipboard image as data URL.
+// Also accepts an {{{<img>}}} element when setting.
 for (let n in gClipboard.flavors) let (name = n) {
   gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name));
-  gClipboard.__defineSetter__(name, function setCB(data) {
+  name === "image" || gClipboard.__defineSetter__(name, function setCB(data) {
     var dict = {};
     dict[name] = data;
     gClipboard.set(dict);
   });
 }
-defineLazyProperty(
-  gClipboard, function service()
-  Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard));
+gClipboard.__defineSetter__("image", function clipboard_setImage(img) {
+  var win = Utils.currentChromeWindow, doc = win.document;
+  if (typeof img === "string") {
+    let i = new win.Image;
+    i.src = img;
+    img = i;
+  }
+  img.complete ? onload() : img.onload = onload;
+  function onload() {
+    const CMD_CIC = "cmd_copyImageContents";
+    var {popupNode} = doc;
+    doc.popupNode = img;
+    var controller = doc.commandDispatcher.getControllerForCommand(CMD_CIC);
+    if (controller.isCommandEnabled(CMD_CIC)) controller.doCommand(CMD_CIC);
+    doc.popupNode = popupNode;
+  }
+});
 
 // == {{{ Utils.history }}} ==
 // Contains functions that make it easy to access
