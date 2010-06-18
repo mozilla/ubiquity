@@ -202,10 +202,8 @@ Parser.prototype = {
     
     var skippedSomeVerbs = false;
     for each (let verb in commandList) {
-      if (!verb.oldAPI || verb.arguments)
-        verbs.push(verb);
-      else
-        skippedSomeVerbs = true;
+      if (verb.oldAPI) skippedSomeVerbs = true;
+      else verbs.push(verb);
     }
 
     if (skippedSomeVerbs && !gOldAlerted) {
