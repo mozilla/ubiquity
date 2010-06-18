@@ -2459,6 +2459,7 @@ Parse.prototype = {
   // It returns the parses with nice {{{<span class='...'></span>}}}
   // wrappers.
   get displayHtml() {
+    let hesc = Utils.escapeHtml;
     let {parser} = this._query;
     // This is the main string to be returned.
     let display = "";
@@ -2467,8 +2468,8 @@ Parse.prototype = {
     let displayFinal = "";
 
     let verb = (
-      '<span class="verb" title="' + (this._verb.id || "null") + '">' +
-      (this._verb.text || "<i>null</i>") +
+      '<span class="verb" title="' + hesc(this._verb.id || "null") + '">' +
+      (hesc(this._verb.text) || "<i>null</i>") +
       "</span>");
     if (this._verb._order === -1)
       // the verb was at the end of the input.
@@ -2531,7 +2532,7 @@ Parse.prototype = {
       if (!label) {
         let nt = neededArg.nountype;
         // _name is for backward compatibility
-        label = nt.label || nt._name || "?";
+        label = hesc(nt.label || nt._name || "?");
       }
       label = ('<span class="' +
                (arg.modifier ? "argument" : "object") +
@@ -2551,8 +2552,8 @@ Parse.prototype = {
     return display + displayFinal;
   },
 
-  get displayHtmlDebug()(
-    this._id + ": " + this.displayHtml + " (" +
+  get displayHtmlDebug() (
+    Utils.escapeHtml(this._id) + ": " + this.displayHtml + " (" +
     ((this.score * 100 | 0) / 100 || "<i>no score</i>") + ',' +
     ((this.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>") +
     ")"),
