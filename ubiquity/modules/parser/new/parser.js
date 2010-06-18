@@ -199,7 +199,7 @@ Parser.prototype = {
   setCommandList: function setCommandList(commandList) {
     // First we'll register the verbs themselves.
     var verbs = this._verbList = [];
-    
+
     var skippedSomeVerbs = false;
     for each (let verb in commandList) {
       if (verb.oldAPI) skippedSomeVerbs = true;
@@ -918,7 +918,7 @@ Parser.prototype = {
         // argument assignments.
         theseParses = newParses;
       }
-      
+
       var oneArgPerRole = function oneArgPerRole(parse) {
         // Returns true if there is only one argument per role.
         // Returns false otherwise. The "object" role is not checked.
@@ -927,10 +927,10 @@ Parser.prototype = {
             return false;
         return true;
       }
-      
+
       if (DONT_PARSE_MULTIPLE_ARGS_PER_ROLE)
         theseParses = theseParses.filter(oneArgPerRole);
-      
+
       // Put all of the different delimiterIndices combinations' parses into
       // possibleParses to return it.
       push.apply(possibleParses, theseParses);
@@ -1769,7 +1769,7 @@ ParseQuery.prototype = {
 
     // start with step 1
     this._next();
-    
+
     // STEP 1: split into words
     this._input = this.parser.wordBreaker(this.input);
     yield true;
@@ -1910,7 +1910,7 @@ ParseQuery.prototype = {
 
     count = 0;
     var STEP_9_YIELD_LOOP_NUM = 4;
-    for each (let {argText, nounTypeIds} in 
+    for each (let {argText, nounTypeIds} in
               dT.getArgsAndNounTypeIdsToCheck(this.parser)) {
       this.parser.detectNounType(this, argText, nounTypeIds,
                                  this.tryToCompleteParses);
@@ -2185,8 +2185,8 @@ NounTypeDetectionTracker.prototype = {
   //
   // This returns an array of pairs of argument strings and the nountypes
   // they must be checked against.
-  // 
-  // Now takes the current parser to get 
+  //
+  // Now takes the current parser to get
   getArgsAndNounTypeIdsToCheck:
   function DT_getArgsAndNounTypeIdsToCheck(parser) {
     var returnArr = parser.extraArgsToDetect.slice();
