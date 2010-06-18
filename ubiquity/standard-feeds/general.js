@@ -240,7 +240,28 @@ const GTRANSLATE_LIMIT = 5120;
 const PREF_LANG_DEFAULT = "extensions.ubiquity.translate.lang.default";
 const PREF_LANG_ALT     = "extensions.ubiquity.translate.lang.alt";
 
-const PREF_LANG_DEPRECATED = "extensions.ubiquity.default_translation_lang";
+function getLocalizedPref(pref) {
+  var {prefs} = Utils;
+  try { return prefs.getComplexValue(pref, Ci.nsIPrefLocalizedString).data }
+  catch ([]) { return String(prefs.get(pref, "")) }
+}
+
+function googlang(exclude) {
+  for each (let pref in [exclude ? PREF_LANG_ALT : PREF_LANG_DEFAULT,
+                         "intl.accept_languages",
+                         "general.useragent.locale"])
+    for each (let code in getLocalizedPref(pref).split(",")) {
+      if (!(code = code.trim())) continue;
+      code = (/^zh-(CN|TW)$/i.test(code)
+              ? "zh-" + RegExp.$1.toUpperCase()
+              : code.slice(0, 2).toLowerCase());
+      if (code === exclude) continue;
+      let name = noun_type_lang_google.getLangName(code);
+      if (name) return {name: name, code: code};
+    }
+  var fallback = exclude === "en" ? "ja" : "en";
+  return {name: noun_type_lang_google.getLangName(fallback), code: fallback};
+}
 
 function googleTranslate(html, langCodePair, callback, pblock) {
   var self = this;
@@ -258,10 +279,8 @@ function googleTranslate(html, langCodePair, callback, pblock) {
       switch (data.responseStatus) {
         case 200: {
           let alt, dsl = data.responseData.detectedSourceLanguage;
-          if (dsl === langCodePair.to &&
-              (alt = Utils.prefs.getValue(PREF_LANG_ALT)) &&
-              dsl !== alt) {
-            langCodePair.to = alt;
+          if (dsl === langCodePair.to) {
+            langCodePair.to = googlang(dsl).code;
             googleTranslate.call(self, html, langCodePair, callback, pblock);
           }
           else callback(data.responseData);
@@ -291,7 +310,7 @@ CmdUtils.CreateCommand({
   arguments: [
     {role: "object", nountype: noun_arb_text},
     {role: "source", nountype: noun_type_lang_google},
-    {role: "goal", nountype: noun_type_lang_google}],
+    {role: "goal",   nountype: noun_type_lang_google}],
   description: "Translates from one language to another.",
   icon: "chrome://ubiquity/skin/icons/google.ico",
   help: "" + (
@@ -306,7 +325,7 @@ CmdUtils.CreateCommand({
     it will translate the whole page.</>),
   execute: function translate_execute({object: {html}, goal, source}) {
     var sl = source.data || "";
-    var tl = goal.data || this._getDefaultLang().code;
+    var tl = goal.data || googlang().code;
     if (html && html.length <= GTRANSLATE_LIMIT)
       this._translate(
         html,
@@ -321,7 +340,7 @@ CmdUtils.CreateCommand({
   },
   preview: function translate_preview(pblock, {object: {html}, goal, source}) {
     var defaultLang;
-    var toLang = goal.text || (defaultLang = this._getDefaultLang()).name;
+    var toLang = goal.text || (defaultLang = googlang()).name;
     var limitExceeded = html.length > GTRANSLATE_LIMIT;
     if (!html || limitExceeded) {
       var ehref = Utils.escapeHtml(this._getUrl());
@@ -345,19 +364,6 @@ CmdUtils.CreateCommand({
         phtml + "<br/><br/>" + translatedText +
         (dsl ? "<p>(" + dsl + " \u2192 " + langCodePair.to + ")</p>" : ""));
     }, pblock);
-  },
-  // Returns the default language for translation.  order of defaults:
-  // PREF_LANG_DEPRECATED > PREF_LANG_DEFAULT > general.useragent.locale > "en"
-  _getDefaultLang: function translate__getDefaultLang() {
-    var {prefs} = Utils;
-    var code = (
-      prefs.getValue(PREF_LANG_DEPRECATED, "") ||
-      prefs.getValue(
-        PREF_LANG_DEFAULT,
-        prefs.getValue("general.useragent.locale", "en").slice(0, 2)));
-    var name = (noun_type_lang_google.getLangName(code) ||
-                noun_type_lang_google.getLangName(code = "en"));
-    return {name: name, code: code};
   },
   _getUrl: function translate_getUrl() noun_type_url.default()[0].text,
   _translate: googleTranslate,
