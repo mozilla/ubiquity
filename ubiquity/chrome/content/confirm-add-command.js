@@ -94,11 +94,11 @@ function displayCode(data) {
     "<pre class='prettyprint lang-js'>" + Utils.escapeHtml(data) + "</pre>" +
     "<link rel='stylesheet' href='resource://ubiquity/scripts/prettify.css'>" +
     ("<style>" + <![CDATA[
-      body, pre {margin: 0; background-color: #eee}
-      .prettyprint {border: 0 !important; font-size: smaller}
+      body, pre {margin: 0}
+      .prettyprint {padding: 2px; white-space: pre-wrap; font-size: smaller}
      ]]> + "</style>") +
-    "<script src='resource://ubiquity/scripts/prettify.js'></script>" +
-    "<script> prettyPrint() </script>");
+    "<script src='resource://ubiquity/scripts/prettify.js'" +
+    " onload='prettyPrint()'></script>");
   $("#sourceCode").empty().append($("<iframe>", {
     css: {width: "100%", maxHeight: "40em", borderWidth: 0},
     src: "data:text/html," + encodeURI(page),
