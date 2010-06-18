@@ -113,7 +113,8 @@ function setSelection(context, content, options) {
     let plainText = String(
       options && options.text ||
       (focusedElement.ownerDocument.createRange()
-       .createContextualFragment("<_>" + content + "</_>").textContent));
+       .createContextualFragment("<div>" + content + "</div>")
+       .lastChild.textContent));
     focusedElement.QueryInterface(Ci.nsIDOMNSEditableElement)
       .editor.QueryInterface(Ci.nsIPlaintextEditor).insertText(plainText);
     focusedElement.selectionStart -= plainText.length;
