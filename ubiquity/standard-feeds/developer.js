@@ -40,7 +40,7 @@ CmdUtils.CreateCommand({
     }
   },
   _codes: function prettify_codes() {
-    var $nodes = $(CmdUtils.selectedNodes), slctr = this._selector;
+    var $nodes = $(CmdUtils.getSelectedNodes(1)), slctr = this._selector;
     var codes = $nodes.filter(slctr).get();
     if (!codes.length) codes = $.unique($nodes.closest(slctr).get());
     if (!codes.length) codes = qsaa(CmdUtils.document, slctr);
