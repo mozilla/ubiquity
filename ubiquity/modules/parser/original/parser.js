@@ -295,7 +295,7 @@ ParsedSentence.prototype = {
       if (x === "object") {
         // Check for a valid text selection. We'll replace
         // the text with a pronoun for readability
-        if (this._selObj.text === text)
+        if (!this.fromNounFirstSuggestion && this._selObj.text === text)
           text = this._query.PRONOUNS[0];
       }
       else preposition += args[x].preposition + " ";
