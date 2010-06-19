@@ -379,13 +379,11 @@ div.ubiq-tutorial h2 {
 .badge {
   border-width: 0;
   float: right;
-/*  position: absolute;*/
-  top: 0px;
-  right: 0px;
 }
 
-.badge a img {
-  border: none;
+.old-api > .badge {
+ color: white; background-color: red;
+ padding: 0 3px; -moz-border-radius: 6px; font: bold 10px/16px monospace;
 }
 
 .favicon {

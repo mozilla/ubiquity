@@ -198,20 +198,13 @@ function fillTableRowForCmd(row, cmd, className) {
     '<div class="help"></div>' +
     '</td>');
 
-  if (UbiquitySetup.parserVersion === 2) {
-    if (!("arguments" in cmd)) {
-      cmdElement.addClass("not-loaded").find(".name").attr(
-        "title",
-        L("ubiquity.cmdlist.oldparsertitle"));
-    }
-    if (cmd.oldAPI) {
-      cmdElement.addClass("oldAPI").prepend(
-        '<span class="badge">' +
-        '<a href="https://wiki.mozilla.org/Labs/Ubiquity/' +
-        'Parser_2_API_Conversion_Tutorial">' +
-        '<img src="resource://ubiquity/chrome/skin/icons/oldapi.png"/>' +
-        '</a></span>');
-    }
+  if (cmd.oldAPI) {
+    cmdElement.addClass("old-api").prepend(
+      A("https://wiki.mozilla.org/Labs/Ubiquity/" +
+        "Parser_2_API_Conversion_Tutorial", "OLD API", "badge"));
+    if (UbiquitySetup.parserVersion === 2)
+      cmdElement.addClass("not-loaded").find(".name")
+        .attr("title", L("ubiquity.cmdlist.oldparsertitle"));
   }
 
   if (className) {
