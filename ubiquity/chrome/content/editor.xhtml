@@ -17,6 +17,7 @@
 
   <link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
   <link rel="stylesheet" href="web-content.css" type="text/css" />
+  <link id="bespin_base" href="bespin"/>
 
   <script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
   <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
@@ -79,7 +80,7 @@
 
   <label for="usebespin">
    <input type="checkbox" id="usebespin" accesskey="B"/>
-   Use <a href="https://bespin.mozillalabs.com/"><u>B</u>espin</a>
+   Use <a href="http://mozillalabs.com/bespin/"><u>B</u>espin</a>
   </label>
 
   <br clear="all" />
@@ -97,8 +98,10 @@
   </div>
 </div>
 
-<div id="editor-div" style="height: 500px;">
-</div>
+<textarea id="editor" class="bespin"
+ style="width:99%; height:480px; display:none"
+ data-bespinoptions='{"syntax": "js", "settings": {"tabstop": 2}}'
+ ></textarea>
 
 <br clear="all" />
 

@@ -2,6 +2,10 @@ Cu.import("resource://ubiquity/modules/prefcommands.js");
 
 var editor, file, lastModifiedTime = 0;
 
+$.ajaxSettings.beforeSend = function forceText(x) {
+  x.overrideMimeType('text/plain;charset=utf-8');
+};
+
 function initialize() {
   document.getElementById("feedTypeMenu").value = PrefCommands.type;
 }
@@ -22,41 +26,36 @@ function watchFile() {
 }
 
 function changeEditor() {
-  var bespin = this.checked;
-  gPrefs.set("extensions.ubiquity.editor.useBespin", bespin);
-  var $ediv = $("#editor-div").empty();
-  if (bespin) {
-    let [iframe] = $("<iframe/>", {
-      src: "resource://ubiquity/chrome/content/bespin.html",
-      style: "width: 100%; height: 100%; border:0",
-    }).appendTo($ediv);
-    Utils.listenOnce(iframe, "load", function onBespinFrameLoad(){
-      this.contentWindow.addEventListener("message", onBespin, false);
-    });
+  var besp = this.checked;
+  gPrefs.set("extensions.ubiquity.editor.useBespin", besp);
+  if (besp) {
+    if (self.bespin) {
+      $("#editor").hide();
+      $("div.bespin").slideDown();
+      onBespinLoad();
+    }
+    else if (!document.querySelector("script[src~=BespinEmbedded]"))
+      $("<script>", {src: "bespin/BespinEmbedded.js"}).appendTo("body");
   }
   else {
-    editor = document.createElement("textarea");
-    editor.style.cssText = "width:100%; height:100%";
+    $("div.bespin").hide();
+    if (editor) editor.focus = false;
+    [editor] = $("#editor").slideDown();
     editor.value = PrefCommands.getCode();
     editor.addEventListener("input", updateCode, false);
-    $ediv.append(editor);
     editor.focus();
   }
 }
-function onBespin(ev) {
-  var {source, data} = ev;
-  editor = (source.wrappedJSObject || source)[data];
+function onBespinLoad() {
+  ({editor}) = document.getElementById("editor").bespin;
   editor.value = PrefCommands.getCode();
-  editor.addEventListener("textChange", updateCode);
-  focusEditor();
+  editor.textChanged.removeAll();
+  editor.textChanged.add(updateCode);
+  editor.focus = true;
 }
 function focusEditor() {
-  if ("focus" in editor) editor.focus();
-  else {
-    let {scrollX, scrollY} = self;
-    editor.setFocus(true);
-    scrollTo(scrollX, scrollY);
-  }
+  if (editor instanceof Element) editor.focus();
+  else editor.focus = true;
 }
 function updateCode() {
   PrefCommands.setCode(editor.value);
