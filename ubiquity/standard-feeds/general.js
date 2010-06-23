@@ -240,20 +240,14 @@ const GTRANSLATE_LIMIT = 5120;
 const PREF_LANG_DEFAULT = "extensions.ubiquity.translate.lang.default";
 const PREF_LANG_ALT     = "extensions.ubiquity.translate.lang.alt";
 
-function getLocalizedPref(pref) {
-  var {prefs} = Utils;
-  try { return prefs.getComplexValue(pref, Ci.nsIPrefLocalizedString).data }
-  catch ([]) { return String(prefs.get(pref, "")) }
-}
-
 function googlang(exclude) {
   for each (let pref in [exclude ? PREF_LANG_ALT : PREF_LANG_DEFAULT,
                          "intl.accept_languages",
                          "general.useragent.locale"])
-    for each (let code in getLocalizedPref(pref).split(",")) {
+    for each (let code in Utils.prefs.get(pref, "").split(",")) {
       if (!(code = code.trim())) continue;
-      code = (/^zh-(CN|TW)$/i.test(code)
-              ? "zh-" + RegExp.$1.toUpperCase()
+      code = (/^(..-)(..)$/i.test(code)
+              ? RegExp.$1.toLowerCase() + RegExp.$2.toUpperCase()
               : code.slice(0, 2).toLowerCase());
       if (code === exclude) continue;
       let name = noun_type_lang_google.getLangName(code);

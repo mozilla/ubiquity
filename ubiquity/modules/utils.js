@@ -1039,6 +1039,10 @@ var gPrefs = Utils.prefs = {
   get: function prefs_get(name, value) {
     switch (gPrefBranch.getPrefType(name)) {
       case PREF_STRING:
+      try {
+        return gPrefBranch.getComplexValue(
+          name, Ci.nsIPrefLocalizedString).data;
+      } catch ([]) {}
       return gPrefBranch.getComplexValue(name, nsISupportsString).data;
       case PREF_BOOL:
       return gPrefBranch.getBoolPref(name);
