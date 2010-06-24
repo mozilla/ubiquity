@@ -198,11 +198,12 @@ var UbiquitySetup = {
     function setAddonInfo(addon) {
       ME.version = addon.version;
       ME.baseUrl = (
-        "getResourceURL" in addon
-        ? addon.getResourceURL("")
+        "getResourceURI" in addon
+        ? addon.getResourceURI("")
         : Utils.IOService.newFileURI(Utils.ExtensionManager
                                      .getInstallLocation(ID)
-                                     .getItemLocation(ID)).spec);
+                                     .getItemLocation(ID))
+        ).spec;
       gWebJsModule = new WebJsModule(callback);
     }
   },
