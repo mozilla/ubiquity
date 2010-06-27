@@ -762,6 +762,14 @@ function count(obj) {
   return num;
 }
 
+// === {{{ Utils.keys(object) }}} ===
+// Returns an array of all own, enumerable property names of {{{object}}}.
+
+var keys = Utils.keys = (
+  "keys" in Object
+  ? function keys(obj) Object.keys(Object(obj))
+  : function keys(obj) [k for (k in obj && new Iterator(obj, true))]);
+
 // === {{{ Utils.powerSet(set) }}} ===
 // Creates a [[http://en.wikipedia.org/wiki/Power_set|power set]] of
 // an array like {{{set}}}. e.g.:
@@ -1012,7 +1020,7 @@ function defineLazyProperty(obj, func, name) {
 function extend(target) {
   for (let i = 1, l = arguments.length; i < l; ++i) {
     let obj = arguments[i];
-    for (let key in new Iterator(obj, true)) {
+    for each (let key in keys(obj)) {
       let g, s;
       (g = obj.__lookupGetter__(key)) && target.__defineGetter__(key, g);
       (s = obj.__lookupSetter__(key)) && target.__defineSetter__(key, s);
