@@ -2,10 +2,6 @@ Cu.import("resource://ubiquity/modules/prefcommands.js");
 
 var editor, file, lastModifiedTime = 0;
 
-$.ajaxSettings.beforeSend = function forceText(x) {
-  x.overrideMimeType('text/plain;charset=utf-8');
-};
-
 function initialize() {
   document.getElementById("feedTypeMenu").value = PrefCommands.type;
 }
