@@ -296,35 +296,39 @@ function encodeJson(object) Utils.json.encode(object);
 // **//Deprecated.//** Use {{{JSON.parse()}}} instead.
 function decodeJson(string) Utils.json.decode(string);
 
-// === {{{Utils.ellipsify(node, characters, ellipsis = "\u2026")}}} ===
+// === {{{Utils.ellipsify(node, characters, [ellipsis])}}} ===
 // Given a DOM {{{node}}} (or string) and a maximum number of {{{characters}}},
 // returns a new DOM node or string that has the same contents truncated to
 // that number of characters. If any truncation was performed,
 // an {{{ellipsis}}} is placed at the end of the content.
 
 function ellipsify(node, chars, ellipsis) {
-  ellipsis = ellipsis || "\u2026";
-  var doc = node.ownerDocument;
-  if (!doc) {
+  if (ellipsis == null) ellipsis = gPrefs.get("intl.ellipsis", "\u2026");
+  if (typeof node != "object") {
     if (chars < 1) return "";
     let str = String(node);
     return str.length > chars ? str.slice(0, chars - 1) + ellipsis : str;
   }
-  var {firstChild: childNode, TEXT_NODE, ELEMENT_NODE} = node;
-  var copy = node.cloneNode(false), childCopy;
-  for (; childNode && chars > 0; childNode = childNode.nextSibling) {
-    if (childNode.nodeType === TEXT_NODE) {
-      let value = childNode.nodeValue;
-      childCopy = (value.length > chars
-                   ? doc.createTextNode(value.slice(0, chars - 1) + ellipsis)
-                   : childNode.cloneNode(false));
-      chars -= value.length;
+  var copy = node.cloneNode(false);
+  switch (node.nodeType) {
+    case node.TEXT_NODE:
+    case node.CDATA_SECTION_NODE:
+    copy.nodeValue = ellipsify(node.nodeValue, chars, ellipsis);
+    break;
+    case node.ELEMENT_NODE:
+    case node.DOCUMENT_NODE:
+    case node.DOCUMENT_FRAGMENT_NODE:
+    let child = node.firstChild;
+    for (; child && chars > 0; child = child.nextSibling) {
+      let key = (child.nodeType == node.ELEMENT_NODE && "textContent" ||
+                 (child.nodeType == node.TEXT_NODE ||
+                  child.nodeType == node.CDATA_SECTION_NODE) && "nodeValue");
+      if (key) {
+        let childCopy = copy.appendChild(ellipsify(child, chars, ellipsis));
+        chars -= childCopy[key].length;
+      }
+      else copy.appendChild(child.cloneNode(false));
     }
-    else if (childNode.nodeType === ELEMENT_NODE) {
-      childCopy = ellipsify(childNode, chars, ellipsis);
-      chars -= childCopy.textContent.length;
-    }
-    copy.appendChild(childCopy);
   }
   return copy;
 }

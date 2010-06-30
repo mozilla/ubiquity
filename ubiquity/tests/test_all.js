@@ -580,16 +580,23 @@ function testUtilsEscapeUnescapeHtml() {
 function testUtilsEllipsify() {
   this.skipIfXPCShell();
 
-  this.assertEquals(Utils.ellipsify("12345", 4), "123\u2026");
+  this.assertEquals(Utils.ellipsify("12345", 4, "\u2026"), "123\u2026");
   this.assertEquals(Utils.ellipsify("just an ellipsis", 1, "..."), "...");
   this.assertEquals(Utils.ellipsify("nothing to ellipsify", 0), "");
 
   var doc = Utils.hiddenWindow.document;
+  var text = doc.createTextNode("text node");
+  var comment = doc.createComment("comment node");
   var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-  div.appendChild(doc.createTextNode("qwerty"));
-  for (let i = 3; i --> 0;) div.appendChild(div.cloneNode(true));
-  for (let i = div.textContent.length + 1; i --> 0; i -= 12) {
-    let {length} = Utils.ellipsify(div, i).textContent;
+  this.assertEquals(Utils.ellipsify(text, 2, ".").nodeValue, "t.");
+  this.assertEquals(Utils.ellipsify(comment, 2, ".").nodeValue,
+                    comment.nodeValue);
+  div.appendChild(comment);
+  div.appendChild(text);
+  this.assertEquals(Utils.ellipsify(div, 5, ".").textContent, "text.");
+  for (let i = 2; i --> 0;) div.appendChild(div.cloneNode(true));
+  for (let i = div.textContent.length + 1; i --> 0; i -= 9) {
+    let {length} = Utils.ellipsify(div, i, ".").textContent;
     this.assert(length <= i, length + " <= " + i);
   }
 }
