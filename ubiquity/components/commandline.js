@@ -38,7 +38,6 @@ const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-var NSGetModule = XPCOMUtils.generateNSGetModule([UbiquityCommandLineHandler]);
 function UbiquityCommandLineHandler() {}
 UbiquityCommandLineHandler.prototype = {
   classDescription: "Ubiquity Command Line Flags",
@@ -84,3 +83,6 @@ function rendezvous(method, param, i) {
   if (gUbiquity) gUbiquity[method](param);
   else Utils.setTimeout(rendezvous, 99, method, param, -~i);
 }
+
+const NSG = "NSGet" + ("generateModule" in XPCOMUtils ? "Module" : "Factory");
+this[NSG] = XPCOMUtils["generate" + NSG]([UbiquityCommandLineHandler]);

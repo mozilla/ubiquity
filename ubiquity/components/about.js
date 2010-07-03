@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,29 +39,27 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-function UbiquityAboutHandler() {}
+XPCOMUtils.defineLazyGetter(this, "newChannel", function () (
+  Cu.import("resource://ubiquity/modules/utils.js", null).
+  Utils.IOService.newChannel));
 
+function UbiquityAboutHandler() {}
 UbiquityAboutHandler.prototype = {
-  newChannel: function UAH_newChannel(aURI) {
-    var name = /\?([\w.-]+)/.test(aURI.spec) ? RegExp.$1 : "about";
+  classDescription: "About Ubiquity Pages",
+  classID: Components.ID("{3a54db0f-281a-4af7-931c-de747c37b423}"),
+  contractID: "@mozilla.org/network/protocol/about;1?what=ubiquity",
+  QueryInterface: XPCOMUtils.generateQI(["nsIAboutModule"]),
+
+  newChannel: function UAH_newChannel(uri) {
+    var name = /\?([\w.-]+)/.test(uri.spec) ? RegExp.$1 : "about";
     if (!/\./.test(name)) name += ".xhtml";
-    var channel = (
-      Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService)
-      .newChannel("chrome://ubiquity/content/" + name, null, null));
-    channel.originalURI = aURI;
+    var channel = newChannel("chrome://ubiquity/content/" + name, null, null);
+    channel.originalURI = uri;
     return channel;
   },
-
-  getURIFlags: function UAH_getURIFlags(aURI) {
-    return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT;
-  },
-
-  classDescription: "About Ubiquity Page",
-  classID: Components.ID("3a54db0f-281a-4af7-931c-de747c37b423"),
-  contractID: "@mozilla.org/network/protocol/about;1?what=ubiquity",
-  QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule]),
+  getURIFlags: function UAH_getURIFlags(uri)
+    Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT,
 };
 
-function NSGetModule(aCompMgr, aFileSpec) {
-  return XPCOMUtils.generateModule([UbiquityAboutHandler]);
-}
+const NSG = "NSGet" + ("generateModule" in XPCOMUtils ? "Module" : "Factory");
+this[NSG] = XPCOMUtils["generate" + NSG]([UbiquityAboutHandler]);

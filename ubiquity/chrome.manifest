@@ -1,3 +1,13 @@
+component {3a54db0f-281a-4af7-931c-de747c37b423} components/about.js
+contract @mozilla.org/network/protocol/about;1?what=ubiquity {3a54db0f-281a-4af7-931c-de747c37b423}
+
+component {789409b9-2e3b-4682-a5d1-71ca80a76556} components/protocol.js
+contract @mozilla.org/network/protocol;1?name=ubiquity {789409b9-2e3b-4682-a5d1-71ca80a76556}
+
+component {bef32df0-b9f6-4833-a3c6-ad361137ae69} components/commandline.js
+contract @mozilla.org/commandlinehandler/general-startup;1?type=ubiquity {bef32df0-b9f6-4833-a3c6-ad361137ae69}
+category command-line-handler m-ubiquity @mozilla.org/commandlinehandler/general-startup;1?type=ubiquity
+
 resource ubiquity ./
 
 content ubiquity chrome/content/

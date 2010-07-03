@@ -34,34 +34,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ['newChannel',
-                        'setPath'];
+let EXPORTED_SYMBOLS = ["newChannel", "setPath"], paths = {};
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-let paths = {};
-
-function newChannel(aURI) {
-  var ios = Components.classes["@mozilla.org/network/io-service;1"]
-                      .getService(Components.interfaces.nsIIOService);
-
-  var path = aURI.spec.slice(11);
-  if (path in paths) {
-    path = paths[path]();
-    return ios.newChannel(path, null, null);
-  } else {
-    return ios.newChannel("data:text/plain,ERROR:unknown path.",
-                          null, null);
-  }
+function newChannel(uri) {
+  var path = uri.spec.slice(11);
+  return Utils.IOService.newChannel(
+    path in paths ? paths[path]() : "data:,ERROR:unknown path.",
+    null, null);
 }
 
 function setPath(path, funcOrUri) {
-  let func;
-
-  if (typeof(funcOrUri) == "string")
-    func = function() { return funcOrUri; };
-  else
-    func = funcOrUri;
-
-  paths[path] = func;
+  paths[path] =
+    typeof funcOrUri == "string" ? function () funcOrUri : funcOrUri;
 }

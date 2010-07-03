@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Darin Fisher <darin@meer.net>
  *   Doron Rosenberg <doronr@us.ibm.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,112 +36,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test protocol related
-const kSCHEME = "ubiquity";
-const kPROTOCOL_NAME = "Ubiquity Protocol";
-const kPROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + kSCHEME;
-const kPROTOCOL_CID = Components.ID("789409b9-2e3b-4682-a5d1-71ca80a76556");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const {nsIProtocolHandler, nsIURI} = Ci;
 
-// Mozilla defined
-const kSIMPLEURI_CONTRACTID = "@mozilla.org/network/simple-uri;1";
-const kIOSERVICE_CONTRACTID = "@mozilla.org/network/io-service;1";
-const nsISupports = Components.interfaces.nsISupports;
-const nsIIOService = Components.interfaces.nsIIOService;
-const nsIProtocolHandler = Components.interfaces.nsIProtocolHandler;
-const nsIURI = Components.interfaces.nsIURI;
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-function Protocol()
-{
-}
+function UbiquityProtocol() {}
+UbiquityProtocol.prototype = {
+  classDescription: "Ubiquity Protocol",
+  classID: Components.ID("{789409b9-2e3b-4682-a5d1-71ca80a76556}"),
+  contractID: "@mozilla.org/network/protocol;1?name=ubiquity",
 
-Protocol.prototype =
-{
-  QueryInterface: function(iid)
-  {
-    if (!iid.equals(nsIProtocolHandler) &&
-        !iid.equals(nsISupports))
-      throw Components.results.NS_ERROR_NO_INTERFACE;
-    return this;
-  },
-
-  scheme: kSCHEME,
+  QueryInterface: XPCOMUtils.generateQI(["nsIProtocolHandler"]),
+  scheme: "ubiquity",
   defaultPort: -1,
-  protocolFlags: nsIProtocolHandler.URI_NORELATIVE |
-                 nsIProtocolHandler.URI_NOAUTH |
-                 nsIProtocolHandler.URI_DANGEROUS_TO_LOAD,
-
-  allowPort: function(port, scheme)
-  {
-    return false;
-  },
-
-  newURI: function(spec, charset, baseURI)
-  {
-    var uri = Components.classes[kSIMPLEURI_CONTRACTID].createInstance(nsIURI);
+  protocolFlags: (nsIProtocolHandler.URI_NORELATIVE |
+                  nsIProtocolHandler.URI_NOAUTH |
+                  nsIProtocolHandler.URI_DANGEROUS_TO_LOAD),
+  allowPort: function UP_allowPort(port, scheme) false,
+  newURI: function UP_newURI(spec, charset, baseURI) {
+    var uri = Cc["@mozilla.org/network/simple-uri;1"].createInstance(nsIURI);
     uri.spec = spec;
     return uri;
   },
-
-  newChannel: function(aURI)
-  {
-    var ubiquityProtocol = Components.utils.import(
-      "resource://ubiquity/modules/ubiquity_protocol.js"
-    );
-    return ubiquityProtocol.newChannel(aURI);
-  }
 };
+XPCOMUtils.defineLazyGetter(
+  UbiquityProtocol.prototype, "newChannel", function () (
+    Cu.import("resource://ubiquity/modules/ubiquity_protocol.js", null).
+    newChannel));
 
-var ProtocolFactory = new Object();
-
-ProtocolFactory.createInstance = function (outer, iid) {
-  if (outer != null)
-    throw Components.results.NS_ERROR_NO_AGGREGATION;
-
-  if (!iid.equals(nsIProtocolHandler) &&
-      !iid.equals(nsISupports))
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-
-  return new Protocol();
-};
-
-
-/**
- * JS XPCOM component registration goop:
- *
- * We set ourselves up to observe the xpcom-startup category.  This provides
- * us with a starting point.
- */
-
-var TestModule = new Object();
-
-TestModule.registerSelf = function (compMgr, fileSpec, location, type)
-{
-  compMgr = compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-  compMgr.registerFactoryLocation(kPROTOCOL_CID,
-                                  kPROTOCOL_NAME,
-                                  kPROTOCOL_CONTRACTID,
-                                  fileSpec,
-                                  location,
-                                  type);
-}
-
-TestModule.getClassObject = function (compMgr, cid, iid)
-{
-  if (!cid.equals(kPROTOCOL_CID))
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-
-  if (!iid.equals(Components.interfaces.nsIFactory))
-    throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-
-  return ProtocolFactory;
-}
-
-TestModule.canUnload = function (compMgr)
-{
-  return true;
-}
-
-function NSGetModule(compMgr, fileSpec)
-{
-  return TestModule;
-}
+const NSG = "NSGet" + ("generateModule" in XPCOMUtils ? "Module" : "Factory");
+this[NSG] = XPCOMUtils["generate" + NSG]([UbiquityProtocol]);
