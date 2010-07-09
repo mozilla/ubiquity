@@ -212,6 +212,22 @@ Parser.prototype = {
                                 "as they are not compatible with Parser 2.");
       gOldAlerted = true;
     }
+    
+    this.refreshCommandList();
+  },
+  
+  addCommandToList: function addCommandToList(command) {
+    if (command.oldAPI && !gOldAlerted) {
+      var msgService = new AlertMessageService();
+      msgService.displayMessage("A verb was not loaded " +
+                                "as is is not compatible with Parser 2.");
+      gOldAlerted = true;
+    }
+  },
+  
+  refreshCommandList: function addCommandToList() {
+
+    var verbs = this._verbList;
 
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
