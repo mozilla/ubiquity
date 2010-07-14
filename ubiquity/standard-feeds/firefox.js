@@ -7,72 +7,22 @@ catch ([]) { Cu.import("resource://gre/modules/utils.js") }
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
-var extApplication = { // helper method for correct quitting/restarting
-  _warnOnClose: function app__warnOnClose(event) {
-    var prefs = {
-      close:   "browser.tabs.warnOnClose",
-      restart: "browser.warnOnRestart",
-      quit:    "browser.warnOnQuit"
-    };
-    if (!(event in prefs) || Utils.prefs.getValue(prefs[event], true)) {
-      var os = Cc["@mozilla.org/observer-service;1"]
-               .getService(Ci.nsIObserverService);
-      var cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
-                       .createInstance(Ci.nsISupportsPRBool);
-      os.notifyObservers(cancelQuit, "quit-application-requested", null);
-      if (cancelQuit.data) return false; // somebody canceled our quit request
-    }
-    return true; // assume yes
-  },
-  _quitWithFlags: function app__quitWithFlags(aFlags, event) {
-    if (this._warnOnClose(event)) {
-      var appStartup = (Cc["@mozilla.org/toolkit/app-startup;1"]
-                        .getService(Ci.nsIAppStartup));
-      appStartup.quit(aFlags);
-      return true;
-    }
-    return false;
-  },
-  quit: function app_quit() {
-    return this._quitWithFlags(Ci.nsIAppStartup.eAttemptQuit, "quit");
-  },
-  restart: function app_restart() {
-    return this._quitWithFlags((Ci.nsIAppStartup.eAttemptQuit |
-                                Ci.nsIAppStartup.eRestart),
-                               "restart");
-  },
-  close: function app_close() {
-    if (this._warnOnClose("close")) {
-      (Cc["@mozilla.org/appshell/window-mediator;1"]
-       .getService(Ci.nsIWindowMediator)
-       .getMostRecentWindow(null)
-       .close());
-      return true;
-    }
-    return false;
-  }
-};
-
 // -----------------------------------------------------------------
 // WINDOW COMMANDS
 // -----------------------------------------------------------------
 
 CmdUtils.CreateCommand({
-  names: ["exit firefox"],
+  names: ["exit Firefox"],
   description: "Exits Firefox.",
   icon: "chrome://global/skin/icons/Close.gif",
-  execute: function exit_execute() {
-    extApplication.quit();
-  }
+  execute: function exit_execute() Application.quit(),
 });
 
 CmdUtils.CreateCommand({
-  names: ["restart firefox"],
+  names: ["restart Firefox"],
   description: "Restarts Firefox.",
   icon: "chrome://global/skin/icons/Restore.gif",
-  execute: function restart_execute() {
-    extApplication.restart();
-  }
+  execute: function restart_execute() Application.restart(),
 });
 
 // TODO: if last window is closed, we should offer to save session
@@ -80,9 +30,7 @@ CmdUtils.CreateCommand({
   names: ["close window"],
   description: "Closes current window.",
   icon: "chrome://ubiquity/skin/icons/delete.png",
-  execute: function closewin_execute() {
-    extApplication.close();
-  }
+  execute: function closewin_execute() context.chromeWindow.close(),
 });
 
 CmdUtils.CreateCommand({
