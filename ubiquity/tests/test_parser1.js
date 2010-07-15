@@ -44,11 +44,8 @@ function makeTestParser(lang, verbs, contextUtils) {
 }
 
 var noun_arb_text = {
-  name: "text",
   rankLast: true,
-  suggest: function(text, html) {
-    return [NounUtils.makeSugg(text, html)];
-  }
+  suggest: function(text, html) NounUtils.makeSugg(text, html, null, .3),
 };
 
 function makeSearchCommand(name) {

@@ -148,7 +148,8 @@ ParserQuery.prototype = {
     // Each suggestion in the suggestion list should already have a matchScore
     // assigned by Verb.match().
     // Give them also a frequencyScore based on the suggestionMemory:
-    let {_parser} = this, {pow} = Math;
+    var {_parser} = this;
+    var {pow} = Math;
     for each (let sugg in this._suggestionList) {
       let freq = _parser.getSuggestionMemoryScore(
         sugg.fromNounFirstSuggestion ? "" : sugg._verb.input,
@@ -172,23 +173,22 @@ function Parser(verbList, languagePlugin, ContextUtils, suggestionMemory) {
 Parser.prototype = {
   _nounFirstSuggestions:
   function P__nounFirstSuggestions(selObj, maxSuggestions, query) {
-    let topGenerics =
-      this._rankedVerbsThatUseGenericNouns.slice(0, maxSuggestions);
-    let verbsToTry = this._verbsThatUseSpecificNouns.concat(topGenerics);
-    return [
-      new PartiallyParsedSentence(verb, {__proto__: null}, selObj, 0, query)
-      for each (verb in verbsToTry) if (!verb.disabled)];
+    function ok(v) !v.disabled;
+    var verbs =
+      this._rankedVerbsThatUseGenericNouns.filter(ok).slice(0, maxSuggestions);
+    push.apply(verbs, this._verbsThatUseSpecificNouns.filter(ok));
+    return [new PartiallyParsedSentence(v, {__proto__: null}, selObj, 0, query)
+            for each (v in verbs)];
   },
 
   strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
-    var verb = chosenSuggestion._verb, {id} = verb.cmd;
+    var verb = chosenSuggestion._verb;
     if (chosenSuggestion.hasFilledArgs) {
-      this._suggestionMemory.remember("", id);
-      this._sortGenericVerbCache();
+      this._suggestionMemory.remember("", verb.cmd.id);
+      verb.usesAnySpecificNounType() || this._sortGenericVerbCache();
     }
-    if (!chosenSuggestion.fromNounFirstSuggestion) {
-      this._suggestionMemory.remember(verb.input, id);
-    }
+    chosenSuggestion.fromNounFirstSuggestion ||
+      this._suggestionMemory.remember(verb.input, verb.cmd.id);
   },
 
   getSuggestionMemoryScore:
@@ -456,7 +456,7 @@ ParsedSentence.prototype = {
       // argument match score starts at 1 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
       // matches user input.
-      let ams = 1, {_argFlags, _argSuggs} = this;
+      let {_argFlags, _argSuggs} = this, ams = 1;
       for (let name in _argFlags)
         if (!(_argFlags[name] & FLAG_DEFAULT))
           ams += _argSuggs[name].score || 1;
@@ -771,9 +771,7 @@ Verb.prototype = {
   },
 
   usesAnySpecificNounType: function V_usesAnySpecificNounType() {
-    for each (let arg in this.args)
-      if (!arg.type.rankLast)
-        return true;
+    for each (let arg in this.args) if (!arg.type.rankLast) return true;
     return false;
   },
 
@@ -800,8 +798,9 @@ Verb.prototype = {
 function hagureMetal(abbr, orig) {
   var len = orig.length;
   if (len < abbr.length) return 0;
-  var sum = 0, score = 1, preIndex = -1, {pow} = Math;
+  var sum = 0, score = 1, preIndex = -1;
   var {nonWord} = hagureMetal;
+  var {pow} = Math;
   for each (let c in abbr) {
     let index = orig.indexOf(c, preIndex + 1);
     if (index < 0) return 0;
