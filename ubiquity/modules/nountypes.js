@@ -596,11 +596,9 @@ var noun_type_twitter_user = {
                  .getInternalKeyToken());
     if (!token.needsLogin() || token.isLoggedIn()) {
       // Look for twitter usernames stored in password manager
-      var usersFound = {};
-      var passwordManager = (Cc["@mozilla.org/login-manager;1"]
-                             .getService(Ci.nsILoginManager));
+      const {LoginManager} = Utils, usersFound = {__proto__: null};
       for each (let url in ["https://twitter.com", "http://twitter.com"]) {
-        for each (let login in passwordManager.findLogins({}, url, "", "")) {
+        for each (let login in LoginManager.findLogins({}, url, "", "")) {
           let {username} = login;
           if (username in usersFound) continue;
           usersFound[username] = true;

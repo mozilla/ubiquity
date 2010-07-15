@@ -110,6 +110,11 @@ delete Utils.QueryInterface;
   function IOService()
   Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
 
+  // === {{{ Utils.LoginManager }}} ===
+  // Shortcut to {{{nsILoginManager}}}.
+  function LoginManager()
+  Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager),
+
   // === {{{ Utils.PromptService }}} ===
   // Shortcut to {{{nsIPromptService}}}.
   function PromptService()
@@ -351,8 +356,7 @@ function absolutifyUrlAttribute(element) {
 // Returns whether or not the given DOM {{{node}}} is a textbox.
 
 function isTextBox(node) {
-  try { return node.selectionEnd >= 0 } catch (_) {}
-  return false;
+  try { return node.selectionEnd >= 0 } catch (_) { return false }
 }
 
 // === {{{ Utils.setTimeout(callback, delay = 0, arg0, arg1, ...) }}} ===
@@ -531,7 +535,7 @@ function focusUrlInBrowser(urlString) {
 function getCookie(domain, name) {
   var cookieManager =
     Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager);
-  var iter = cookieManager.enumerator, {nsICookie} = Ci;
+  var {nsICookie} = Ci, iter = cookieManager.enumerator;
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
     if (cookie instanceof nsICookie &&
@@ -1275,20 +1279,25 @@ var gClipboard = Utils.clipboard = {
 defineLazyProperty(gClipboard, function service() {
   return Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
 });
+for (let n in gClipboard.flavors) let (name = n) {
+  gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name));
+}
 // === {{{ Utils.clipboard.text }}} ===
+// Gets or sets the clipboard text.
+gClipboard.__defineSetter__(
+  "text", function clipboard_setText(txt) gClipboard.set({text: txt}));
 // === {{{ Utils.clipboard.html }}} ===
-// Gets or sets the clipboard text or html.
+// Gets or sets the clipboard HTML text.
+// Also accepts a DOM node when setting.
+gClipboard.__defineSetter__("html", function clipboard_setHtml(htm) {
+  gClipboard.set(htm instanceof Ci.nsIDOMNode ? {
+    text: (htm.documentElement || htm).textContent || htm.nodeValue || '',
+    html: new Utils.hiddenWindow.XMLSerializer().serializeToString(htm),
+  } : {text: htm, html: htm});
+});
 // === {{{ Utils.clipboard.image }}} ===
 // Gets or sets the clipboard image as data URL.
 // Also accepts an {{{<img>}}} element when setting.
-for (let n in gClipboard.flavors) let (name = n) {
-  gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name));
-  name === "image" || gClipboard.__defineSetter__(name, function setCB(data) {
-    var dict = {};
-    dict[name] = data;
-    gClipboard.set(dict);
-  });
-}
 gClipboard.__defineSetter__("image", function clipboard_setImage(img) {
   var win = Utils.currentChromeWindow, doc = win.document;
   if (typeof img === "string") {

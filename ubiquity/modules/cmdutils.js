@@ -524,23 +524,19 @@ function getImageSnapshot(url, callback) {
 // corresponding to the username
 
 function savePassword(opts) {
-  var loginManager =
-    Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+  const {LoginManager} = Utils;
   var nsLoginInfo = new Components.Constructor(
-    "@mozilla.org/login-manager/loginInfo;1",
-    Ci.nsILoginInfo,
-    "init");
+    "@mozilla.org/login-manager/loginInfo;1", Ci.nsILoginInfo, "init");
   var hostname = "chrome://ubiquity/content";
   var formSubmitURL = "UbiquityInformation" + opts.name;
   var loginInfo = new nsLoginInfo(
     hostname, formSubmitURL, null, opts.username, opts.password, "", "");
-
-  try { loginManager.addLogin(loginInfo) } catch (e) {
+  try { LoginManager.addLogin(loginInfo) } catch (e) {
     // "This login already exists."
-    var logins = loginManager.findLogins(
+    var logins = LoginManager.findLogins(
       {}, hostname, formSubmitURL, null);
     for each (var login in logins) if (login.username === opts.username) {
-      loginManager.modifyLogin(login, loginInfo);
+      LoginManager.modifyLogin(login, loginInfo);
       break;
     }
   }
@@ -558,10 +554,8 @@ function savePassword(opts) {
 
 function retrieveLogins(name) [
   {username: login.username, password: login.password}
-  for each (login in (
-    Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager)
-    .findLogins({}, "chrome://ubiquity/content",
-                "UbiquityInformation" + name, null)))];
+  for each (login in Utils.LoginManager.findLogins(
+    {}, "chrome://ubiquity/content", "UbiquityInformation" + name, null))];
 
 // == COMMAND CREATION ==
 
