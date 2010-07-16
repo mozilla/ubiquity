@@ -44,14 +44,14 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
 
   function contextPopupShowing(event) {
     var {menupopup} = ubiquityMenu;
-    if (event.target !== menupopup || !selected()) return;
+    if (event.target !== menupopup) return;
 
     var context = menupopup.context = {
       screenX: event.screenX,
       screenY: event.screenY,
       chromeWindow: window,
       focusedWindow: document.commandDispatcher.focusedWindow,
-      focusedElement: document.commandDispatcher.focusedElement,
+      focusedElement: document.popupNode,
     };
     cmdSuggester(context, function onSuggest(suggestions) {
       removeChildren(menupopup);
@@ -109,8 +109,11 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     event.stopPropagation();
     gContextMenu.menu.hidePopup();
   }
-  function selected() (gContextMenu.isContentSelection() ||
-                       gContextMenu.onTextInput);
+  function selected() (
+    gContextMenu.isContentSelected ||
+    let (node = document.popupNode) (
+      gUbiquity.Utils.isTextBox(node) &&
+      node.selectionStart < node.selectionEnd));
 
   ubiquityMenu.addEventListener("popupshowing", contextPopupShowing, false);
   ubiquityMenu.addEventListener("command", executeMenuCommand, false);
