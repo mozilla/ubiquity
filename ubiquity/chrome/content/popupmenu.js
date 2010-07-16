@@ -53,8 +53,6 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       focusedWindow: document.commandDispatcher.focusedWindow,
       focusedElement: document.commandDispatcher.focusedElement,
     };
-
-    removeChildren(menupopup);
     cmdSuggester(context, function onSuggest(suggestions) {
       removeChildren(menupopup);
       var suggsToDisplay = suggestions.filter(hasObject).slice(0, maxSuggs);
@@ -72,6 +70,11 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     });
     event.stopPropagation();
   }
+  function contextPopupHidden() {
+    var {menupopup} = ubiquityMenu;
+    removeChildren(menupopup);
+    delete menupopup.context;
+  }
   function toggleUbiquityMenu(event) {
     ubiquityMenu.hidden = ubiquitySeparator.hidden = !selected();
   }
@@ -79,7 +82,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     var {target} = event;
     if (event.button !== 0 && "suggestion" in target) {
       // nonleft click on a menuitem suggestion
-      popdown(event)
+      popdown(event);
       gUbiquity.preview(target.suggestion.completionText);
     }
     if (target !== this) return;
@@ -89,8 +92,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function executeMenuCommand(event) {
     event.target.suggestion.execute(this.context);
   }
-  function removeChildren(menupopup) {
-    for (var c; c = menupopup.lastChild;) menupopup.removeChild(c);
+  function removeChildren(parent) {
+    while (parent.hasChildNodes()) parent.removeChild(parent.lastChild);
   }
   function hasObject(sugg) {
     if (sugg.args) {
