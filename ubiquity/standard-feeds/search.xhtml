@@ -718,37 +718,23 @@ CmdUtils.makeSearchCommand({
   },
 });
 
-CmdUtils.CreateCommand({
+CmdUtils.makeSearchCommand({
   names: ["Bugzilla"],
-  description: (
-    'Searches <a href="http://bugzilla.mozilla.com">Bugzilla</a>' +
-    ' for Mozilla bugs matching the given words.'),
+  url: "https://bugzilla.mozilla.org/buglist.cgi?quicksearch=%s",
+  defaultUrl: "https://bugzilla.mozilla.com",
+  help: "Bugzilla QuickSearch".link(
+    "https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html"),
   icon: "chrome://ubiquity/skin/icons/mozilla.ico",
-  argument: {
-    name: "Bugzilla Number/Query",
-    suggest: function bugz_suggest(txt, htm, cb, sx) (
-      (txt = txt.trim())
-      ? [CmdUtils.makeSugg(txt, null, null, /^\d+$/.test(txt) ? .9 : .3, sx)]
-      : []),
-  },
-  execute: function bugz_execute({object: {text, score}}) {
-    Utils.openUrlInBrowser("https://bugzilla.mozilla.org/" + (
-      text &&
-      (score > .5
-       ? "show_bug.cgi?id=" + +text
-       : ("buglist.cgi?query_format=specific&order=relevance+desc&" +
-          "bug_status=__open__&content=" + encodeURIComponent(text)))));
-  },
-  preview: function bugz_preview(pb, {object: {text}}) {
-    var me = this;
-    if (!text) return void me.previewDefault(pb);
-
-    var shortUrl = "http://bugzil.la/" + encodeURI(text);
+  preview: function bugz_preview(pb, args) {
+    var query = args.object.text.trim(), me = this;
+    if (!query) return void me.previewDefault(pb);
+    var shortUrl = "http://bugzil.la/" +
+      query.replace(/\S+/g, encodeURIComponent).replace(/\s+/g, "+");
     pb.innerHTML = (
-      "<div id='bugzilla'>" +
-      "<input type='button' class='copy' value='Copy' accesskey='C'/> " +
-      "<a href='" + shortUrl + "' accesskey='H'>" + shortUrl + "</a>" +
-      "</div>");
+      '<div id="bugzilla">' +
+      '<input type="button" class="copy" value="Copy" accesskey="C"/> ' +
+      '<a href="' + shortUrl + '" accesskey="H">' + shortUrl + '</a>' +
+      '</div>');
     pb.querySelector(".copy").addEventListener("click", function bugz_copy() {
       displayMessage(Utils.clipboard.text = shortUrl, me);
     }, false);
