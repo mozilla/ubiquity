@@ -52,6 +52,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       chromeWindow: window,
       focusedWindow: document.commandDispatcher.focusedWindow,
       focusedElement: document.popupNode,
+      menu: gContextMenu,
     };
     cmdSuggester(context, function onSuggest(suggestions) {
       removeChildren(menupopup);
@@ -110,6 +111,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     gContextMenu.menu.hidePopup();
   }
   function selected() (
+    gContextMenu.onLink ||
     gContextMenu.isContentSelected ||
     let (node = document.popupNode) (
       gUbiquity.Utils.isTextBox(node) &&

@@ -88,7 +88,8 @@ function getSelection(context, joint) {
     let {selectionStart: ss, selectionEnd: se} = focusedElement;
     if (ss !== se) return focusedElement.value.slice(ss, se);
   }
-  return getSelectedRanges(context).join(joint == null ? "\n\n" : joint);
+  var text = getSelectedRanges(context).join(joint == null ? "\n\n" : joint);
+  return text || !context.menu ? text : context.menu.linkURL;
 }
 
 // === {{{ ContextUtils.setSelection(context, content, options) }}} ===
@@ -143,10 +144,10 @@ function setSelection(context, content, options) {
 // If there is no HTML selection, {{{html}}} will be HTML-escaped {{{text}}}.
 
 function getSelectionObject(context) {
-  var selection = getSelection(context);
+  var text = getSelection(context);
   return {
-    text: selection,
-    html: getHtmlSelection(context) || Utils.escapeHtml(selection),
+    text: text,
+    html: getHtmlSelection(context) || Utils.escapeHtml(text),
   };
 }
 
