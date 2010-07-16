@@ -222,16 +222,18 @@ var jQACmd = CmdUtils.CreateCommand({
         [me.default] = list;
         cb && cb();
       }
-      function jqa_err(x) {
+      function jqa_err(xhr, msg, err) {
         Utils.reportInfo(
-          "Failed to get <" + this.url + ">.\n" +
-          x.status + " " + x.statusText + "\n" + x.responseText);
+          "Failed to get <" + this.url + "> (" + msg + ").\n" +
+          xhr.status + " " + xhr.statusText);
+        Utils.reportError(err);
         Utils.setTimeout(
-          function jqa_r() { me.default = me._default },
+          function jqa_r() me.default = me._default,
           1e3 * (1 << ++me._retries));
       }
       $.ajax({
         url: JQAPI + "api/", dataType: "xml",
+        beforeSend: function(xhr) xhr.overrideMimeType("text/xml"),
         success: jqa_scs, error: jqa_err,
       });
       me._default = jqa_default;
