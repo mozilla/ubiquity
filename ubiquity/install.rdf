@@ -3,7 +3,7 @@
   xmlns="http://www.mozilla.org/2004/em-rdf#">
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>ubiquity@labs.mozilla.com</id>
-    <version>0.5.5pre8</version>
+    <version>0.6.1pre</version>
     <type>2</type>
 
     <!-- Target Application this extension can install into,
