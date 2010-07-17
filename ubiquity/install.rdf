@@ -10,7 +10,7 @@
          with minimum and maximum supported versions. -->
     <targetApplication><rdf:Description>
       <!--Firefox--><id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-      <minVersion>3.5</minVersion>
+      <minVersion>3.6</minVersion>
       <maxVersion>4.0b2pre</maxVersion>
     </rdf:Description></targetApplication>
 
