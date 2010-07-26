@@ -47,17 +47,17 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var displayParse = function(parse, labels) (
-  parse._id + ": " + parse.displayHtml 
-  + (labels && parse._caller ? '<br/>' + L("ubiquity.playpen.caller") + ' ' + parse._caller : '') 
+  parse._id + ": " + parse.displayHtml
+  + (labels && parse._caller ? '<br/>' + L("ubiquity.playpen.caller") + ' ' + parse._caller : '')
   + (labels && parse._combination ? '<br/>' + L("ubiquity.playpen.combo") + ' <code>'
-    +parse._combination.replace(/},/g,'},<br/>') + '</code>' : '') 
-  + (labels ? '<br/>' + L("ubiquity.playpen.argstring") + ' ' + parse.argString : '') 
-  + (labels ? '<br/>' : ' (') 
-  + (labels ? L("ubiquity.playpen.score") + ' ' : '') 
+    +parse._combination.replace(/},/g,'},<br/>') + '</code>' : '')
+  + (labels ? '<br/>' + L("ubiquity.playpen.argstring") + ' ' + parse.argString : '')
+  + (labels ? '<br/>' : ' (')
+  + (labels ? L("ubiquity.playpen.score") + ' ' : '')
     + ((parse.score * 100 | 0) / 100 || "<em>" + L("ubiquity.playpen.noscore") + "</em>") + ', '
-  + (labels ? L("ubiquity.playpen.multiplier") + ' ' : '') 
+  + (labels ? L("ubiquity.playpen.multiplier") + ' ' : '')
     + ((parse.scoreMultiplier * 100 | 0) / 100 || "<em>" + L("ubiquity.playpen.noscore") + "</em>")
-  + (labels ? '' : ')') 
+  + (labels ? '' : ')')
 )
 
 var demoParserInterface = {
@@ -73,7 +73,7 @@ var demoParserInterface = {
         this.currentQuery.cancel();
 //    this.currentParser._nounCache = {};
 
-    if ($('#flushcache').attr('checked'))
+    if ($('#flushcache')[0].checked)
       this.currentParser.flushNounCache();
 
     $('#parseinfo').empty();
@@ -84,13 +84,13 @@ var demoParserInterface = {
     this.currentQuery.resulted = false;
 
     // override the selection object
-    this.currentQuery.selObj = {text: $('#selection').val(), 
+    this.currentQuery.selObj = {text: $('#selection').val(),
                                 html: $('#selection').val()};
 
     $('#scoredParses').empty();
 
-    if ($('#displayparseinfo').attr('checked') 
-        && this.runtimes + 2 > $('.runtimes').text()) {
+    if ($('#displayparseinfo')[0].checked &&
+        this.runtimes + 2 > $('.runtimes').text()) {
       this.currentQuery.watch('_step',function(id,oldval,newval) {
         switch (oldval) {
           case 1:
@@ -108,10 +108,10 @@ var demoParserInterface = {
             $('<h3>' + L("ubiquity.playpen.step3") + '</h3>').appendTo($('#parseinfo'));
             break;
 
-          case 4: 
+          case 4:
             $('<h3>' + L("ubiquity.playpen.step4") + '</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('#argParses').append('<li>' + parse.displayText() + '</li>');
+              $('#argParses').append('<li>' + parse.displayHtml + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
@@ -120,7 +120,7 @@ var demoParserInterface = {
             $('<h3>' + L("ubiquity.playpen.step5") + '</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#newPossibleParses')
-                .append('<li>' + parse.displayText() + '</li>');
+                .append('<li>' + parse.displayHtml + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
@@ -179,33 +179,33 @@ var demoParserInterface = {
       });
     }
 
-    if ($('#displayparsetree').attr('checked') 
-        && this.runtimes + 2 > $('.runtimes').text()) {
+    if ($('#displayparsetree')[0].checked &&
+        this.runtimes + 2 > $('.runtimes').text()) {
       this.currentQuery.watch('_step',function(id,oldval,newval) {
         switch (oldval) {
           //case 3: TODO
-          case 4: 
+          case 4:
           case 5:
           case 6:
           case 7:
-            for each (let parse in this._possibleParses) 
+            for each (let parse in this._possibleParses)
               if (!parse._survivedStep)
                 parse._survivedStep = oldval;
             break;
-                    
+
           case 8:
             for each (let parse in this._verbedParses)
               if (!parse._survivedStep)
                 parse._survivedStep = oldval;
             break;
-  
+
           case 9:
 	          for each (let parse in this.aggregateScoredParses())
               if (!parse._survivedStep)
                 parse._survivedStep = oldval;
             break;
         }
-        
+
         return newval;
       });
     }
@@ -226,7 +226,7 @@ var demoParserInterface = {
 
           dump(L("ubiquity.playpen.average") + ' '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
           $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
- 
+
           var suggestionList = this.suggestionList;
  	        $('#scoredParses').empty();
           for each (var parse in suggestionList) {
@@ -237,8 +237,8 @@ var demoParserInterface = {
 
         }
 
-        if ($('#displayparsetree').attr('checked') 
-            && demoParserInterface.runtimes + 2 > $('.runtimes').text()) {
+        if ($('#displayparsetree')[0].checked &&
+            demoParserInterface.runtimes + 2 > $('.runtimes').text()) {
           for each (let parse in demoParserInterface.currentQuery._allParses) {
 
             let host = $('#parsetree');
@@ -284,7 +284,7 @@ $(document).ready(function(){
 
   for each (let {role, delimiter} in parser.roles) {
     // may need to switch &quot; to &#34;
-    $('<li><code>'+role+'</code>: &quot;'+delimiter+'&quot;</li>').appendTo($('#roles'));
+    $('<li><code>'+role+'</code>: &quot;'+ delimiter+'&quot;</li>').appendTo($('#roles'));
   }
 
   for (let id in parser._nounTypes) {
@@ -297,7 +297,7 @@ $(document).ready(function(){
   for each (let verb in parser._verbList) {
     // skip if disabled
     if (verb.disabled) continue;
-    
+
     let {names, help, description} = verb;
     let args = $('<ul></ul>');
     for each (let {nountype, role, label} in verb.arguments) {
@@ -314,7 +314,7 @@ $(document).ready(function(){
   if (UbiquitySetup.parserVersion != 2) {
     $('#parser2').show();
   }
-  
+
   function run() {
     demoParserInterface.startTime = new Date().getTime();
     $('.runtimes').text($('#times').val());
