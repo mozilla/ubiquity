@@ -2543,7 +2543,7 @@ Parse.prototype = {
 
     for each (let neededArg in this._verb.arguments) {
       let arg = this.args[neededArg.role];
-      if (arg && (arg[0] || 0).text) continue;
+      if (!arg || (arg[0] || 0).text) continue;
       let {label} = neededArg;
       if (!label) {
         let nt = neededArg.nountype;
