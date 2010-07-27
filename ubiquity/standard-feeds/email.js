@@ -138,15 +138,15 @@ CmdUtils.CreateCommand({
   },
   execute: function email_execute({
     object: {text, html}, goal: {text: toAddress}}) {
-    var {title, URL} = context.focusedWindow.document;
+    var {title, URL} = CmdUtils.document;
     // #574: no one I tested liked the stock "You might be interested in"
     //       just offer a link and the selected text.
     text = [title, URL, "", text].join("\n");
     html = <p><a href={URL}>{title}</a></p> + "\n" + html;
-    title = "'" + title + "'";
+    title = "\u201c" + title + "\u201d";
 
     var gmailTab =
-      findGmailTab() || Utils.openUrlInBrowser("http://mail.google.com/mail");
+      findGmailTab() || Utils.openUrlInBrowser("https://mail.google.com/mail");
     var {browser} = gmailTab;
     nabFrame() || browser.addEventListener("load", nabFrame, true);
 
@@ -162,20 +162,22 @@ CmdUtils.CreateCommand({
       return true;
     }
     function compose(doc) {
-      var ta, rich;
       doc.defaultView.parent.location.hash = "compose";
-      if (text && (ta = last(doc.getElementsByName("body")))) {
+      var it, ok = false;
+      if ((it = last(doc.getElementsByTagName("iframe")))) {
+        let {body} = it.contentDocument;
+        body.innerHTML = html + body.innerHTML;
+        ok = true;
+      }
+      if ((it = last(doc.getElementsByName("body"))) && it.clientHeight) {
+        it.value = text + it.value;
+        ok = true;
+      }
+      if (ok) {
         last(doc.getElementsByName("to")).value = toAddress;
         last(doc.getElementsByName("subject")).value = title;
-        ta.value = text + ta.value;
-        text = '';
       }
-      if (html && (rich = last(doc.getElementsByTagName("iframe")))) {
-        let {body} = rich.contentDocument;
-        body.innerHTML = html + body.innerHTML;
-        html = '';
-      }
-      return !html;
+      return ok;
     }
     function last(xs) Array.slice(xs, -1)[0];
   },
