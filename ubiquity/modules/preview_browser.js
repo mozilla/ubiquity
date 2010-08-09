@@ -94,30 +94,25 @@ PreviewBrowser.prototype = {
   },
 
   activateAccessKey: function PB_activateAccessKey(code) {
-    var doc = this.__previewBrowser.contentDocument;
     var key = String.fromCharCode(code).toUpperCase();
     var keylc = key.toLowerCase();
-    if (key !== keylc) key += keylc;
-    var keyq = key === "'" ? '"' + key + '"' : "'" + key + "'";
-    var node = doc.evaluate(
-      "/html/body//*[@accesskey][contains(" + keyq + ",@accesskey)]",
-      doc, null, 9, // FIRST_ORDERED_NODE_TYPE
-      null).singleNodeValue;
-    if (!node) return false;
-
-    var namelc = node.nodeName.toLowerCase();
-    if (namelc === "a") {
+    if (key != keylc) key += keylc;
+    var keyq = key == "'" ? '"' + key + '"' : "'" + key + "'";
+    var cwin = this.__previewBrowser.contentWindow;
+    for each (let win in [cwin].concat(Array.slice(cwin))) {
+      let doc = win.document;
+      let lmn = doc.evaluate(
+        "descendant::*[@accesskey][contains(" + keyq + ",@accesskey)]",
+        doc.body || doc.documentElement, null, 9, // FIRST_ORDERED_NODE_TYPE
+        null).singleNodeValue;
+      if (!lmn) continue;
       let evt = doc.createEvent("MouseEvents");
-      evt.initMouseEvent("click", true, true, doc.defaultView,
+      evt.initMouseEvent("click", true, true, win,
                          0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      node.dispatchEvent(evt);
+      lmn.dispatchEvent(evt);
+      return true;
     }
-    else if (namelc === "input" &&
-             /^(?!text|password|hidden|file)/.test(node.type))
-      node.click();
-    else
-      node.focus();
-    return true;
+    return false;
   },
 
   queuePreview: function PB__queuePreview(url, delay, cb) {
