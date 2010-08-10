@@ -98,21 +98,19 @@ PreviewBrowser.prototype = {
     var keylc = key.toLowerCase();
     if (key != keylc) key += keylc;
     var keyq = key == "'" ? '"' + key + '"' : "'" + key + "'";
-    var cwin = this.__previewBrowser.contentWindow;
-    for each (let win in [cwin].concat(Array.slice(cwin))) {
-      let doc = win.document;
-      let lmn = doc.evaluate(
+    return (function seek(win) {
+      var doc = win.document;
+      var lmn = doc.evaluate(
         "descendant::*[@accesskey][contains(" + keyq + ",@accesskey)]",
         doc.body || doc.documentElement, null, 9, // FIRST_ORDERED_NODE_TYPE
         null).singleNodeValue;
-      if (!lmn) continue;
-      let evt = doc.createEvent("MouseEvents");
+      if (!lmn) return Array.some(win, seek);
+      var evt = doc.createEvent("MouseEvents");
       evt.initMouseEvent("click", true, true, win,
                          0, 0, 0, 0, 0, false, false, false, false, 0, null);
       lmn.dispatchEvent(evt);
       return true;
-    }
-    return false;
+    })(this.__previewBrowser.contentWindow);
   },
 
   queuePreview: function PB__queuePreview(url, delay, cb) {
