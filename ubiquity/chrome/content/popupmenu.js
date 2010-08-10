@@ -46,12 +46,12 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     var {menupopup} = ubiquityMenu;
     if (event.target !== menupopup) return;
 
-    var context = menupopup.context = {
+    var context = menupopup.context = let (cd = document.commandDispatcher) {
       screenX: event.screenX,
       screenY: event.screenY,
       chromeWindow: window,
-      focusedWindow: document.commandDispatcher.focusedWindow,
-      focusedElement: document.popupNode,
+      focusedWindow: cd.focusedWindow,
+      focusedElement: cd.focusedElement,
       menu: gContextMenu,
     };
     cmdSuggester(context, function onSuggest(suggestions) {
@@ -113,9 +113,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function selected() (
     gContextMenu.onLink ||
     gContextMenu.isContentSelected ||
-    let (node = document.popupNode) (
-      gUbiquity.Utils.isTextBox(node) &&
-      node.selectionStart < node.selectionEnd));
+    (gContextMenu.onTextInput &&
+     let (ti = gContextMenu.target) ti.selectionStart < ti.selectionEnd));
 
   ubiquityMenu.addEventListener("popupshowing", contextPopupShowing, false);
   ubiquityMenu.addEventListener("command", executeMenuCommand, false);
