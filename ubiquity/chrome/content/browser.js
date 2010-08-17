@@ -86,7 +86,9 @@ addEventListener("load", function ubiquityBoot() {
         resizeSuggs.tid = setTimeout(resizeSuggsDelayed, 99, this);
       },
       false);
-    function resizeSuggsDelayed(doc) { suggFrame.height = doc.height }
+    function resizeSuggsDelayed(doc) {
+      suggFrame.height = (doc.body || doc.documentElement).clientHeight;
+    }
 
     // Hack to get the default skin to work on Linux, which we don't
     // support per-pixel alpha transparency on.

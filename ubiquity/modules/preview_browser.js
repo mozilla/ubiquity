@@ -51,7 +51,8 @@ function PreviewBrowser(browser, defaultUrl) {
     resizeContainer.tid = Utils.setTimeout(resizeDelayed, 99, this);
   }
   function resizeDelayed(doc) {
-    browser.parentNode.style.height = doc.height + "px";
+    browser.parentNode.style.height =
+      (doc.body || doc.documentElement).clientHeight + "px";
   }
   browser.addEventListener("load", function bindResize(e) {
     for each (var h in ["load", "DOMSubtreeModified"])
