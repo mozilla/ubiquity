@@ -1,6 +1,0 @@
-@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
-body {
-  /* On Mac this is changed to white, due to a rendering bug. See bug #717, related to #466. */
-  background: rgba(0%, 0%, 0%, 0.8);
-}
-}
