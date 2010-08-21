@@ -523,23 +523,17 @@ function getImageSnapshot(url, callback) {
 // *{{{password}}} : the password (or other private data, such as an API key)
 // corresponding to the username
 
-function savePassword(opts) {
-  const {LoginManager} = Utils;
-  var nsLoginInfo = new Components.Constructor(
-    "@mozilla.org/login-manager/loginInfo;1", Ci.nsILoginInfo, "init");
-  var hostname = "chrome://ubiquity/content";
-  var formSubmitURL = "UbiquityInformation" + opts.name;
-  var loginInfo = new nsLoginInfo(
-    hostname, formSubmitURL, null, opts.username, opts.password, "", "");
-  try { LoginManager.addLogin(loginInfo) } catch (e) {
-    // "This login already exists."
-    var logins = LoginManager.findLogins(
-      {}, hostname, formSubmitURL, null);
-    for each (var login in logins) if (login.username === opts.username) {
-      LoginManager.modifyLogin(login, loginInfo);
-      break;
-    }
+function savePassword({name, username, password}) {
+  const {LoginManager} = Utils, Host = "chrome://ubiquity";
+  var loginInfo = (Cc["@mozilla.org/login-manager/loginInfo;1"]
+                   .createInstance(Ci.nsILoginInfo));
+  loginInfo.init(Host, null, name, username, password, "", "");
+  for each (let login in LoginManager.findLogins({}, Host, null, name)) {
+    if (login.username != username) continue;
+    LoginManager.modifyLogin(login, loginInfo);
+    return;
   }
+  LoginManager.addLogin(loginInfo);
 }
 
 // === {{{ CmdUtils.retrieveLogins(name) }}} ===
@@ -552,10 +546,14 @@ function savePassword(opts) {
 // This must match the {{{opts.name}}} that was passed in to
 // {{{savePassword()}}} when the password was stored.
 
-function retrieveLogins(name) [
-  {username: login.username, password: login.password}
-  for each (login in Utils.LoginManager.findLogins(
-    {}, "chrome://ubiquity/content", "UbiquityInformation" + name, null))];
+function retrieveLogins(name) {
+  const {LoginManager} = Utils;
+  var logins = LoginManager.findLogins({}, "chrome://ubiquity", null, name);
+  // backward compatibility
+  if (!logins.length) logins = LoginManager.findLogins(
+      {}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
+  return logins;
+}
 
 // == COMMAND CREATION ==
 
