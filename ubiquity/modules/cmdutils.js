@@ -523,7 +523,8 @@ function getImageSnapshot(url, callback) {
 // *{{{password}}} : the password (or other private data, such as an API key)
 // corresponding to the username
 
-function savePassword({name, username, password}) {
+function savePassword(name, username, password) {
+  if (typeof name != "string") var {name, username, password} = name;
   const {LoginManager} = Utils, Host = "chrome://ubiquity";
   var loginInfo = (Cc["@mozilla.org/login-manager/loginInfo;1"]
                    .createInstance(Ci.nsILoginInfo));
@@ -534,6 +535,17 @@ function savePassword({name, username, password}) {
     return;
   }
   LoginManager.addLogin(loginInfo);
+}
+
+// === {{{ CmdUtils.loadPassword(name, username) }}} ===
+// Returns the saved password for the {{{name}}}space and {{{username}}}
+// or {{{null}}} if not found.
+
+function loadPassword(name, username) {
+  if (typeof name != "string") var {name, username} = name;
+  for each (let login in retrieveLogins(name))
+    if (login.username == username) return login.password;
+  return null;
 }
 
 // === {{{ CmdUtils.retrieveLogins(name) }}} ===
@@ -550,9 +562,9 @@ function retrieveLogins(name) {
   const {LoginManager} = Utils;
   var logins = LoginManager.findLogins({}, "chrome://ubiquity", null, name);
   // backward compatibility
-  if (!logins.length) logins = LoginManager.findLogins(
-      {}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
-  return logins;
+  logins.push.apply(logins, LoginManager.findLogins(
+    {}, "chrome://ubiquity/content", "UbiquityInformation" + name, null));
+  return Utils.uniq(logins, "username");
 }
 
 // == COMMAND CREATION ==

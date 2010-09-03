@@ -94,11 +94,9 @@ CmdUtils.CreateCommand({
   },
   _auth: function twitter_auth({username, password}, cb) {
     username = username && username.toLowerCase();
-    for each (let saved in CmdUtils.retrieveLogins("TwitterOAuth")) {
-      if (saved.username !== username) continue;
-      let [key, secret] = saved.password.split(" ");
-      return cb.call(this, username, key, secret);
-    }
+    var keys = CmdUtils.loadPassword("TwitterOAuth", username);
+    if (keys) return cb.apply(this, [username].concat(keys.split(" ")));
+
     const APIURL = "https://api.twitter.com/oauth/access_token";
     if (!username || !password) {
       let un = {value: username || ""};
