@@ -1016,8 +1016,11 @@ CmdUtils.CreateCommand({
     var xmls = {}, param = {query: formatLatLon(data) || text};
     ["WXCurrentObXML", "ForecastXML"].forEach(function (api) {
       CmdUtils.previewGet(
-        pblock, "http://api.wunderground.com/auto/wui/geo/" + api, param,
-        function (x) { xmls[api] = x; weather_tryToPreview(); }, "xml");
+        pblock,
+        "http://api.wunderground.com/auto/wui/geo/" + api + "/index.xml",
+        param,
+        function (x) { xmls[api] = x; weather_tryToPreview(); },
+        "xml");
     });
     function weather_tryToPreview() {
       var {WXCurrentObXML: weatherXml, ForecastXML: forecastXml} = xmls;
