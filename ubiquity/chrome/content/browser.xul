@@ -27,7 +27,7 @@
           <div id="ubiquity-preview-container">
             <div id="ubiquity-preview">
               <xul:browser id="ubiquity-browser"
-                type="content" width="490" height="500"
+                type="content" width="490" height="500" transparent="true"
                 tooltip="aHTMLTooltip" oncontextmenu="event.stopPropagation()"
                 disablesecurity="true" disablehistory="true"/>
             </div>
