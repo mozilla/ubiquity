@@ -103,7 +103,6 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
       type: this.type,
       canAutoUpdate: true,
     });
-    //errorToLocalize
     messageService.displayMessage("Subscription successful!");
   };
 
@@ -367,7 +366,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         let info = new XPCSafeJSObjectWrapper(originalInfo);
 
         if (!info.execute)
-          //errorToLocalize
           throw new Error("Command execute function not provided.");
       
         let cmd = {
@@ -384,7 +382,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         // ensure name, names and synonyms
         { let names = originalNames;
           if (!names)
-            //errorToLocalize
             throw Error("CreateCommand: name or names is required.");
           if (!Utils.isArray(names))
             names = (names + "").split(/\s{0,}\|\s{0,}/);
@@ -410,7 +407,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         if (info.takes)
           for (var directObjLabel in info.takes) {
             if (typeof(directObjLabel) != "string")
-              //errorToLocalize
               throw new Error("Direct object label is not a string: " +
                               directObjLabel);
             var regExp = safeConvertRegExp(info.takes[directObjLabel]);
@@ -422,7 +418,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           cmd.modifiers = {};
           for (var modLabel in info.modifiers) {
             if (typeof(modLabel) != "string")
-              //errorToLocalize
               throw new Error("Modifier label is not a string: " +
                               directObjLabel);
             cmd.modifiers[modLabel] = toSafeNounType(info.modifiers[modLabel]);
@@ -529,7 +524,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                        filename: codeSource.id,
                                        lineNumber: 1}]);
       } catch (e) {
-        //errorToLocalize
         messageService.displayMessage(
           {text:  "An exception occurred while loading code.",
            exception: e}
@@ -569,7 +563,6 @@ function safeConvertRegExp(regExp) {
 
   if (typeof(pattern) != "string" ||
       typeof(flags) != "string")
-    //errorToLocalize
     throw new Error("Parameter was not a RegExp object.");
 
   return new RegExp(pattern, flags);
@@ -620,7 +613,6 @@ function setMetadata(metadata, object, schema, htmlSanitize) {
               object[propName] = propVal;
           });
         if (typeof(object[propName]) == "undefined")
-          //errorToLocalize
           Utils.reportWarning("URL scheme is unsafe: " + propVal);
         break;
       }

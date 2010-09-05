@@ -91,7 +91,6 @@ ErrorConsoleMessageService.prototype = {
 
     Utils.reportError(exception);
     var tb = ExceptionUtils.stackTrace(exception);
-    //errorToLocalize
     if (tb) Utils.reportError("Traceback for last exception:\n" + tb);
   }
 };

@@ -206,7 +206,6 @@ function makeCodeSource(feedInfo, headerSources, footerSources) {
   else if (LocalUriCodeSource.isValidUri(srcUri))
     codeSource = new LocalUriCodeSource(srcUri.spec);
   else
-    //errorToLocalize
     throw new Error("Don't know how to make code source for " + srcUri.spec);
 
   codeSource = new XhtmlCodeSource(codeSource);
@@ -254,7 +253,6 @@ DFPFeed.prototype = {
     try {
       factory.evalInSandbox(code, sandbox, codeSource.codeSections);
     } catch (e) {
-      //errorToLocalize
       this._messageService.displayMessage({
         text: "An exception occurred while loading a command feed.",
         exception: e,

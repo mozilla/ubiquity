@@ -91,7 +91,6 @@ var FMgrProto = FeedManager.prototype;
 
 FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   if (plugin.type in this._plugins)
-    //errorToLocalize
     throw new Error("Feed plugin for type '" + plugin.type +
                     "' already registered.");
 
@@ -273,7 +272,6 @@ FMgrProto.__getFeed = function FMgr___getFeed(uri) {
     try { feeds[spec] = self.__makeFeed(uri) } catch (e) {
       Cu.reportError(e);
       Utils.reportInfo(
-        //errorToLocalize
         "An error occurred when retrieving the feed for " + spec);
       // remove the mal-URI here, since we can't "purge" it as feed
       self._annSvc.removePageAnnotations(uri);
@@ -456,7 +454,6 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // {{{LockedDownFeedPlugin}}}.
   var plugin = this._plugins[feed.type];
   if (!plugin)
-    //errorToLocalize
     throw new Error("No feed plugin registered for type '" + feed.type + "'.");
 
   return plugin.makeFeed(feed, this._hub);

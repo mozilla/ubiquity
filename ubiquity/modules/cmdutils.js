@@ -665,7 +665,6 @@ function CreateCommand(options) {
   // ensure name and names
   { let names = options.names || options.name;
     if (!names)
-      //errorToLocalize
       throw Error("CreateCommand: name or names is required");
     if (!Utils.isArray(names))
       names = String(names).split(/\s{0,}\|\s{0,}/);
@@ -732,8 +731,7 @@ CreateCommand.executeDefault = function executeDefault() {
   var {proto: {execute}, global} = this, uri;
   try { uri = global.Utils.uri(execute) } catch ([]) {}
   if (uri) return Utils.focusUrlInBrowser(uri.spec);
-
-  if (execute == null) execute = "No action defined."; //ToLocalize
+  if (execute == null) execute = L("ubiquity.cmdutils.noactiondef");
   global.displayMessage(execute, this);
 };
 CreateCommand.previewDefault = function previewDefault(pb) {
@@ -745,9 +743,8 @@ CreateCommand.previewDefault = function previewDefault(pb) {
     if ("help" in this)
       html += '<p class="help">' + this.help + '</p>';
     if (!html)
-      //ToLocalize
-      html = ('Executes the <b class="name">' +
-              Utils.escapeHtml(this.name) + '</b> command.');
+      html = L("ubiquity.cmdutils.previewdefault", 
+               "<strong class='name'>" + Utils.escapeHtml(this.name) + "</strong>");
     html = '<div class="default">' + html + '</div>';
   }
   return (pb || 0).innerHTML = html;
@@ -945,8 +942,7 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
   }
   var {parser, global} = this, html = Utils.escapeHtml(text);
   put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
-      //ToLocalize
-      parser ? "<p class='loading'>Loading results...</p>" : "");
+      parser ? "<p class='loading'>" + L("ubiquity.cmdutils.loadingresults") + "</p>" : "");
   if (!parser) return;
 
   var {type, keys} = parser;
@@ -966,7 +962,7 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
   global.CmdUtils.previewAjax(pblock, params);
   function searchParse(data) {
     if (!data) {
-      put("<em class='error'>Error parsing search results.</em>"); //ToLocalize
+      put("<em class='error'>" + L("ubiquity.cmdutils.searchparserror") + "</em>");
       return;
     }
     if (parser.log) parser.log(data, "data");
@@ -1048,11 +1044,14 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
         list += "<dd class='body'>" + body + "</dd>";
       if (++i >= max) break;
     }
-    //ToLocalize
+
     put(list
-        ? ("<span class='found'>Results for <strong>" + html +
-           "</strong>:</span><dl class='list'>" + list + "</dl>")
-        : "<span class='empty'>No results for " + html + ".</span>");
+        ? ("<span class='found'>" + 
+           L("ubiquity.cmdutils.parsedresultsfound", "<strong>" + html + "</strong>") +
+           "</span><dl class='list'>" + list + "</dl>")
+        : "<span class='empty'>" + 
+          L("ubiquity.cmdutils.parsedresultsnotfound", "<strong>" + html + "</strong>") +
+          "</span>");
     global.CmdUtils.absUrl(pblock, parser.baseUrl);
   }
 };
@@ -1320,7 +1319,6 @@ function absUrl(data, baseUrl) {
 function safeWrapper(func) function safeWrapped() {
   try { return func.apply(this, arguments) } catch (e) {
     messageService.displayMessage({
-      //errorToLocalize
       text: "An exception occurred while running " + func.name + "().",
       exception: e});
     return e;

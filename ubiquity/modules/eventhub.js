@@ -62,7 +62,6 @@ function EventHub() {
     ensureEventName(eventName);
 
     if (listeners[eventName].indexOf(listener) != -1)
-      //errorToLocalize
       throw new Error('Listener already registered for event "' + eventName +
                       '"');
     listeners[eventName].push(listener);
@@ -77,7 +76,6 @@ function EventHub() {
 
     let index = listeners[eventName].indexOf(listener);
     if (index == -1)
-      //errorToLocalize
       throw new Error('Listener not registered for event "' + eventName +
                       '"');
     listeners[eventName].splice(index, 1);

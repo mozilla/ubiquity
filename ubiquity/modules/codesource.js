@@ -189,7 +189,6 @@ LocalUriCodeSource.prototype = {
       req.send(null);
 
       if (req.status !== 0)
-        //errorToLocalize
         throw new Error("XHR returned status " + req.status);
 
       let code = req.responseText;
@@ -198,7 +197,6 @@ LocalUriCodeSource.prototype = {
       return this._cachedCode = code;
     } catch (e) {
       if (!throwNoError)
-        //errorToLocalize
         Cu.reportError("Retrieving " + this.id + " raised exception " + e);
       this.updated = false;
       return "";

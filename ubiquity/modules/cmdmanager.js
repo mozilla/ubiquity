@@ -165,7 +165,6 @@ CommandManager.prototype = {
             function clearPreview(pblock) { pblock.innerHTML = ""; });
         break;
       }
-      //errorToLocalize
       default: throw new Error("Unknown state: " + state);
     }
   },
@@ -272,7 +271,6 @@ CommandManager.prototype = {
       activeSugg.previewDelay,
       function queuedPreview(pblock) {
         try { activeSugg.preview(context, pblock) } catch (e) {
-          //errorToLocalize
           self.__msgService.displayMessage({
             text: ('An exception occurred while previewing the command "' +
                    activeSugg._verb.name + '".'),
@@ -336,7 +334,6 @@ CommandManager.prototype = {
         this.__nlParser.strengthenMemory(activeSugg);
         activeSugg.execute(context);
       } catch (e) {
-        //errorToLocalize
         this.__msgService.displayMessage({
           text: ('An exception occurred while running the command "' +
                  activeSugg._verb.name + '".'),

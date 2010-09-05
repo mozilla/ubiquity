@@ -143,7 +143,6 @@ var SFP = Utils.extend(SkinFeedPlugin.prototype, {
       fos.write(cssText, cssText.length);
       fos.close();
     } catch (e) {
-      //errorToLocalize
       e.message =
         "Error writing Ubiquity skin to " + file.path + ": " + e.message;
       Cu.reportError(e);
@@ -209,7 +208,6 @@ Utils.extend(SkinFeed.prototype, {
       Utils.prefs.set(PREF_SKIN, uri.spec);
     } catch (e) {
       this._msgService.displayMessage(
-        //errorToLocalize
         "Error applying Ubiquity skin from " + uri.spec);
       Cu.reportError(e);
     }
