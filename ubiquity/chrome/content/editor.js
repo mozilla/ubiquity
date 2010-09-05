@@ -1,4 +1,8 @@
 Cu.import("resource://ubiquity/modules/prefcommands.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 var editor, file, lastModifiedTime = 0;
 
@@ -76,7 +80,6 @@ var Editor = {
   },
   launchEditor: function (value) {
     var editor = gPrefs.getValue(this.EDITOR_PREF, null);
-    //errorToLocalize
     if (!editor) {
       displayMessage("please set your external editor");
       return;
@@ -124,7 +127,6 @@ var Editor = {
         Utils.reportInfo("ret code   : " + ret);
       } catch (e) {
         Cu.reportError(e);
-        //errorToLocalize
         displayMessage("Error running editor : " + e);
         return null;
       }
@@ -133,7 +135,6 @@ var Editor = {
         deleteTemporaryFileOnExit(file);
       return file;
     }
-    //errorToLocalize
     displayMessage(editor + " is not an executable");
     return null;
   },
@@ -207,11 +208,8 @@ function saveAs() {
       PrefCommands.setCode(editor.value = "");
       //ToLocalize
       $("#editor-log").html(
-        "<p>The command source was saved to <strong>" + fp.file.path +
-        "</strong> and you are now subscribed to that page. Edit that file " +
-        "and any changes will take effect the moment you invoke Ubiquity." +
-        "</p><p>You can remove this subscription on the " +
-        "<a href='about:ubiquity?cmdlist'>Command List</a>.</p>");
+        "<p>" + L("ubiquity.editor.savelogmsgp1", "<strong>" + fp.file.path + "</strong>") 
+        + "</p><p>" + L("ubiquity.editor.savelogmsgp2") + "</p>");
     }
   } catch (e) {
     Cu.reportError(e);

@@ -118,10 +118,8 @@ addEventListener("load", function ubiquityBoot() {
   UbiquitySetup.preload(function ubiquitySetupWrapper() {
     try { ubiquitySetup() } catch (e) {
       Utils.reportError(e);
-      //errorToLocalize
       Utils.reportInfo(
         "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e));
-      //errorToLocalize
       new jsm.AlertMessageService().displayMessage({
         text: "Setup failed. See Error Console for details.",
         onfinished: window.toErrorConsole || window.toJavaScriptConsole,

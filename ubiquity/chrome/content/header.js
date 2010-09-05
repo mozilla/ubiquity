@@ -109,7 +109,7 @@ function jump(hash) {
 
 function pasteToGist(name, code, ext) {
   //ToLocalize
-  name = prompt("Pasting to gist.github.com with the following name:", name);
+  name = prompt(L("ubiquity.nav.githubpastename"), name);
   if (!name) return;
   var file = {};
   file[name + "." + ext] = code;

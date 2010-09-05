@@ -33,11 +33,9 @@ function scheduleCheckForUbiquity() {
     var win = Utils.currentChromeWindow;
 
     if (win.gUbiquity) {
-      //errorToLocalize
       dump('Ubiquity found.\n');
       runTests();
     } else {
-      //errorToLocalize
       dump('Waiting ' + INTERVAL_MS + ' ms...\n');
       scheduleCheckForUbiquity();
     }
