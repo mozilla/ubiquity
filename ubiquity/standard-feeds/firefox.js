@@ -14,14 +14,14 @@ XML.prettyPrinting = XML.ignoreWhitespace = false;
 CmdUtils.CreateCommand({
   names: ["exit Firefox"],
   description: "Exits Firefox.",
-  icon: "chrome://global/skin/icons/Close.gif",
+  icon: "chrome://ubiquity/skin/icons/exit_stop.png",
   execute: function exit_execute() Application.quit(),
 });
 
 CmdUtils.CreateCommand({
   names: ["restart Firefox"],
   description: "Restarts Firefox.",
-  icon: "chrome://global/skin/icons/Restore.gif",
+  icon: "chrome://ubiquity/skin/icons/arrow_refresh.png",
   execute: function restart_execute() Application.restart(),
 });
 
@@ -36,7 +36,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
-  icon: "chrome://global/skin/icons/monitor.png",
+  icon: "chrome://ubiquity/skin/icons/arrow_out.png",
   execute: function fullscreen_execute() {
     CmdUtils.getWindow().fullScreen ^= 1;
   }
@@ -146,6 +146,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["stop"],
   description: "Stops the current page.",
+  icon: "chrome://ubiquity/skin/icons/stop.png",
   execute: function stop_execute() {
     CmdUtils.getWindow().stop();
   }
@@ -163,7 +164,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["bookmark"],
   description: "Adds the current page to bookmarks.",
-  icon: "chrome://browser/skin/places/starred48.png",
+  icon: "chrome://ubiquity/skin/icons/folder_star.png",
   execute: function bookmark_execute() {
     const NBS = (Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
                  .getService(Ci.nsINavBookmarksService));
@@ -221,6 +222,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["go home"],
   description: "Goes to home page.",
+  icon: "chrome://ubiquity/skin/icons/home_house.png",
   execute: function home_execute() {
     CmdUtils.getWindow().home();
   }
@@ -301,7 +303,7 @@ CmdUtils.CreateCommand({
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
-  icon: "moz-icon://.js?size=16",
+  icon: "chrome://ubiquity/skin/icons/script_lightning.png",
   argument: noun_type_bookmarklet,
   execute: function bml_execute({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;

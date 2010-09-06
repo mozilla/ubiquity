@@ -9,7 +9,7 @@ CmdUtils.CreateCommand({
   names: ["add to google calendar", "quick add"],
   argument: {object_event: noun_arb_text},
   serviceDomain: "calendar.google.com",
-  icon: "chrome://ubiquity/skin/icons/calendar_add.png",
+  icon: "chrome://ubiquity/skin/icons/calendar_google.ico",
   description: "Adds an event to your calendar.",
   help: (
     <>
@@ -87,7 +87,7 @@ CmdUtils.CreateCommand({
   names: ["check google calendar"],
   argument: {object: noun_type_date},
   serviceDomain: "calendar.google.com",
-  icon : "chrome://ubiquity/skin/icons/calendar.png",
+  icon : "chrome://ubiquity/skin/icons/calendar_google.ico",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,
   execute: function gcale_execute({object: {data}}) {
