@@ -42,6 +42,8 @@
 <!ENTITY ubiqutiy.about.UsingParagraph1 "Weitere Informationen die über das Basis Tutorial hinausgehen gibt es in der <a href='&link.extDocs;'>In-depth documentation page</a>.">
 <!ENTITY ubiqutiy.about.UsingParagraph2 "Hilf &appTitle; mit deiner Anmeldung bei <a href='&link.herdMain;'>Herd</a>. Herd schickt anonyme Daten an das <a href='&link.herdDash;'>Dashboard</a> und hilft &appTitle; noch intuitiver zu gestalten.">
 <!ENTITY ubiqutiy.about.UsingParagraph3 "Informationen über die zukünftigen Ziele von &appTitle; und Pläne für kommende Versionen gibt es auf der 
+
+
 <a href='&link.roadmap;'> &appTitle; Roadmap</a>.">
 <!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; ist das Produkt einer Teamarbeit von freiwilligen Helfern aus der ganzen Welt. Für eine Liste aller Helfer und Wegbegleiter schau dir die <a href='&link.credits;'>&appTitle; Credits</a> an.">
 <!ENTITY ubiqutiy.about.Thanks "Vielen Dank für dein Vertrauen in &appTitle; &appVersion;!">

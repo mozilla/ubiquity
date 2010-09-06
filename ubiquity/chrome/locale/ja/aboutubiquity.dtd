@@ -24,6 +24,7 @@ Sincerely,
 
 
 
+
 -->
 <!ENTITY ubiquity.pagetitle.About "&appTitle; について">
 <!ENTITY ubiquity.pagetitle.Settings "各種設定 - &appTitle;">
@@ -60,6 +61,7 @@ Sincerely,
 <!--
 - I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.
 - This will also be useful when we do a full about: page overhaul possibly condensing the editors.
+
 
 
 
@@ -146,6 +148,8 @@ Sincerely,
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "コマンドの作成については、<a href='&link.cmdTutorial;'>チュートリアル</a> (英語) をお読みください。内蔵コマンドのソースは<a href='&file.FeedsIndex;'>こちら</a>から参照できます。">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "​<a href='&file.DevelDocs;'>コマンド API ドキュメント</a>">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>開発に参加</strong>してみませんか？
+
+
 まずは <a href='&link.wikiMain;'>&appTitle; Wiki</a> で取っ掛かりを掴んでください。">
 <!ENTITY ubiquity.editor.YourExternalEd "外部エディタ:">
 <!ENTITY ubiquity.editor.EditorCommandType "コマンド種別:">
