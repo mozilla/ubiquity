@@ -100,7 +100,8 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       title: title,
     });
 
-    if (!isTrustedUrl(commandsUrl, targetLink.type)) {
+    if (!LocalUriCodeSource.isValidUri(commandsUrl) &&
+        !isTrustedUrl(commandsUrl, targetLink.type)) {
       Utils.openUrlInBrowser(confirmUrl);
       return;
     }
