@@ -61,6 +61,7 @@ const FEED_BUILTIN_ANNO      = "ubiquity/builtin";
 const FEED_SUBSCRIBED_ANNO   = "ubiquity/confirmed";
 const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO      = "ubiquity/commands";
+const FEED_URL_ANNO          = "ubiquity/url";
 const FEED_TITLE_ANNO        = "ubiquity/title";
 const FEED_DATE_ANNO         = "ubiquity/date";
 const FEED_BIN_ANNO          = "ubiquity/bin";
@@ -162,7 +163,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 
 FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
   let annSvc = this._annSvc;
-  let uri = Utils.uri(info.url);
+  let uri = Utils.uri(info.sourceUrl);
   let expiration = annSvc[info.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
 
   annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
@@ -177,6 +178,9 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
                            info.canAutoUpdate, 0, expiration);
   annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO,
                            "true", 0, expiration);
+  if (info.url)
+    annSvc.setPageAnnotation(uri, FEED_URL_ANNO,
+                             info.url, 0, expiration);
   if (info.title)
     annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO,
                              info.title, 0, expiration);
@@ -202,7 +206,7 @@ FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) (
 // Returns whether or not the given feed URL was once subscribed
 // to, but is no longer.
 
-FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) (
+FMgrProto.isUnsubscribedFeed = function FMgr_isUnsubscribedFeed(uri) (
   this._annSvc.pageHasAnnotation(Utils.uri(uri), FEED_UNSUBSCRIBED_ANNO));
 
 // === {{{FeedManager#installToWindow()}}} ===
@@ -270,7 +274,7 @@ FMgrProto.__getFeed = function FMgr___getFeed(uri) {
   var {spec} = uri, self = this, feeds = self._feeds;
   if (!(spec in feeds)) {
     try { feeds[spec] = self.__makeFeed(uri) } catch (e) {
-      Cu.reportError(e);
+      Utils.reportError(e);
       Utils.reportInfo(
         "An error occurred when retrieving the feed for " + spec);
       // remove the mal-URI here, since we can't "purge" it as feed
@@ -293,17 +297,22 @@ FMgrProto.__getFeed = function FMgr___getFeed(uri) {
 
 function Feed(uri, annSvc, hub) {
   // === {{{Feed#uri}}} ===
-  // An {{{nsIURI}}} corresponding to the feed's URL. This is the
-  // human-readable page that the end-user clicked the "Subscribe..."
-  // button on; it is not necessarily the same page that contains the
-  // feed's actual source code. Read-only.
+  // An {{{nsIURI}}} identifying this feed. Read-only.
   this.uri = uri;
 
   // === {{{Feed#srcUri}}} ===
   // An {{{nsIURI}}} corresponding to the URL for the feed's source code.
   // Read-only.
-  this.srcUri = Utils.uri(annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO),
-                          "data:,");
+  this.srcUri = Utils.uri(
+    annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO, uri), uri);
+
+  // === {{{Feed#pageUri}}} ===
+  // An {{{nsIURI}}} corresponding to the feed's URL. This is the
+  // human-readable page that the end-user clicked the "Subscribe..."
+  // button on; it is not necessarily the same page that contains the
+  // feed's actual source code. Read-only.
+  this.pageUri = Utils.uri(
+    annSvc.getPageAnnotation(uri, FEED_URL_ANNO, uri), uri);
 
   this._annSvc = annSvc;
   this._hub = hub;
@@ -320,7 +329,7 @@ Feed.prototype = {
   get viewSourceUri() (
     this.canAutoUpdate
     ? this.srcUri
-    : Utils.uri("data:," + escape(this.getCode()))),
+    : Utils.uri("data:;charset=utf-8," + encodeURI(this.getCode()))),
 
   // === {{{Feed#type}}} ===
   // A string identifying the type of the feed. This is usually the

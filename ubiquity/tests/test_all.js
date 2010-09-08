@@ -133,20 +133,15 @@ function testFeedManagerWorks() {
   var FMgr = new FeedManager(new TestAnnotationMemory(this));
   var fakeFeedPlugin = {
     type: "fake",
-    makeFeed: function makeFeed(baseFeedInfo, hub) {
-      var feedInfo = {};
-
-      feedInfo.refresh = function refresh() {
+    makeFeed: function makeFeed(baseFeedInfo, hub) ({
+      __proto__: baseFeedInfo,
+      refresh: function refresh() {
         this.commandNames = [];
         this.commands = [];
         this.pageLoadFuncs = [];
         this.ubiquityLoadFuncs = [];
-      };
-
-      feedInfo.__proto__ = baseFeedInfo;
-
-      return feedInfo;
-    }
+      },
+    }),
   };
 
   FMgr.registerPlugin(fakeFeedPlugin);
@@ -155,21 +150,25 @@ function testFeedManagerWorks() {
   var sourceUrl = "http://www.foo.com/code.js";
   var code = "function blah() {}";
 
+  this.assert(!FMgr.isSubscribedFeed(sourceUrl));
+  FMgr.addSubscribedFeed({
+    url: url,
+    sourceUrl: sourceUrl,
+    sourceCode: code,
+    canAutoUpdate: false,
+    type: "fake",
+    isBuiltIn: true,
+  });
   this.assert(!FMgr.isSubscribedFeed(url));
-  FMgr.addSubscribedFeed({url: url,
-                          sourceUrl: sourceUrl,
-                          sourceCode: code,
-                          canAutoUpdate: false,
-                          type: "fake"});
-  this.assert(FMgr.isSubscribedFeed(url));
+  this.assert(FMgr.isSubscribedFeed(sourceUrl));
 
   var results = FMgr.getSubscribedFeeds();
 
-  this.assert(results.length == 1);
+  this.assertEquals(results.length, 1);
 
   // Ensure the result is what we think it is.
   var feed = results[0];
-  this.assert(feed.getCode() == code);
+  this.assertEquals(feed.getCode(), code);
 
   // Add another subscribed feed and make sure things still make sense.
   var moreCode = "function narg() {}";
@@ -192,15 +191,15 @@ function testFeedManagerWorks() {
   // how we think it should.
 
   results[0].remove();
-  this.assert(!FMgr.isSubscribedFeed(url));
-  this.assert(FMgr.isUnsubscribedFeed(url));
+  this.assert(!FMgr.isSubscribedFeed(sourceUrl));
+  this.assert(FMgr.isUnsubscribedFeed(sourceUrl));
 
   results[0].unremove();
-  this.assert(FMgr.isSubscribedFeed(url));
-  this.assert(!FMgr.isUnsubscribedFeed(url));
+  this.assert(FMgr.isSubscribedFeed(sourceUrl));
+  this.assert(!FMgr.isUnsubscribedFeed(sourceUrl));
 
   results[0].purge();
-  this.assertEquals(FMgr.getFeedForUrl(url), null);
+  this.assertEquals(FMgr.getFeedForUrl(sourceUrl), null);
 }
 
 function getNounList() {

@@ -64,41 +64,34 @@ var UbiquitySetup = {
   isNewlyInstalledOrUpgraded: false,
 
   STANDARD_FEEDS_URI: "resource://ubiquity/standard-feeds/",
-  STANDARD_FEEDS: [{page: "firefox.html",
-                    source: "firefox.js",
-                    title: "Mozilla Browser Commands"},
-
-                   {page: "social.html",
-                    source: "social.js",
-                    title: "Mozilla Social Networking Commands"},
-
-                   {page: "developer.html",
-                    source: "developer.js",
-                    title: "Mozilla Developer Commands"},
-
-                   {page: "pageedit.html",
-                    source: "pageedit.js",
-                    title: "Mozilla Page Editing Commands"},
-
-                   {page: "general.html",
-                    source: "general.js",
-                    title: "Mozilla General Utility Commands"},
-
-                   {page: "email.html",
-                    source: "email.js",
-                    title: "Mozilla Email Commands"},
-
-                   {page: "calendar.html",
-                    source: "calendar.js",
-                    title: "Mozilla Calendar Commands"},
-
-                   {page: "map.html",
-                    source: "map.js",
-                    title: "Mozilla Map Commands"},
-
-                   {page: "search.html",
-                    source: "search.xhtml",
-                    title: "Mozilla Web Search Commands"}],
+  STANDARD_FEEDS: [{
+    source: "firefox.js",
+    title: "Mozilla Browser Commands",
+  }, {
+    source: "social.js",
+    title: "Mozilla Social Networking Commands",
+  }, {
+    source: "developer.js",
+    title: "Mozilla Developer Commands",
+  }, {
+    source: "pageedit.js",
+    title: "Mozilla Page Editing Commands",
+  }, {
+    source: "general.js",
+    title: "Mozilla General Utility Commands",
+  }, {
+    source: "email.js",
+    title: "Mozilla Email Commands",
+  }, {
+    source: "calendar.js",
+    title: "Mozilla Calendar Commands",
+  }, {
+    source: "map.js",
+    title: "Mozilla Map Commands",
+  }, {
+    source: "search.xhtml",
+    title: "Mozilla Web Search Commands",
+  }],
 
   __modifyUserAgent: function __modifyUserAgent() {
     // This is temporary code to fix old versions of Ubiquity that
@@ -212,15 +205,13 @@ var UbiquitySetup = {
     gPrefs.set(RESET_SCHEDULED_PREF, value),
 
   __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
-    var OLD_STD_FEED_URIS = [
-      "https://ubiquity.mozilla.com/standard-feeds/",
-      this.getBaseUri() + "standard-feeds/"];
+    var OLD_STD_FEED_TESTERS = [
+      /^https:\/\/ubiquity\.mozilla\.com\/standard-feeds\/./,
+      RegExp("^" + Utils.regexp.quote(this.baseUrl) + "standard-feeds/"),
+      /^resource:\/\/ubiquity\/standard-feeds\/.+\.html$/];
 
     feedManager.getAllFeeds().forEach(function removeExtinct(feed) {
-      var {spec} = feed.uri;
-      if (OLD_STD_FEED_URIS.some(function (u) spec.indexOf(u) === 0) ||
-          feed.title === "Mozilla Image-Related Commands")
-        feed.purge();
+      if (OLD_STD_FEED_TESTERS.some("".match, feed.uri.spec)) feed.purge();
     });
   },
 
@@ -287,7 +278,6 @@ var UbiquitySetup = {
         // spinning via a call to processNextEvent() until some kind of
         // I/O is finished?
         defaultFeedPlugin.installDefaults(this.STANDARD_FEEDS_URI,
-                                          this.STANDARD_FEEDS_URI,
                                           this.STANDARD_FEEDS);
       }
 

@@ -71,21 +71,16 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       title: title,
     });
 
-  this.installDefaults = function DFP_installDefaults(baseUri,
-                                                      baseLocalUri,
-                                                      infos) {
+  this.installDefaults = function DFP_installDefaults(baseUrl, infos) {
     for each (let info in infos) {
-      let uri = Utils.uri(baseUri + info.page);
-
-      if (!feedManager.isUnsubscribedFeed(uri)) {
-        let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
-        feedManager.addSubscribedFeed({
-          url: uri,
-          sourceUrl: baseUri + info.source,
-          sourceCode: lcs.getCode(),
-          canAutoUpdate: true,
-          title: info.title});
-      }
+      let url = baseUrl + info.source;
+      if (feedManager.isUnsubscribedFeed(url)) continue;
+      feedManager.addSubscribedFeed({
+        sourceUrl: url,
+        sourceCode: new LocalUriCodeSource(url).getCode(),
+        canAutoUpdate: true,
+        title: info.title,
+      });
     }
   };
 

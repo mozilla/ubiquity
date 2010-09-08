@@ -86,9 +86,9 @@ function actionLink(text, action)(
   .addClass("action"));
 
 function fillTableCellForFeed(cell, feed, sortMode) {
-  var feedUrl = feed.uri.spec;
+  var feedUrl = feed.pageUri.spec;
   cell.append(A(feedUrl, feed.title, "", {name: feedUrl}), "<br/>");
-  cell.append(formatMetaData(feed.metaData));
+  cell.append(formatMetaData(feed.metaData || {}));
   if (+feed.date)
     cell.append('<span class="feed-date">' +
                 feed.date.toLocaleString() +

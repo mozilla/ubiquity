@@ -92,8 +92,8 @@ var SFP = Utils.extend(SkinFeedPlugin.prototype, {
       success: function yay(css) {
         me._feedManager.addSubscribedFeed({
           type: "ubiquity-skin",
-          url: cssUrl, sourceUrl: cssUrl,
-          title: pageUrl,
+          url: pageUrl,
+          sourceUrl: cssUrl,
           sourceCode: css,
           canAutoUpdate: true,
         }).getFeedForUrl(cssUrl).pick();
@@ -147,8 +147,7 @@ var SFP = Utils.extend(SkinFeedPlugin.prototype, {
         "Error writing Ubiquity skin to " + file.path + ": " + e.message;
       Cu.reportError(e);
     }
-    this.onSubscribeClick({title: RE_LEAFNAME(spec)[0], URL: spec}, spec);
-    this._feedManager.getFeedForUrl(spec).pick();
+    this.onSubscribeClick(spec, {href: spec});
     return file.path;
   },
   toString: function SFP_toString() "[object SkinFeedPlugin]",
@@ -178,19 +177,23 @@ Utils.extend(SkinFeed.prototype, {
   // === {{{ SkinFeed#dataUri }}} ===
   // Data URI object used to register this skin.
   get dataUri()
-    Utils.uri("data:text/css,/*ubiquity-skin*/" + encodeURI(this.css)),
+    Utils.uri("data:text/css;charset=utf-8,/*ubiquity-skin*/" +
+              encodeURI(this.css)),
 
   // === {{{ SkinFeed#metaData }}} ===
   // Contents of the meta data block ({{{ =skin= ~ =/skin= }}}).
   get metaData() {
     if (this._dataCache) return this._dataCache;
-    var {css} = this, data = {name: this.title};
+    var {css} = this, data = {};
     var [, block] = /=skin=\s*([^]+)\s*=\/skin=/(css) || 0;
     if (block) {
       let re = /^[ \t]*@(\w+)[ \t]+(.+)/mg, m;
       while ((m = re.exec(block))) data[m[1]] = m[2].trim();
     }
-    if (!("homepage" in data)) data.homepage = this.title;
+    if (!("name" in data)) let ({spec} = this.uri)
+      data.name = spec.slice(spec.lastIndexOf("/") + 1);
+    if (!("homepage" in data))
+      data.homepage = this.pageUri.spec;
     return this._dataCache = data;
   },
 
@@ -234,5 +237,5 @@ Cu.import("resource://ubiquity/modules/ubiquity_protocol.js", null).setPath(
   RE_LEAFNAME(URL_CUSTOM)[0], function customSkinUri() {
     var css = Utils.prefs.get(PREF_CUSTOM);
     if (!css) css = Utils.getLocalUrl(URL_ROOT + "custom.css");
-    return "data:text/css," + encodeURI(css);
+    return "data:text/css;charset=utf-8," + encodeURI(css);
   });
