@@ -2,6 +2,33 @@
 //
 // This is the command feed for core developer commands.
 
+// === {{{check XHTML pages}}} command ===
+
+CmdUtils.CreateCommand({
+  names: ["check XHTML pages"],
+  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
+  description: (
+    "Opens or reloads all <code>.xhtml</code> pages under " +
+    "&lt;chrome://ubiquity/content&gt;. " +
+    "Useful for checking <code>.dtd</code> errors etc."),
+  execute: function cxp_execute() {
+    var tabs = {__proto__: null};
+    for (let tab in Utils.tabs) tabs[tab.uri.spec] = tab;
+    var rootUri = Utils.ResProtocolHandler.getSubstitution("ubiquity");
+    var dir = rootUri.QueryInterface(Ci.nsIFileURL).file;
+    dir.append("chrome");
+    dir.append("content");
+    var nmr = dir.directoryEntries, re = /\.xhtml$/i;
+    while (nmr.hasMoreElements()) {
+      let {leafName} = nmr.getNext().QueryInterface(Ci.nsIFile);
+      if (!re.test(leafName)) continue;
+      let url = "about:ubiquity?" + RegExp.leftContext;
+      if (url in tabs) tabs[url].browser.reload();
+      else Utils.openUrlInBrowser(url);
+    }
+  },
+});
+
 // === {{{run unit tests}}} command ===
 //
 // Runs the unit test suite.
@@ -10,7 +37,7 @@ CmdUtils.CreateCommand({
   names: ["test", "unit test", "run unit tests"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Run the Ubiquity unit test suite",
-  execute: "about:ubiquity?test"
+  execute: "about:ubiquity?test",
 });
 
 // === {{{playpen}}} command ===
@@ -21,7 +48,7 @@ CmdUtils.CreateCommand({
   names: ["playpen", "parser playpen", "open parser playpen"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Go to the parser playpen",
-  execute: "about:ubiquity?playpen"
+  execute: "about:ubiquity?playpen",
 });
 
 // === {{{tuner}}} command ===
@@ -32,7 +59,7 @@ CmdUtils.CreateCommand({
   names: ["tuner", "nountype tuner", "tune nountype"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Go to the nountype tuner",
-  execute: "about:ubiquity?tuner"
+  execute: "about:ubiquity?tuner",
 });
 
 // === {{{markupTickets()}}} ===
@@ -138,7 +165,7 @@ function pageLoad_developerCommands(doc) {
       addMoreLinks(rev, doc);
     }
     else if (location.pathname === "/hg/ubiquity-firefox/") {
-      addBuildbotInfo(doc);
+      //addBuildbotInfo(doc);
     }
   }
 }
