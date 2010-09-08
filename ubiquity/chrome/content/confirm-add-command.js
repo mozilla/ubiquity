@@ -101,7 +101,7 @@ function displayCode(data) {
     " onload='prettyPrint()'></script>");
   $("#sourceCode").empty().append($("<iframe>", {
     css: {width: "100%", maxHeight: "40em", borderWidth: 0},
-    src: "data:text/html," + encodeURI(page),
+    src: "data:text/html;charset=utf-8," + encodeURI(page),
     load: function () { this.height = this.contentDocument.height },
   }));
   $("#submit")[0].disabled = false;
