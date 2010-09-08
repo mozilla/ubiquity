@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,118 +35,70 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["SandboxFactory"];
+const EXPORTED_SYMBOLS = ["SandboxFactory"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Cu.import("resource://ubiquity/modules/utils.js");
 
 var defaultTarget = this;
 
 function SandboxFactory(globals, target, ignoreForcedProtection) {
   maybeInitialize();
+  globals = globals || {};
+  this._target = target || defaultTarget;
   this._ignoreForcedProtection = ignoreForcedProtection;
-  if (typeof(target) == "undefined")
-    target = defaultTarget;
-  this._target = target;
-
-  if (globals == undefined)
-    globals = {};
-
-  if (typeof(globals) == "function")
-    this._makeGlobals = globals;
-  else
-    this._makeGlobals = function defaultMakeGlobals(id) {
-      return globals;
-    };
+  this._makeGlobals = typeof globals == "function" ?
+    globals : function defaultMakeGlobals(id) globals;
 }
 
 SandboxFactory.protectedFileUriPrefix = "";
 SandboxFactory.fileUri = "";
-SandboxFactory.isFilenameReported = false;
 SandboxFactory.isInitialized = false;
 
 SandboxFactory.unmungeUrl = function unmungeUrl(url) {
-  if (this.isInitialized &&
-      this.isFilenameReported &&
-      url.indexOf(this.protectedFileUriPrefix) == 0)
+  if (this.isInitialized && ~url.lastIndexOf(this.protectedFileUriPrefix, 0))
     return url.slice(this.protectedFileUriPrefix.length);
   return url;
 };
 
 function maybeInitialize() {
-  if (!SandboxFactory.isInitialized) {
-    var ioService = Cc["@mozilla.org/network/io-service;1"].
-                    getService(Ci.nsIIOService);
+  if (SandboxFactory.isInitialized) return;
 
-    var resProt = ioService.getProtocolHandler("resource")
-                  .QueryInterface(Ci.nsIResProtocolHandler);
+  var resProt = (Utils.IOService.getProtocolHandler("resource")
+                 .QueryInterface(Ci.nsIResProtocolHandler));
 
-    SandboxFactory.fileUri = resProt.resolveURI(
-      Utils.url("resource://ubiquity/modules/sandboxfactory.js")
-    );
+  SandboxFactory.fileUri = resProt.resolveURI(
+    Utils.uri("resource://ubiquity/modules/sandboxfactory.js"));
 
-    // We need to prefix any source code URI's with a known
-    // "protected" file URI so that XPConnect wrappers are implicitly
-    // made for them.
-    SandboxFactory.protectedFileUriPrefix = SandboxFactory.fileUri + "#";
+  // We need to prefix any source code URI's with a known
+  // "protected" file URI so that XPConnect wrappers are implicitly
+  // made for them.
+  SandboxFactory.protectedFileUriPrefix = SandboxFactory.fileUri + "#";
 
-    // Now figure out if we're in a version of the platform that allows
-    // us to specify the filename of code that runs in the sandbox, and
-    // accurately reports it in tracebacks.
-    var sandbox = Components.utils.Sandbox("http://www.mozilla.com");
-    try {
-      Components.utils.evalInSandbox("throw new Error()",
-                                     sandbox,
-                                     "1.8",
-                                     "somefilename",
-                                     1);
-    } catch (e) {
-      SandboxFactory.isFilenameReported = ((e.fileName) == "somefilename");
-    }
-
-    SandboxFactory.isInitialized = true;
-  }
+  SandboxFactory.isInitialized = true;
 }
 
-SandboxFactory.prototype = {
+Utils.extend(SandboxFactory.prototype, {
   makeSandbox: function makeSandbox(codeSource) {
-    var sandbox = Components.utils.Sandbox(this._target);
+    var sandbox = Cu.Sandbox(this._target);
     var globals = this._makeGlobals(codeSource);
-
-    for (var symbolName in globals) {
-      sandbox[symbolName] = globals[symbolName];
-    }
-
+    for (let key in globals) sandbox[key] = globals[key];
     return sandbox;
   },
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
-    if (!codeSections)
-      codeSections = [{filename: "<string>",
-                       lineNumber: 0,
-                       length: code.length}];
-
-    var retVal;
-    let currIndex = 0;
-    for (let i = 0; i < codeSections.length; i++) {
-      let section = codeSections[i];
+    codeSections = codeSections ||
+      [{filename: "<string>", lineNumber: 0, length: code.length}];
+    var retVal, currIndex = 0;
+    for each (let section in codeSections) {
+      let sourceCode = code.slice(currIndex, currIndex += section.length);
       let filename = section.filename;
-
       if (!this._ignoreForcedProtection)
         filename = SandboxFactory.protectedFileUriPrefix + filename;
-
-      let sourceCode = code.slice(currIndex, currIndex + section.length);
-
-      retVal = Components.utils.evalInSandbox(sourceCode,
-                                              sandbox,
-                                              "1.8",
-                                              filename,
-                                              section.lineNumber);
-
-      currIndex += section.length;
+      retVal = Cu.evalInSandbox(sourceCode, sandbox,
+                                1.8, filename, section.lineNumber);
     }
     return retVal;
   }
-};
+});

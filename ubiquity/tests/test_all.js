@@ -365,36 +365,20 @@ function testUtilsIsArray() {
   this.assert(!Utils.isArray({length: 0}));
 }
 
-// This tests bug #25.
-function testSandboxSupportsJs17() {
-  var sbf = new SandboxFactory({});
-
-  if (!SandboxFactory.isFilenameReported)
-    // Only if the filename is reported can we also be certain that
-    // we have control over the JS version of the sandbox; see Bugzilla
-    // bug #445873 for more information.
-    throw new this.SkipTestError();
-
-  var s = sbf.makeSandbox();
-  sbf.evalInSandbox("let k = 1;", s);
-}
-
 function testSandboxFactoryProtectsSandbox() {
   // This is a regression test for #434.
   this.skipIfXPCShell();
 
   var sbf = new SandboxFactory({}, globalObj);
   var sandbox = sbf.makeSandbox();
-  var code = "Application.activeWindow.activeTab.document.defaultView";
-  sandbox.Application = Utils.Application;
-
+  sandbox.Utils = Utils;
+  var code = "String(Utils.currentChromeWindow.content)";
   this.assertEquals(
-    String(sbf.evalInSandbox(
-      code,
-      sandbox,
+    sbf.evalInSandbox(
+      code, sandbox,
       [{filename: "__arbitraryString://blarg/",
         lineNumber: 1,
-        length: code.length}])),
+        length: code.length}]),
     "[object XPCNativeWrapper [object Window]]");
 }
 
