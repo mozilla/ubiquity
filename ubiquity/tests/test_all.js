@@ -529,7 +529,7 @@ function testUtilsListenOnce() {
 }
 
 function testUtilsExtend() {
-  var target = {prop: 0, get getter() 0, set setter() 0};
+  var target = {prop: 0, get getter() 0, set setter(x) 0};
   var obj1 = {prop: "prop", get getter() "getter"};
   var obj2 = {set setter(v) this.prop = v};
   this.assertEquals(target, Utils.extend(target, obj1, obj2));
