@@ -50,7 +50,7 @@ var H = Utils.escapeHtml;
 var gPrefs = Utils.prefs;
 
 function createNavLinks() {
-  let containerElem = document.getElementById("nav-container");
+  var containerElem = document.getElementById("nav-container");
   if (!containerElem) return;
 
   var U = document.createElement("span");
@@ -59,7 +59,7 @@ function createNavLinks() {
   var [head] = document.getElementsByClassName("head");
   head.insertBefore(U, head.firstChild);
 
-  let listElem = document.createElement("ul");
+  var listElem = document.createElement("ul");
   listElem.id = "nav";
   containerElem.appendChild(listElem);
 
@@ -77,8 +77,10 @@ function createNavLinks() {
     [L("ubiquity.nav.hackubiquity"),
      "about:ubiquity?editor"]];
 
+  var [currentUrl] = /^[^#]+/.exec(location.href);
   for each (let [name, url] in navUrls) {
     let listItem = document.createElement("li");
+    if (currentUrl == url) listItem.className = "selected";
     listElem.appendChild(listItem);
     let link = document.createElement("a");
     link.href = url;
