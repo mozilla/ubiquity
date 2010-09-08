@@ -6,10 +6,9 @@
 
 CmdUtils.CreateCommand({
   names: ["check XHTML pages"],
-  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
+  icon: "chrome://ubiquity/skin/icons/page_refresh.png",
   description: (
-    "Opens or reloads all <code>.xhtml</code> pages under " +
-    "&lt;chrome://ubiquity/content&gt;. " +
+    "Opens or reloads all <code>.xhtml</code> pages bundled with Ubiquity. " +
     "Useful for checking <code>.dtd</code> errors etc."),
   execute: function cxp_execute() {
     var tabs = {__proto__: null};
