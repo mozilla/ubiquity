@@ -121,6 +121,12 @@ delete Utils.QueryInterface;
   Cc["@mozilla.org/embedcomp/prompt-service;1"]
   .getService(Ci.nsIPromptService),
 
+  // === {{{ Utils.ResProtocolHandler }}} ===
+  // Shortcut to {{{nsIResProtocolHandler}}}.
+  function ResProtocolHandler()
+  Utils.IOService.getProtocolHandler("resource")
+  .QueryInterface(Ci.nsIResProtocolHandler),
+
   // === {{{ Utils.UnescapeHTML }}} ===
   // Shortcut to {{{nsIScriptableUnescapeHTML}}}.
   function UnescapeHTML()

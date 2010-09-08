@@ -52,9 +52,6 @@ Cu.import("resource://ubiquity/modules/xml_script_commands_parser.js");
 const VALID_SCHEMES_REMOTE = {http: 1, https: 1};
 const VALID_SCHEMES_LOCAL  = {file: 1, chrome: 1, resource: 1, ubiquity: 1};
 
-var gRPH = (Utils.IOService.getProtocolHandler("resource")
-            .QueryInterface(Ci.nsIResProtocolHandler));
-
 function MixedCodeSource(bodySource, headerSources, footerSources) {
   this.id = bodySource.id;
   this._bodySource = bodySource;
@@ -155,8 +152,9 @@ function LocalUriCodeSource(uri) {
   this.uri = Utils.uri(uri, "data:,");
   this._cachedCode = null;
   this._cachedTimestamp = 0;
-  if (this.uri.scheme === "resource")
-    try { this.uri = Utils.uri(gRPH.resolveURI(this.uri)) } catch (e) {}
+  if (this.uri.scheme == "resource") try {
+    this.uri = Utils.uri(Utils.ResProtocolHandler.resolveURI(this.uri));
+  } catch ([]) {}
 }
 
 LocalUriCodeSource.isValidUri =

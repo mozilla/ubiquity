@@ -65,12 +65,9 @@ SandboxFactory.unmungeUrl = function unmungeUrl(url) {
 function maybeInitialize() {
   if (SandboxFactory.isInitialized) return;
 
-  var resProt = (Utils.IOService.getProtocolHandler("resource")
-                 .QueryInterface(Ci.nsIResProtocolHandler));
-
-  SandboxFactory.fileUri = resProt.resolveURI(
-    Utils.uri("resource://ubiquity/modules/sandboxfactory.js"));
-
+  SandboxFactory.fileUri =
+    Utils.ResProtocolHandler.resolveURI(
+      Utils.uri("resource://ubiquity/modules/sandboxfactory.js"));
   // We need to prefix any source code URI's with a known
   // "protected" file URI so that XPConnect wrappers are implicitly
   // made for them.
