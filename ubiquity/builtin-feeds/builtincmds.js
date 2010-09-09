@@ -40,6 +40,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+feed.title  = _("Built-in Commands");
+feed.author = _("Ubiquity Team");
+
 // -----------------------------------------------------------------
 // SYSTEM COMMANDS
 // -----------------------------------------------------------------
@@ -263,5 +266,3 @@ function startup_openUbiquityWelcomePage() {
   if (UbiquitySetup.isNewlyInstalledOrUpgraded)
     Utils.focusUrlInBrowser(Help);
 }
-
-feed.author = "Ubiquity Team";
