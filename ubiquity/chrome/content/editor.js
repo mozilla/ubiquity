@@ -188,7 +188,7 @@ function saveAs() {
     const {nsIFilePicker} = Ci;
 
     var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
-    fp.init(window, "Save your commands", nsIFilePicker.modeSave);
+    fp.init(window, L("ubiquity.editor.savecommands"), nsIFilePicker.modeSave);
 
     //Save as a javascript file
     //fp.appendFilters(nsIFilePicker.filterAll);
@@ -206,7 +206,7 @@ function saveAs() {
         canAutoUpdate: true});
 
       PrefCommands.setCode(editor.value = "");
-      //ToLocalize
+
       $("#editor-log").html(
         "<p>" + L("ubiquity.editor.savelogmsgp1", "<strong>" + fp.file.path + "</strong>") 
         + "</p><p>" + L("ubiquity.editor.savelogmsgp2") + "</p>");
