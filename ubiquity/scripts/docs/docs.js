@@ -224,7 +224,7 @@ App.layout = function layout(parser, code, div) {
       docs.css(App.columnCss);
       parser.renderDocText(docs, this.text);
       $(div).append(docs);
-      var code = $('<div class="code">');
+      var code = $('<pre class="code">');
       code.css(App.columnCss);
       parser.renderCode(code, this.code);
       $(div).append(code);
@@ -405,7 +405,7 @@ App.CHARS_PER_ROW = 80;
 
 App.initColumnSizes = function initSizes() {
   // Get the width of a single monospaced character of code.
-  var oneCodeCharacter = $('<div class="code">M</div>');
+  var oneCodeCharacter = $('<pre class="code">M</pre>');
   $("#content").append(oneCodeCharacter);
   App.charWidth = oneCodeCharacter.width();
   App.columnWidth = App.charWidth * App.CHARS_PER_ROW;

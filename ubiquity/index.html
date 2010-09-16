@@ -5,6 +5,8 @@
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <link rel="stylesheet" type="text/css" media="all"
         href="scripts/docs/docs.css" />
+  <link rel="stylesheet" type="text/css" media="all"
+        href="scripts/prettify.css" />
   <title>Ubiquity Code Documentation</title>
 </head>
 <body>
@@ -62,6 +64,7 @@
 <script src="scripts/jquery.js"></script>
 <script src="scripts/wikicreole.js"></script>
 <script src="scripts/docs/docs.js"></script>
+<script src="scripts/prettify.js"></script>
 <script>
 var MDC_URL_TEMPLATE = "https://developer.mozilla.org/en/N%QUERY%";
 var INTRA_DOC_LINKS = {};
@@ -70,8 +73,8 @@ $(".intra-wiki").each(function () {
   INTRA_DOC_LINKS[$a.text()] = $a.attr("href");
 });
 
-App.processors.push(function (documentation) {
-  $(documentation).find("tt").each(function () {
+App.processors.push(function ($documentation) {
+  $documentation.find("tt").each(function () {
     var $tt = $(this), text = $tt.text();
     if (~text.lastIndexOf("nsI", 0)) {
       App.addMenuItem(this, "View MDC entry",
@@ -83,6 +86,12 @@ App.processors.push(function (documentation) {
         $tt.wrap('<a class="intra-wiki" href="' + href + '"></a>');
     }
   });
+  $("pre").addClass("prettyprint").each(function () {
+    // workaround to preserve trailing linefeeds after prettify
+    var $code = $(this);
+    if ($code.text().slice(-1) == "\n") $code.append("\n");
+  });
+  prettyPrint();
 });
 </script>
 </html>

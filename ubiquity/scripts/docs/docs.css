@@ -21,7 +21,7 @@ body {
     color: black;
     padding: 3px;
     border: black dotted;
-    border-width: 1px 1px 0 1px; 
+    border-width: 1px 1px 0 1px;
 }
 
 .popup .selected {
@@ -65,6 +65,7 @@ body {
                  courier new, monospace;
     float: left;
     white-space: pre;
+    margin: 0;
     font-size: 6pt;
     background-color: #f0f0f0;
 }
