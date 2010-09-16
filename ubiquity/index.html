@@ -15,7 +15,7 @@
   <p><strong>We need your help!</strong>
   Contribute by documenting more of the code, and keeping it
   up-to-date.</p>
-  <p>Here is what we've got for documentation so far.</p>
+  <p>Here is what we&#39;ve got for documentation so far.</p>
   <ul>
     <li><a class="intra-wiki"
            href="#chrome/content/ubiquity.js">Ubiquity</a></li>
@@ -63,42 +63,26 @@
 <script src="scripts/wikicreole.js"></script>
 <script src="scripts/docs/docs.js"></script>
 <script>
-  var XUL_PLANET_URL_TEMPLATE = "http://www.xulplanet.com/references/" +
-                                "xpcomref/ifaces/%QUERY%.html";
-  var MDC_URL_TEMPLATE = "https://developer.mozilla.org/en/N%QUERY%";
+var MDC_URL_TEMPLATE = "https://developer.mozilla.org/en/N%QUERY%";
+var INTRA_DOC_LINKS = {};
+$(".intra-wiki").each(function () {
+  var $a = $(this);
+  INTRA_DOC_LINKS[$a.text()] = $a.attr("href");
+});
 
-  var INTRA_DOC_LINKS = {
-    FeedManager: "modules/feedmanager.js",
-    Feed: "modules/feedmanager.js",
-    WebJsModule: "modules/webjsm.js",
-    EventHub: "modules/eventhub.js",
-    AnnotationService: "modules/annotation_memory.js",
-    MessageService: "modules/msgservice.js",
-    LockedDownFeedPlugin: "modules/locked_down_feed_plugin.js"
-  }
-
-  App.processors.push(
-    function(documentation) {
-      $(documentation).find("tt").each(
-        function() {
-          var text = $(this).text();
-
-          if (text.indexOf("nsI") == 0) {
-            App.addMenuItem(this, "View MDC entry",
-                            MDC_URL_TEMPLATE.replace("%QUERY%",
-                                                     text.slice(1)));
-            App.addMenuItem(this, "View XULPlanet entry",
-                            XUL_PLANET_URL_TEMPLATE.replace("%QUERY%",
-                                                            text));
-          } else {
-            if (text in INTRA_DOC_LINKS) {
-              var href = "#" + INTRA_DOC_LINKS[text];
-              if (window.location.hash != href)
-                $(this).wrap('<a class="intra-wiki" href="' + href +
-                             '"></a>');
-            }
-          }
-        });
-    });
+App.processors.push(function (documentation) {
+  $(documentation).find("tt").each(function () {
+    var $tt = $(this), text = $tt.text();
+    if (~text.lastIndexOf("nsI", 0)) {
+      App.addMenuItem(this, "View MDC entry",
+                      MDC_URL_TEMPLATE.replace("%QUERY%", text.slice(1)));
+    }
+    else if (text in INTRA_DOC_LINKS) {
+      var href = INTRA_DOC_LINKS[text];
+      if (href != location.hash)
+        $tt.wrap('<a class="intra-wiki" href="' + href + '"></a>');
+    }
+  });
+});
 </script>
 </html>

@@ -156,7 +156,7 @@ var noun_type_percentage = {
 // === {{{ noun_type_tab }}} ===
 // Suggests currently opened tabs.
 // * {{{text, html}}} : tab title or URL
-// * {{{data}}} : [[#modules/utils.js|Utils]]{{{.BrowserTab}}} instance
+// * {{{data}}} : {{{Utils}}}{{{.BrowserTab}}} instance
 
 var noun_type_tab = {
   label: "title or URL",
@@ -294,7 +294,7 @@ var noun_type_tag = {
 // Suggests "Awesome Bar" query results.
 // * {{{text, html}}} : title or url
 // * {{{data}}} : a query result
-//   (see [[#modules/utils.js|Utils]]{{{.history.search}}})
+//   (see {{{Utils}}}{{{.history.search}}})
 
 var noun_type_awesomebar = {
   label: "query",
@@ -544,7 +544,7 @@ var noun_type_disabled_command = {
 // === {{{ noun_type_skin }}} ===
 // Suggests each installed skin whose name matches the input.
 // * {{{text, html}}} : skin name
-// * {{{data}}} : [[#modules/skin_feed_plugin.js|SkinFeed]] instance
+// * {{{data}}} : skin feed object (see {{{SkinFeedPlugin}}})
 
 var noun_type_skin = {
   label: "name",
@@ -834,8 +834,8 @@ function getYahooContacts(callback) {
 
 // === {{{ noun_type_geolocation }}} ===
 // * {{{text, html}}} : user input / "city,( state,) country"
-// * {{{data}}} : null / geoLocation
-//   (as returned by [[#modules/cmdutils.js|CmdUtils]].getGeoLocation())
+// * {{{data}}} : {{{null}}} or geoLocation object
+//   (as returned by {{{CmdUtils}}}{{{.getGeoLocation()}}})
 
 var noun_type_geolocation = {
   label: "geolocation",

@@ -97,12 +97,12 @@ this.doAt = function doAt(code, keys) {
 };
 
 // == From NounUtils ==
-// {{{CmdUtils}}} inherits [[#modules/nounutils.js|NounUtils]].
+// {{{CmdUtils}}} inherits {{{NounUtils}}}.
 
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
-// {{{CmdUtils}}} inherits [[#modules/contextutils.js|ContextUtils]].
+// {{{CmdUtils}}} inherits {{{ContextUtils}}}.
 // The methods are wrapped so that the {{{context}}} argument isn't needed.
 // (i.e. {{{CmdUtils.getSelection("")}}} is equivalent to
 // {{{ContextUtils.getSelection(context, "")}}})
@@ -119,7 +119,7 @@ doAt(<![CDATA[{
 }]]>, (name for (name in ContextUtils)));
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
-// See [[#modules/utils.js|Utils]]{{{.log}}}.
+// See {{{Utils}}}{{{.log}}}.
 
 CmdUtils.log = Utils.log;
 

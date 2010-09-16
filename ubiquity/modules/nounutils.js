@@ -44,7 +44,7 @@
 // = NounUtils =
 //
 // A library of noun related utilities.
-// [[#modules/cmdutils.js|CmdUtils]] inherits them all.
+// {{{CmdUtils}}} inherits them all.
 
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
