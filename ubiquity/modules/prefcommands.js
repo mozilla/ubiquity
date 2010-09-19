@@ -42,17 +42,15 @@ Cu.import("resource://ubiquity/modules/ubiquity_protocol.js");
 
 var PrefCommands = {
   COMMANDS_PREF : "extensions.ubiquity.commands",
-  FEED_TYPE_PREF : "extensions.ubiquity.commandsFeedType",
 
   __feedManager: null,
 
   __subscribeFeed: function PC__subscribeFeed() {
     this.__feedManager.addSubscribedFeed({
-      url: this.id,
-      type: this.type,
       sourceUrl: this.id,
       canAutoUpdate: true,
-      isBuiltIn: true});
+      isBuiltIn: true,
+    });
   },
 
   init: function PC_init(feedManager) {
@@ -60,27 +58,11 @@ var PrefCommands = {
     this.__subscribeFeed();
   },
 
-  changeType: function PC_changeType(newType) {
-    if (newType === this.type) return;
-
-    Utils.prefs.setValue(this.FEED_TYPE_PREF, newType);
-    // TODO: If we're storing the feed type in a preference, we really need
-    // to attach an observer to the preference and have the following code
-    // execute whenever the preference changes, so that we behave the same
-    // way if e.g. the user uses about:config to change the pref instead
-    // of calling this method.
-    var feed = this.__feedManager.getFeedForUrl(this.id);
-    if (feed) feed.purge();
-    this.__subscribeFeed();
-  },
-
   setCode: function PC_setCode(code) {
-    Utils.prefs.setValue(this.COMMANDS_PREF, code);
+    Utils.prefs.set(this.COMMANDS_PREF, code);
   },
 
-  getCode: function PC_getCode() Utils.prefs.getValue(this.COMMANDS_PREF, ""),
-
-  get type() Utils.prefs.getValue(this.FEED_TYPE_PREF, "commands"),
+  getCode: function PC_getCode() Utils.prefs.get(this.COMMANDS_PREF, ""),
 
   get id() "ubiquity://command-editor-code",
 };
@@ -88,5 +70,5 @@ var PrefCommands = {
 setPath(
   "command-editor-code",
   function makeDataUri() (
-    "data:application/javascript," +
-    encodeURIComponent(PrefCommands.getCode())));
+    "data:application/javascript;charset=utf-8," +
+    encodeURI(PrefCommands.getCode())));

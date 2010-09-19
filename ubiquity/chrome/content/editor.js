@@ -6,9 +6,6 @@ var L = LocalizationUtils.propertySelector(
 
 var editor, file, lastModifiedTime = 0;
 
-function initialize() {
-  document.getElementById("feedTypeMenu").value = PrefCommands.type;
-}
 function launch() {
   file = Editor.launchEditor(editor.value);
   if (!file || !file.exists()) return;
@@ -64,19 +61,11 @@ function updateCode() {
 var Editor = {
   EDITOR_PREF : "extensions.ubiquity.editor",
 
-  onFeedTypeChange: function () {
-    var value = $("#feedTypeMenu").val();
-    PrefCommands.changeType(value);
-    $(".feed-type-desc").hide();
-    $("#" + value).show();
-  },
   onLoad: function () {
-    var editor = gPrefs.getValue(this.EDITOR_PREF, null);
-    $("#editorInputBox").val(editor);
-    this.onFeedTypeChange();
+    $("#editorInputBox").val(gPrefs.get(this.EDITOR_PREF, ""));
   },
   onSave: function () {
-    gPrefs.setValue(this.EDITOR_PREF, $("#editorInputBox").val());
+    gPrefs.set(this.EDITOR_PREF, $("#editorInputBox").val());
   },
   launchEditor: function (value) {
     var editor = gPrefs.getValue(this.EDITOR_PREF, null);
@@ -92,13 +81,11 @@ var Editor = {
     executable.followLinks = true;
     executable.initWithPath(isOSX ? "/usr/bin/open" : editor);
     if (executable.exists()) {
-      var file = Utils.DirectoryService.get("TmpD", Ci.nsIFile);
+      let file = Utils.DirectoryService.get("TmpD", Ci.nsIFile);
       file.append("ubiquity.tmp.js");
       file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
 
-      Utils.reportInfo("temp file path    : " + file.path);
-      // file is nsIFile, data is a string
-      var foStream = (Cc["@mozilla.org/network/file-output-stream;1"]
+      let foStream = (Cc["@mozilla.org/network/file-output-stream;1"]
                       .createInstance(Ci.nsIFileOutputStream));
 
       // use 0x02 | 0x10 to open file for appending.
@@ -109,22 +96,13 @@ var Editor = {
       foStream.write(value, value.length);
       foStream.close();
       try {
-        var process = (Cc["@mozilla.org/process/util;1"]
+        let process = (Cc["@mozilla.org/process/util;1"]
                        .createInstance(Ci.nsIProcess));
         process.init(executable);
-        var args = new Array();
-        if (isOSX) {
-          args[0] = "-a";
-          args[1] = editor;
-          args[2] = file.path;
-        }
-        else {
-          args[0] = file.path;
-        }
-        Utils.reportInfo("Executable : " + executable);
-        Utils.reportInfo("args       : " + args);
+        let args = [];
+        if (isOSX) args.push("-a", editor, file.path);
+        else args[0] = file.path;
         ret = process.run(false, args, args.length);
-        Utils.reportInfo("ret code   : " + ret);
       } catch (e) {
         Cu.reportError(e);
         displayMessage("Error running editor : " + e);
@@ -161,16 +139,8 @@ var Editor = {
 
 function paste() {
   try {
-    var feedType = $("#feedTypeMenu").val();
-    var editor = document.getElementById("editor-div");
     var code = editor.value;
-    if (feedType === "commands")
-      pasteToGist("x", code, /^\s*</.test(code) ? "xhtml" : "js");
-    else if (feedType === "locked-down-commands") {
-      var url = ("http://ubiquity.mozilla.com/locked-down-feeds/" +
-                 "?initial_content=" + encodeURIComponent(code));
-      Utils.openUrlInBrowser(url);
-    }
+    pasteToGist("x", code, /^\s*</.test(code) ? "xhtml" : "js");
   } catch (e) {
     Cu.reportError(e);
     displayMessage(e);
@@ -186,31 +156,23 @@ function importTemplate() {
 function saveAs() {
   try {
     const {nsIFilePicker} = Ci;
-
     var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
     fp.init(window, L("ubiquity.editor.savecommands"), nsIFilePicker.modeSave);
-
-    //Save as a javascript file
-    //fp.appendFilters(nsIFilePicker.filterAll);
     fp.appendFilter("JavaScript", "*.js");
+    if (fp.show() == nsIFilePicker.returnCancel) return;
 
-    var rv = fp.show();
-    if (rv === nsIFilePicker.returnOK || rv === nsIFilePicker.returnReplace) {
-      saveTextToFile(editor.value, fp.file);
-
-      let feedMgr = UbiquitySetup.createServices().feedManager;
-      feedMgr.addSubscribedFeed({
-        url: fp.fileURL.spec,
-        sourceUrl: fp.fileURL.spec,
-        sourceCode: "",
-        canAutoUpdate: true});
-
-      PrefCommands.setCode(editor.value = "");
-
-      $("#editor-log").html(
-        "<p>" + L("ubiquity.editor.savelogmsgp1", "<strong>" + fp.file.path + "</strong>") 
-        + "</p><p>" + L("ubiquity.editor.savelogmsgp2") + "</p>");
-    }
+    saveTextToFile(editor.value, fp.file);
+    UbiquitySetup.createServices().feedManager.addSubscribedFeed({
+      title: fp.file.leafName,
+      sourceUrl: fp.fileURL.spec,
+      sourceCode: "",
+      canAutoUpdate: true,
+    });
+    PrefCommands.setCode(editor.value = "");
+    $("#editor-log").html(
+      "<p>" + L("ubiquity.editor.savelogmsgp1",
+                "<strong>" + H(fp.file.path) + "</strong>") + "</p>" +
+      "<p>" + L("ubiquity.editor.savelogmsgp2") + "</p>");
   } catch (e) {
     Cu.reportError(e);
     displayMessage(e);
@@ -234,12 +196,12 @@ function saveTextToFile(text, file) {
 }
 
 function displayMessage(msg) {
-  $("#notification-bar").text(msg).show("fast");
+  $("#notification-bar").hide().text(msg).show("fast");
 }
 
 function onload() {
-  initialize();
   var [ubcb] = $("#usebespin").change(changeEditor);
   ubcb.checked = gPrefs.get("extensions.ubiquity.editor.useBespin", true);
   changeEditor.call(ubcb);
+  Editor.onLoad();
 }

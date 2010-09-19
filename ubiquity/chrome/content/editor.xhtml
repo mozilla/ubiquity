@@ -59,21 +59,8 @@
 
   <div id="external-editor-pref">
     &ubiquity.editor.YourExternalEd;
-    <input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
-  </div>
-
-  <br />
-
-  <div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
-    <select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
-      <option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
-      <option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
-    </select>
-  </div>
-
-  <div>
-    <span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
-    <span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDesc;</span>
+    <input id="editorInputBox" type="file" size="42"
+     onchange="Editor.onSave()"/>
   </div>
 
   <br />
