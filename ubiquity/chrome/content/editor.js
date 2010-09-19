@@ -165,7 +165,6 @@ function saveAs() {
     UbiquitySetup.createServices().feedManager.addSubscribedFeed({
       title: fp.file.leafName,
       sourceUrl: fp.fileURL.spec,
-      sourceCode: "",
       canAutoUpdate: true,
     });
     PrefCommands.setCode(editor.value = "");

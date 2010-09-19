@@ -157,7 +157,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 //     which is cached.
 //   * {{{canAutoUpdate}}} specifies whether or not the latest version
 //     of the feed's source code should be fetched from the
-//     network. If this is {{{false}}}, then the feed manager will
+//     network. If this isn't {{{true}}}, then the feed manager will
 //     only ever use the cached version of the source code.
 //   * {{{title}}} is the human-readable name for the feed.
 
@@ -172,12 +172,14 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
                            info.type || DEFAULT_FEED_TYPE, 0, expiration);
   annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO,
                            info.sourceUrl, 0, expiration);
-  annSvc.setPageAnnotation(uri, FEED_SRC_ANNO,
-                           info.sourceCode, 0, expiration);
-  annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO,
-                           info.canAutoUpdate, 0, expiration);
   annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO,
                            "true", 0, expiration);
+  if (info.sourceCode)
+    annSvc.setPageAnnotation(uri, FEED_SRC_ANNO,
+                             info.sourceCode, 0, expiration);
+  if (info.canAutoUpdate)
+    annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO,
+                             !!info.canAutoUpdate, 0, expiration);
   if (info.url)
     annSvc.setPageAnnotation(uri, FEED_URL_ANNO,
                              info.url, 0, expiration);
