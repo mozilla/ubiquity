@@ -105,36 +105,13 @@ var UbiquitySetup = {
   },
 
   __maybeReset: function __maybeReset() {
-    if (this.isResetScheduled) {
-      // Reset all feed subscriptions.
-      let annDb = AnnotationService.getProfileFile(ANN_DB_FILENAME);
-      if (annDb.exists())
-        annDb.remove(false);
+    if (!this.isResetScheduled) return;
 
-      // We'll reset the preferences for our extension here.  Unfortunately,
-      // there doesn't seem to be an easy way to get this from FUEL, so
-      // we'll have to use XPCOM directly.
-      var prefs = (Cc["@mozilla.org/preferences-service;1"]
-                   .getService(Ci.nsIPrefService));
-      prefs = prefs.getBranch("extensions.ubiquity.");
-
-      // Ideally we'd call prefs.resetBranch() here, but according to MDC
-      // the function isn't implemented yet, so we'll have to do it
-      // manually.
-      var children = prefs.getChildList("", {});
-      children.forEach(
-        function eachChild(name) {
-          if (prefs.prefHasUserValue(name))
-            prefs.clearUserPref(name);
-        });
-
-      // Reset suggestion memory:
-      new SuggestionMemory("main_parser").wipe();
-
-      // This is likely redundant since we just reset all prefs, but we'll
-      // do it for completeness...
-      this.isResetScheduled = false;
-    }
+    // Reset feed subscriptions, preferences and suggestion memory.
+    let annDb = AnnotationService.getProfileFile(ANN_DB_FILENAME);
+    if (annDb.exists()) annDb.remove(false);
+    gPrefs.resetBranch("extensions.ubiquity.");
+    new SuggestionMemory("main_parser").wipe();
   },
 
   getBaseUri: function getBaseUri() this.baseUrl,

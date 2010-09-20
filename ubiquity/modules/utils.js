@@ -1050,7 +1050,9 @@ function extend(target) {
 const {PREF_STRING, PREF_BOOL, PREF_INT} = Ci.nsIPrefBranch;
 
 defineLazyProperty(this, function gPrefBranch() (
-  Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2)));
+  Cc["@mozilla.org/preferences-service;1"]
+  .getService(Ci.nsIPrefService)
+  .QueryInterface(Ci.nsIPrefBranch2)));
 
 var gPrefs = Utils.prefs = {
   // === {{{ Utils.prefs.getValue(name, value = undefined) }}} ===
@@ -1086,6 +1088,20 @@ var gPrefs = Utils.prefs = {
       default: throw TypeError("invalid pref value");
     }
     return value;
+  },
+  // === {{{ Utils.prefs.reset(name) }}} ===
+  // Resets the {{{name}}}d preference to the default value.
+  // Returns a boolean indicating whether or not the reset succeeded.
+  reset: function prefs_reset(name)
+    gPrefBranch.prefHasUserValue(name) && !gPrefBranch.clearUserPref(name),
+  // === {{{ Utils.prefs.resetBranch(name) }}} ===
+  // Resets all preferences that start with {{{name}}} to the default values.
+  // Returns an array of preference names that were reset.
+  resetBranch: function prefs_resetBranch(name) {
+    var names = (gPrefBranch.getChildList(name, {})
+                 .filter(gPrefBranch.prefHasUserValue));
+    names.forEach(gPrefBranch.clearUserPref);
+    return names;
   },
   __noSuchMethod__:
   function prefs_pass(name, args) gPrefBranch[name].apply(gPrefBranch, args),

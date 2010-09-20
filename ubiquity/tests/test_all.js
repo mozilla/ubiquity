@@ -542,12 +542,17 @@ function testUtilsPrefs() {
 
   var {prefs} = Utils;
   var p = "extensions.ubiquity.test";
-  this.assertEquals(prefs.getValue(p, p), p);
-  for each (let v in ["str", true, 42]) {
-    prefs.setValue(p, v);
-    this.assertEquals(prefs.getValue(p), v);
-    prefs.deleteBranch(p);
+  this.assertEquals(prefs.get(p, p), p);
+  this.assert(!prefs.reset(p));
+  for each (let v in ["\u2713", true, 42]) {
+    prefs.set(p, v);
+    this.assertEquals(prefs.get(p), v);
+    this.assert(prefs.reset(p));
   }
+  prefs.set(p + 1, 0);
+  prefs.set(p + 2, 0);
+  this.assertEquals(uneval(prefs.resetBranch(p).sort()),
+                    uneval([p + 1, p + 2]));
 }
 
 function testUtilsEscapeUnescapeHtml() {
