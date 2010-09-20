@@ -367,44 +367,48 @@ function setLastResult(result) {
 // with a geolocation object. If specified, {{{getGeoLocation}}} returns
 // the requesting {{{XMLHttpRequest}}} instead.
 //
-// The geolocation object has the following properties:
-// {{{ city }}}, {{{ state }}}, {{{ country }}}, {{{ country_code }}},
-// {{{ lat }}}, {{{ lon }}}.
-// (For a list of country codes, refer to http://www.maxmind.com/app/iso3166)
+// The geolocation object has at least the following properties:
+//   {{{lat}}}, {{{lon}}}, {{{city}}}, {{{state}}}, {{{country}}}
+// (See [[http://code.google.com/apis/maps/documentation/geocoding/#Types]]
+//  for a list of possible properties.)
 //
 // You can choose to use the function synchronously: do not pass in any
 // callback, and the geolocation object will instead be returned
 // directly.
 
 function getGeoLocation(callback) {
-  if (callback) {
-    var xhr = Utils.currentChromeWindow.XMLHttpRequest();
+  if (!callback)
+    return getGeoLocation.cache || getGeoLocation(function fetch() {});
+
+  const GL = (Cc["@mozilla.org/geolocation;1"]
+              .getService(Ci.nsIDOMGeoGeolocation));
+  return GL.getCurrentPosition(function got({coords}) {
+    var loc = {lat: coords.latitude, lon: coords.longitude};
+    var url = ("http://maps.google.com/maps/api/geocode/json?sensor=false" +
+               "&latlng=" + loc.lat + "," + loc.lon);
+    var xhr = new Utils.currentChromeWindow.XMLHttpRequest;
     xhr.mozBackgroundRequest = true;
-    xhr.open("GET", "http://j.maxmind.com/app/geoip.js", true);
-    xhr.overrideMimeType("text/plain");
-    xhr.onload = function getGL_onload() {
-      eval(xhr.responseText);
-      var lon = geoip_longitude();
-      callback(getGeoLocation.cache = {
-        city: geoip_city(),
-        state: geoip_region_name(),
-        country: geoip_country_name(),
-        country_code: geoip_country_code(),
-        lat: geoip_latitude(),
-        lon: lon, "long": lon,
-      });
+    xhr.open("GET", url, true);
+    xhr.onload = function loaded() {
+      do {
+        if (this.status != 200) break;
+        let dat = JSON.parse(this.responseText);
+        if (dat.status != "OK") break;
+        for each (let result in dat.results)
+          for each (let address in result.address_components)
+            for each (let type in address.types)
+              if (!loc[type]) loc[type] = address.long_name;
+        loc.country = loc.country || loc.political;
+        loc.city    = loc.locality;
+        loc.state   = loc.administrative_area_level_1;
+      } while (0);
+      callback(getGeoLocation.cache = loc);
     };
-    xhr.send(null);
-    return xhr;
-  }
-  if ("cache" in getGeoLocation) return getGeoLocation.cache;
-  getGeoLocation(function fetch(){});
-  return null;
+    xhr.send();
+  }, null, {enableHighAccuracy: true});
 }
 getGeoLocation(); // prefetch
 
-// TODO: UserCode is only used by experimental-commands.js.  Does it still
-// need to be included here?
 CmdUtils.UserCode = {
   //Copied with additions from chrome://ubiquity/content/prefcommands.js
   COMMANDS_PREF : "extensions.ubiquity.commands",
@@ -742,9 +746,9 @@ CreateCommand.previewDefault = function previewDefault(pb) {
       html += '<div class="description">' + this.description + '</div>';
     if ("help" in this)
       html += '<p class="help">' + this.help + '</p>';
-    if (!html)
-      html = L("ubiquity.cmdutils.previewdefault", 
-               "<strong class='name'>" + Utils.escapeHtml(this.name) + "</strong>");
+    if (!html) html = L(
+      "ubiquity.cmdutils.previewdefault",
+      '<strong class="name">' + Utils.escapeHtml(this.name) + "</strong>");
     html = '<div class="default">' + html + '</div>';
   }
   return (pb || 0).innerHTML = html;
@@ -942,7 +946,8 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
   }
   var {parser, global} = this, html = Utils.escapeHtml(text);
   put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
-      parser ? "<p class='loading'>" + L("ubiquity.cmdutils.loadingresults") + "</p>" : "");
+      !parser ? "" :
+      "<p class='loading'>" + L("ubiquity.cmdutils.loadingresults") + "</p>");
   if (!parser) return;
 
   var {type, keys} = parser;
@@ -1045,13 +1050,14 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
       if (++i >= max) break;
     }
 
+    var query = "<strong>" + html + "</strong>";
     put(list
-        ? ("<span class='found'>" + 
-           L("ubiquity.cmdutils.parsedresultsfound", "<strong>" + html + "</strong>") +
+        ? ("<span class='found'>" +
+           L("ubiquity.cmdutils.parsedresultsfound", query) +
            "</span><dl class='list'>" + list + "</dl>")
-        : "<span class='empty'>" + 
-          L("ubiquity.cmdutils.parsedresultsnotfound", "<strong>" + html + "</strong>") +
-          "</span>");
+        : ("<span class='empty'>" +
+           L("ubiquity.cmdutils.parsedresultsnotfound", query) +
+           "</span>"));
     global.CmdUtils.absUrl(pblock, parser.baseUrl);
   }
 };
