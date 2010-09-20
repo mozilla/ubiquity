@@ -944,8 +944,9 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
     pblock.innerHTML =
       "<div class='search-command'>" + Array.join(arguments, "") + "</div>";
   }
-  var {parser, global} = this, html = Utils.escapeHtml(text);
-  put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), html),
+  var {parser, global} = this, queryHtml =
+    "<strong class='query'>" + Utils.escapeHtml(text) + "</strong>";
+  put(L("ubiquity.cmdutils.searchcmd", Utils.escapeHtml(this.name), queryHtml),
       !parser ? "" :
       "<p class='loading'>" + L("ubiquity.cmdutils.loadingresults") + "</p>");
   if (!parser) return;
@@ -1050,13 +1051,12 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
       if (++i >= max) break;
     }
 
-    var query = "<strong>" + html + "</strong>";
     put(list
         ? ("<span class='found'>" +
-           L("ubiquity.cmdutils.parsedresultsfound", query) +
+           L("ubiquity.cmdutils.parsedresultsfound", queryHtml) +
            "</span><dl class='list'>" + list + "</dl>")
         : ("<span class='empty'>" +
-           L("ubiquity.cmdutils.parsedresultsnotfound", query) +
+           L("ubiquity.cmdutils.parsedresultsnotfound", queryHtml) +
            "</span>"));
     global.CmdUtils.absUrl(pblock, parser.baseUrl);
   }
@@ -1082,14 +1082,14 @@ makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
 
 function makeBookmarkletCommand(options) {
   options.execute = makeBookmarkletCommand.execute;
-  "preview" in options || (options.preview = makeBookmarkletCommand.preview);
-  return this.CreateCommand(options);
+  var cmd = this.CreateCommand(options);
+  if (!("description" in options)) options.description = L(
+    "ubiquity.cmdutils.bookmarkletexec",
+    '<strong class="name">' + Utils.escapeHtml(cmd.name) + '</strong>');
+  return cmd;
 }
 makeBookmarkletCommand.execute = function bookmarklet_execute() {
   getWindow().location = this.url;
-};
-makeBookmarkletCommand.preview = function bookmarklet_preview(pblock) {
-  pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
 };
 
 // == TEMPLATING ==
