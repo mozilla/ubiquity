@@ -475,3 +475,14 @@ CmdUtils.CreateCommand({
     ><button id="quit" title="Quit" accesskey="q">&#xD7;</button
     ></nobr></body>),
 });
+
+CmdUtils.makeBookmarkletCommand({
+  names: ["SkyWriter", "Bespin"],
+  homepage: "http://mozillalabs.com/skywriter/",
+  icon: "http://bespin.mozillalabs.com/favicon.ico",
+  url: "javascript: void new " + function () {
+    var script = document.createElement("script");
+    script.src = "https://bespin.mozillalabs.com/bookmarklet/bookmarklet.js";
+    document.body.removeChild(document.body.appendChild(script));
+  },
+});
