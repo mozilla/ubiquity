@@ -5,6 +5,7 @@
     <id>ubiquity@labs.mozilla.com</id>
     <version>0.6.1pre</version>
     <type>2</type>
+    <unpack>true</unpack>
 
     <!-- Target Application this extension can install into,
          with minimum and maximum supported versions. -->
