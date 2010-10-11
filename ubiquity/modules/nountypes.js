@@ -906,6 +906,7 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Italian: "it",
   Japanese: "ja",
   Korean: "ko",
+  Latin: "la",
   Latvian: "lv",
   Lithuanian: "lt",
   Macedonian: "mk",
