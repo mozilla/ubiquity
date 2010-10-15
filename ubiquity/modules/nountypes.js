@@ -46,8 +46,9 @@
 // * common properties.
 // ** {{{suggest}}}
 // ** {{{default}}}
-// ** {{{noExternalCalls}}}
 // ** {{{label}}} (, {{{name}}}, {{{id}}})
+// ** {{{noSelection}}}
+// ** {{{noExternalCalls}}}
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
@@ -1119,6 +1120,7 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
     return o;
   }, {});
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
+  ntl.noSelection = true;
 }
 {
   let locale =

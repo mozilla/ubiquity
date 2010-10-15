@@ -654,14 +654,6 @@ PartiallyParsedSentence.prototype = {
     return newPPS;
   },
 
-  _getUnfilledArguments: function PPS__getUnfilledArguments() {
-    // Returns list of the names of all arguments the verb expects for which
-    // no argument was provided in this partially parsed sentence.
-    return [argName
-            for (argName in this._verb.args)
-            if (!this._argStrings[argName])];
-  },
-
   getAlternateSelectionInterpolations:
   function PPS_getAlternateSelectionInterpolations() {
     let alternates = [this];
@@ -670,8 +662,10 @@ PartiallyParsedSentence.prototype = {
     // the selection could go.
     // If the selection can't be used, returns a
     // list containing just this object.
-    let unfilledArgs = this._getUnfilledArguments();
-    if (unfilledArgs.length === 0) return alternates;
+    let unfilledArgs = [
+      name for ([name, arg] in new Iterator(this._verb.args))
+      if (!this._argStrings[name] && !arg.type.noSelection)];
+    if (!unfilledArgs.length) return alternates;
 
     let {text, html, fake} = this._selObj;
     let indices = [0, fake ? 0 : text.length];
