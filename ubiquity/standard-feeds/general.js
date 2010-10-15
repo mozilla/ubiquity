@@ -306,7 +306,7 @@ CmdUtils.CreateCommand({
     {role: "source", nountype: noun_type_lang_google},
     {role: "goal",   nountype: noun_type_lang_google}],
   description: "Translates from one language to another.",
-  icon: "chrome://ubiquity/skin/icons/google.ico",
+  icon: "chrome://ubiquity/skin/icons/translate_google.ico",
   help: "" + (
     <>You can specify the language to translate to,
     and the language to translate from.
