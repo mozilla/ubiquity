@@ -1,0 +1,59 @@
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetitle.PlayPen "Pískoviště Parseru 2 &appTitle;">
+<!ENTITY ubiquity.pagetitle.QuickLaunch "Snadné spuštění &appTitle; z plochy">
+<!ENTITY ubiquity.pagetitle.Persistence "Projekt trvání Ubiquity">
+<!ENTITY ubiquity.pagetitle.SuggMemDebug "Ladička paměti návrhů">
+<!ENTITY ubiquity.pagetitle.TestSuite "Testovací sada &appTitle;">
+<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; Ladič typu jména">
+<!-- Common errors -->
+<!ENTITY ubiquity.error.WarningParser2 "Nepoužíváte Parser 2! Ladič typu jména funguje v současné době pouze s Parserem 2. <a href='chrome://ubiquity/content/settings.xhtml'>Zapněte Parser 2 (parser nové generace)</a>, restartujte Firefox a zkuste to znovu">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> was not loaded properly. Most likely this means you loaded this page at the same time that you loaded the window, and this page loaded before the window chrome, in which case you can just reload this page and it should work. Otherwise, there may actually be a problem with some code.">
+<!-- Common strings -->
+<!ENTITY ubiquity.common.OptionAutoRun "automaticky parsovat po aktualizaci">
+<!ENTITY ubiquity.common.OptionGSync "synchronizovat s <code>gUbiquity</code>">
+<!ENTITY ubiquity.common.ButtonRun "spustit!">
+<!ENTITY ubiquity.common.HeaderSettings "Nastavení">
+<!-- Test Suite chrome/content/playpen.xhtml -->
+<!ENTITY ubiquity.playpen.Header "Pískoviště Parseru 2 &appTitle;">
+<!ENTITY ubiquity.playpen.ShortDesc "This is a parser testing and optimization playpen for the upcoming Ubiquity parser.">
+<!ENTITY ubiquity.playpen.OptionMaxSuggs "maximum návrhů:">
+<!ENTITY ubiquity.playpen.OptionShowInfo "zobrazit informace o parsování">
+<!ENTITY ubiquity.playpen.OptionShowLineage "display parse lineage">
+<!ENTITY ubiquity.playpen.FlushOnParse "flush cache on parse (necessary for accurate timings)">
+<!ENTITY ubiquity.playpen.WordTimes "krát">
+<!ENTITY ubiquity.playpen.SelectionText "selection text (for anaphora substitution):">
+<!ENTITY ubiquity.playpen.EnvironmentInfo "Environment info <small>(click me to toggle)</small>">
+<!ENTITY ubiquity.playpen.ActiveSemanticRoles "Active semantic roles:">
+<!ENTITY ubiquity.playpen.NotesOverlapping "(overlapping roles with the same delimiters indicate synonymous delimiters)">
+<!ENTITY ubiquity.playpen.ActiveNounTypes "Aktivní typy jmen:">
+<!ENTITY ubiquity.playpen.ScoreFunctions "(pro hodnocení funkcí si zobrazte zzdroj)">
+<!ENTITY ubiquity.playpen.ActiveVerbs "Aktivní slovesa:">
+<!ENTITY ubiquity.playpen.WordSuggestions "Návrhy">
+<!ENTITY ubiquity.playpen.WordKey "KLÍČ:">
+<!ENTITY ubiquity.playpen.WordVerb "sloveso">
+<!ENTITY ubiquity.playpen.WordObject "objekt">
+<!ENTITY ubiquity.playpen.WordPrefix "předpona">
+<!ENTITY ubiquity.playpen.WordArgument "argument">
+<!ENTITY ubiquity.playpen.VerbsNote "(hover over the verb to see the actual verb and over prefixes to see the associated semantic role)">
+<!ENTITY ubiquity.playpen.CurrentParse "Aktuální parsování:">
+<!ENTITY ubiquity.playpen.AvgTimingResults "ms (průměr: <span class='avg'></span> ms)">
+<!ENTITY ubiquity.playpen.ParseTree "Strom parsování aktuálního výrazu:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
+<!ENTITY ubiquity.quicklaunch.Header "Rychlé spuštění z plochy">
+<!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Rychlé spuštění z plochy</strong> je velmi experimentální funkce, která vám umožní vyvolat &appTitle; kdekoliv ve vašem počítači i mimo prohlížeč.">
+<!ENTITY ubiquity.quicklaunch.LongDesc1 "Právě teď je tato funkce podporována pouze na OS X, ale do budoucna plánujeme i podporu ostatních platforem.">
+<!ENTITY ubiquity.quicklaunch.LongDesc2 "Pro povolení rychlého spuštění z plochy klikněte na tlačítko níže. Jakmile to povolíte, můžete vyvolat Ubiquity kdekoliv na svém počítači.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
+<!ENTITY ubiquity.testsuite.ShowSuccess "Zobrazit úspěšné testy">
+<!ENTITY ubiquity.testsuite.ShowSkipped "Zobrazit přeskočené testy">
+<!ENTITY ubiquity.testsuite.ShowFailed "Zobrazit testy, které selhaly">
+<!ENTITY ubiquity.testsuite.TestsRunning "Testy běží...">
+<!-- Test Suite chrome/content/tuner.xhtml -->
+<!ENTITY ubiquity.tuner.Header "&appTitle; Ladič typu jména">
+<!ENTITY ubiquity.tuner.ShortDesc "Tento ladič vám umožní testovat různé vstupy oproti aktivním typům jmen a ověřovat jejich návrhy. Toto je obzvláště užitečné pro vývojáře, aby se dozvěděli jak upravit své typy jmen pro hodnocení návrhů. <strong>POZNÁMKA: při každé spuštění vymaže ladič typu jmen <code>nounCache</code>.</strong>">
+<!ENTITY ubiquity.tuner.OptionMaxSuggs "maximální počet návrhů na typ jména:">
+<!ENTITY ubiquity.tuner.OptionParserTip "používá stejný parser jako současná instance &appTitle;">
+<!ENTITY ubiquity.tuner.OptionGSync "synchronizovat s <code>gUbiquity</code>">
+<!ENTITY ubiquity.tuner.HeaderSuggestions "Návrhy">
+<!ENTITY ubiquity.tuner.THeadNounType "typ jména">
+<!ENTITY ubiquity.tuner.THeadSuggestion "návrh">

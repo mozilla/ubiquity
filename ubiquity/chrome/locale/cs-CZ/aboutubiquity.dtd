@@ -1,0 +1,165 @@
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetitle.About "O doplňku &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "Nastavení a vzhledy &appTitle;">
+<!ENTITY ubiquity.pagetitle.YourCommands "Příkazy &appTitle;">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&appTitle; Příkazy - Lokalizační šablona">
+<!ENTITY ubiquity.pagetitle.Support "Podpora &appTitle;">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Editor příkazů &appTitle;">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Příkaz z nedůvěryhodného zdroje &appTitle;">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Restartovat &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, máme problém!">
+<!-- Page header taglines -->
+<!ENTITY ubiquity.tagline.About "Nesurfujte na webu. Přikazujte mu.">
+<!ENTITY ubiquity.tagline.Settings "Nastavení a vzhledy">
+<!ENTITY ubiquity.tagline.YourCommands "Wherein are listed the commands at your disposal.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "Pro globalizaci je nutná lokalizace.">
+<!ENTITY ubiquity.tagline.Support "Pomozte!">
+<!ENTITY ubiquity.tagline.HackUbiquity "Hacknout to.">
+<!-- Header page tips -->
+<!ENTITY ubiquity.pagetip.About "Na tuto stránku se můžete kdykoliv dostat pomocí příkazu &ldquo;help&rdquo; command.">
+<!ENTITY ubiquity.pagetip.Settings "Na tuto stránku se můžete kdykoliv dostat pomocí příkazu &ldquo;change ubiquity settings&rdquo;.">
+<!ENTITY ubiquity.pagetip.YourCommands "Na tuto stránku se můžete kdykoliv dostat pomocí příkazu &ldquo;list ubiquity commands&rdquo;.">
+<!ENTITY ubiquity.pagetip.Support "Na tuto stránku se můžete kdykoliv dostat pomocí příkazu &ldquo;get support&rdquo;.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "Na tuto stránku se můžete kdykoliv dostat pomocí příkazu &ldquo;write ubiquity commands&rdquo;.">
+<!-- Buttons, Buttons and more Buttons. Here are our generic editor buttons found everywhere an editor resides -->
+<!ENTITY ubiquity.generic.ImportTemplate "Importovat ze šablony">
+<!ENTITY ubiquity.generic.LaunchExternalEd "Spustit externí editor">
+<!ENTITY ubiquity.generic.EnableHighlighting "Povolit zvýrazňování syntaxe">
+<!ENTITY ubiquity.generic.ButtonEdit "Upravit">
+<!ENTITY ubiquity.generic.ButtonSave "Uložit">
+<!ENTITY ubiquity.generic.ButtonSaveAs "Uložit jako">
+<!ENTITY ubiquity.generic.ButtonShare "Sdílet">
+<!-- End common elements -->
+<!-- Everything from here down is page by page in no particular page order -->
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Co je &appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; je doplněk pro Firefox, který zpřístupňuje příkazy zadávané do speciálního vstupního pole.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Příkazy jsou zkratky pro věci, které na Webu obvykle děláte; mohou vyřadit opakující se úlohy a umožnit vám tak udělat více věcí rychleji.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Nejskvělejší věc na &appTitle; je, že každý může napsat vlastní příkaz a sdílet ho se zbytkem světa v podstatě stejným způsobem jako Web umožňuje každému psát stránky a sdílet informace se zbytkem světa.">
+<!ENTITY ubiqutiy.about.LearnHow "Naučit se jak používat &appTitle;">
+<!ENTITY ubiqutiy.about.TutorialButton "Pro interaktivní tutoriál klepněte sem">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Více o použití &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "Po základním tutoriálu na této stránce, se můžete naučit více přečtením <a href='&link.extDocs;'>podrobné dokumentace</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Pomozte nám odebíráním <a href='&link.herdMain;'>Herdu</a>. To přidá vaše data na <a href='&link.herdDash;'>panel</a> &mdash; je to naprosto anonymní a umožní nám to učinit &appTitle; lepší a bezpečnější.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Pro více informací o cílech projektu &appTitle; a našich plánech do budoucích vydání shlédněte <a href='&link.roadmap;'>plán</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href='&link.credits;'>credits page</a>.">
+<!ENTITY ubiqutiy.about.Thanks "Děkujeme vám za poiužívání &appTitle; &appVersion;!">
+<!ENTITY ubiquity.about.ThanksParagraph "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the <a href='&link.releaseNotes;'>&appTitle; &appVersion; Release notes</a>.">
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.settings.Skins "Vzhledy">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "Upravit vlastní vzhled">
+<!ENTITY ubiquity.settings.KeyCombination "Kombinace kláves">
+<!ENTITY ubiquity.settings.InvokingUbiquity "Vyvolejte &appTitle; stisknutím:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Pro změnu klávesové zkratky použité pro otevření a zavření &appTitle; klikněte na <strong>Změnit</strong> umístěné výše.">
+<!ENTITY ubiquity.settings.LangSettings "Nastavení jazyka">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 je experimentální parser nové generace pro &appTitle; a nemusí v něm fungovat všechny příkazy, avšak podporuje více jazyků.">
+<!ENTITY ubiquity.settings.UseParser2 "Použít Parser 2 (parser nové generace)">
+<!ENTITY ubiquity.settings.SelectLanguage "Jazyk:">
+<!ENTITY ubiquity.settings.MiscSettings "Různá nastavení">
+<!ENTITY ubiquity.settings.MaxSuggestions "Maximální počet návrhů:">
+<!ENTITY ubiquity.settings.Parser2Context "Parser 2">
+<!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Povolit externí volání pro všechny dotazy parseru 2">
+<!ENTITY ubiquity.settings.NotificationWarning "Pokud používáte Growl pro Windows, ujistěte se, zda je spuštěn. Pokud ne, neobdržíte žádná oznámení.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "Pro získávání <a href='&link.libNotify;'>oznámení od libnotify</a> fungující na Linuxu, si musíte nejprve nainstalovat balíček libnotify-bin pomocí správce balíčků Synaptic na Ubuntu nebo spuštěním <code>sudo aptitude install libnotify-bin</code>, popř. ekvivalentu tohoto příkazu pro vaši distribuci.">
+<!ENTITY ubiquity.settings.NotificationSettings "Nastavení oznamování">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity široce využívá průsvitná nemodální oznámení. Na OS X to může být uskutečněno díky aplikaci Growl. Windows to zobrazí jako oznámení aplikace <a href='&link.snarl;'>Snarl</a>, <a href='&link.growlWin;'>Growlu pro Windows</a> nebo oznámení &ldquo;toasteru&rdquo; v pravém dolním rohu obrazovky. Pokud máte nainstalován a spuštěn <a href='&link.snarl;'>Snarl</a>, Ubiquity se ho pokusí automaticky detekovat a použije ho pro posílání oznámení.">
+<!ENTITY ubiquity.settings.NotificationEnable "Povolit oznamovací služby">
+<!ENTITY ubiquity.settings.CustomSkin "Editor vlastního vzhledu">
+<!ENTITY ubiquity.settings.SaveSkin "Uložit">
+<!ENTITY ubiquity.settings.SaveSkinAs "Uložit jako">
+<!ENTITY ubiquity.settings.ShareSkin "Sdílet">
+<!ENTITY ubiquity.settings.SaveNotice "Klepnutím na uložit se okamžitě změní vzhled &appTitle;.">
+<!ENTITY ubiquity.settings.Bug449Warning "Vámi provedené změny vlastního vzhledu se nemusí projevit do restartu prohlížeče. Toto je <a href='&link.bug449;'>známá chyba</a>.">
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "Máte &cmdCount; příkazů v &feedCount; kanálech. | Zrušili jste odběr <a href='&chrome.graveyard;'>&unsubCount; zdrojů příkazů</a>. | &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Všechny příkazy, které &appTitle; rozpozná jsou uvedeny v pravém sloupci. Černý text je název příkazu (který pro použití napíšete do &appTitle;). Šedě je vysvětlení co daný příkaz dělá.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "Levý sloupec zobrazuje všechny &ldquo;kanály&rdquo;, které &appTitle; odebírá. Každý kanál může obsahovat více příkazů.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Tuto stránku můžete zobrazit řazenou podle kanálů nebo příkazů. Klikněte na některý z odkazů vedle &ldquo;řadit podle&rdquo;, níže.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Pokud je zde příkaz, který nechcete, odškrtněte zaškrtávací pole vedle něj. Příkaz vrátíte zpět opětovným zaškrtnutím tohoto pole.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Pokud už nechcete odebírat celý kanál, klikněte na odkaz &ldquo;[zrušit odběr]&rdquo; pod názvem kanálu. Všechny příkazy v kanálu přestanou fungovat. Pokud změníte názor, v dolní části stránky se nachází odkaz na obnovení odběru.">
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "Odebírané kanály">
+<!ENTITY ubiquity.commandlist.AvailableCommands "Příkazy">
+<!ENTITY ubiquity.commandlist.SortBy "Řadit podle:">
+<!ENTITY ubiquity.commandlist.SortByFeed "Název kanálu">
+<!ENTITY ubiquity.commandlist.SortByDate "Datum odběru">
+<!ENTITY ubiquity.commandlist.SortByEnabled "Poboleno">
+<!ENTITY ubiquity.commandlist.SortByCommand "Název příkazu">
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Kanály se zrušeným odběrem">
+<!ENTITY ubiquity.commandlist.GraveYardText "Tyto kanály jste dříve odebírali. Pokud chcete některý kanál znovu odebírat, klepněte na odkaz &ldquo;[znovu odebírat]&rdquo; pod ním.">
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "Získávání nápovědy">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Kvůli neobvyklé povaze &appTitle; (laboratorní experiment), se můžete během používání dostat do problémů. Existuje spousta míst, kam si můžete zajít pro pomoc s &appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a> je komunitou řízená stránka podpory. Velké množství obecných problémů s &appTitle; již zde bylo vyřešeno a pokud zde nenaleznete odpověď na svou otázku, můžete založit vlastní téma.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>Naše skupina na Google Groups/E-Mailová konference</a> je vhodná pro diskusi o vývoji příkazů, uživatelském rozhraní, návrhu nových funkcí, stejně jako o ostatních tématech vysoké technické úrovně.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>&appTitle; Wiki</a> také obsahuje informace o celém projektu &appTitle; (včetně dokumentace, tutoriálů, a odkazů na starší verze &appTitle;).">
+<!ENTITY ubiquity.support.ReportBugs "Oznámit chybu">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "Pracujeme na automatizované službě pro hlášení chyb, ale dokud nebude hotova, měli byste veškeré reprodukovatelné problémy hlásit pomocí Get Satisfaction nebo skrz naší skupiny na Google Groups/E-Mailové konference.">
+<!ENTITY ubiquity.support.ResetUbiquity "Resetování &appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Pokud vám aplikace &appTitle; přestane odpovídat, může být nutné ji před opětovným použitím vrátit na její &ldquo;výchozí výrobní nastavení&rdquo;. Pro provedení obnovy, <a href='&chrome.reset;'>klikněte zde</a> &mdash; a přijměte prosím naši omluvu za tímto způsobené nepříjemnosti!">
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "Editor příkazů &appTitle;">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "Do oblasti níže <strong>zadejte nové příkazy</strong>. Jakmile je napíšete budou automaticky uloženy a bude je možné ihned použít v režimu zadávání příkazů.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "Pro více informací <strong>si přečtěte <a href='&link.cmdTutorial;'>tutoriál tvorby příkazů</a></strong>. Pro příklady zabudovaných příkazů se <a href='&file.FeedsIndex;'>podívejte sem</a>.">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Dokumentace pro <a href='&file.DevelDocs;'>API příkazů</a>">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Zapojte se</strong>. Zjistěte jak navštívením <a href='&link.wikiMain;'>&appTitle; Wiki</a>.">
+<!ENTITY ubiquity.editor.YourExternalEd "Váš externí editor je">
+<!ENTITY ubiquity.editor.EditorCommandType "Typ příkazu je">
+<!ENTITY ubiquity.editor.CmdTypeRegular "Běžný">
+<!ENTITY ubiquity.editor.CmdTypeLocked "Uzamčený">
+<!ENTITY ubiquity.editor.RegularCommandDesc "<em>Běžné</em> kanály mohou dělat s vaším počítačem cokoliv.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Uzamčené</em> kanály jsou velmi bezpečné, ale nemají takovou svobodu interakce s vaším počítačem. Pro více informací se podívejte na <a href='&link.lockedFeeds;'>Tutoriál pro uzamčené kanály</a>.">
+<!ENTITY ubiquity.editor.ImportTemplate "Importovat šablonu příkazu">
+<!ENTITY ubiquity.editor.LaunchExternalEd "Spustit externí editor">
+<!ENTITY ubiquity.editor.ShareCommand "Sdílet">
+<!ENTITY ubiquity.editor.SaveToFile "Uložit do souboru">
+<!ENTITY ubiquity.editor.EnableHighlighting "Povolit zvýrazňování syntaxe">
+<!ENTITY ubiquity.editor.ShareYourCommands "Sdílet vaše příkazy">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Své příkazy odešlete na stránku <a href='&link.wildCmds;'>příkazy v divočině</a> na wiki, kde je mohou nalézt ostatní uživatelé.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "The &ldquo;Share&rdquo; button lets you paste your commands to <a href='http://gist.github.com/'>Gist</a>, which auto detects &appTitle; codes and makes them subscribable. To browse all the commands and skins pasted to Gist, visit <a href='http://ubigist.appspot.com/'>ubigist</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Vyvíjení &appTitle;">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Spustit <a href='&chrome.tests;'>testy jednotek</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Pomozte nám otestovat <a href='&feed.ExperimentalCmds;'>experimentální příkazy</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experiment with parser performance and introspect in the <a href='&chrome.playpen;'>parser playpen</a>. Use the <a href='&chrome.nounTuner;'>nountype tuner</a> to check your nountypes' suggestions and scoring.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "A pokud se chystáte vyvíjet samotný &appTitle;, omrkněte náš <a href='&feed.DevelCmds;'>kanál příkazů vývojářů jádra</a>.">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Poslední změny kódu &appTitle;">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Příkazy z nedůvěryhodného zdroje">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "You are about to subscribe to a <a href='&chrome.about;'>&appTitle; command</a> from an unknown, untrusted third-party source located at &targetLink;. If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "Zde je zdrojový kód příkazu v JavaScriptu:">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Načítání kódu, prosím čekejte...">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Pokud rozumíte JavaScriptu, měli byste si to přečíst a podle svého nejlepšího uvážení rozhodnout, jestli je tento příkaz něco, co je bezpečné spouštět. Pokračujte na vlastní nebezpečí!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "Pokud JavaScriptu nerozumíte, měli byste příkaz odebírat pouze pokud vám ho dal někdo, koho znáte a komu věříte.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &ldquo;social trust network&rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of &appTitle;.">
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Automaticky aktualizovat tento kanál.">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Dostaňte mě odsud!">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "Vím co dělám. Chci to odebírat!">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph1 "This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph2 "Note that this feed is served using an insecure protocol, and is therefore subject to <a href='&link.mitmInfo;'>man-in-the-middle attacks</a>. Please only auto-update this feed if you are sure about the implications of what you're doing.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "Nyní odebíráte zdroj příkazů a můžete využít jeho funkcionalitu.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "If you ever want to unsubscribe, you can use the &ldquo;list&rdquo; &appTitle; command at any time to get to the <a href='&chrome.cmdlist;'>command management page</a> where you can see all commands which you are subscribed to, and cancel any that you no longer want.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "Nyní můžete zavřít toto okno.">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.reset.Header "Obnovit &appTitle; na výchozí nastavení?">
+<!ENTITY ubiquity.reset.Paragraph1 "If &appTitle; isn't working properly, you may want to consider resetting it to its original &ldquo;factory defaults&rdquo;. To do this, click the button below. In order to complete the operation, Firefox will then be restarted.">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Varování:</strong> Pokud toto provedete, odstraníte všechny úpravy, které jste na &appTitle; provedli, včetně nejen:">
+<!ENTITY ubiquity.reset.Feeds "Odebírané kanály">
+<!ENTITY ubiquity.reset.Skins "Vlastní vzhledy">
+<!ENTITY ubiquity.reset.Code "Kód editoru příkazů">
+<!ENTITY ubiquity.reset.NoReturn "<strong>Piznámka:</strong> Jakmile to provedete, nebude možné vrátit tuto operaci zpět.">
+<!ENTITY ubiquity.reset.ButtonExport "Exportovat má současná nastavení aplikace &appTitle; do nového panelu">
+<!ENTITY ubiquity.reset.ButtonReset "Ano, vím co dělám. Resetovat &appTitle; a testartovat Firefox">
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
+<!ENTITY ubiquity.localizecmd.ForTemplate "Toto je šablona pro <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1 "Toto je lokalizační šablona pro kanál příkazů &feedKey; ve formátu gettext/přenositelný objekt (*.po). Zjistěte více o <a href='&link.gettextInfo;'>gettextu na Wikipedii</a>, která zároveň obsahuje odkazy na další užitečné nástroje.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2 "Pro otestování lokalizace ji uložte do složky &localeDir; pod jménem <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Ujistěte se, že &ldquo;/XY/&rdquo; odpovídá kódu lokalizace vašeho jazyka. Pokud složka neexistuje, jednoduše ji vytvořte.">
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!ENTITY ubiquity.bug19warning.Header "Průhledná zpráva nemůže být zobrazena!">
+<!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity se pokoušelo zobrazit průhlednou zprávu, ale selhalo.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Kvůli <a href='&link.bug19;'>chybě v &appTitle;</a> na OS X si možná budete muset <a href='&link.growl;'>nainstalovat Growl</a> (pokud jste již tak neučinili). Poté bude možná nutné restartovat Firefox.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Omlouváme se za způsobené nepříjemnosti.">
+<!-- File/Feed redirectors chrome/content/file.xhtml -->
+<!ENTITY ubiquity.redirect.FileHeader "Přesměrovač souborů">
+<!ENTITY ubiquity.redirect.FileShortDesc "Tato stránka je jednoduchý přesměrovač, který uživatele přesune z Ubiquity chrome: URI na file: URI">
+<!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">

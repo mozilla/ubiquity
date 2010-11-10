@@ -23,6 +23,7 @@ locale ubiquity ca    chrome/locale/ca/
 locale ubiquity de    chrome/locale/de/
 locale ubiquity en-US chrome/locale/en-US/
 locale ubiquity es-ES chrome/locale/es-ES/
+locale ubiquity cs-CZ chrome/locale/cs-CZ/
 locale ubiquity fi-FI chrome/locale/fi-FI/
 locale ubiquity fr    chrome/locale/fr/
 locale ubiquity fy-NL chrome/locale/fy-NL/
