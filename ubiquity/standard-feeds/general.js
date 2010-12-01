@@ -206,7 +206,7 @@ CmdUtils.CreateCommand({
       }
     }
     var url = this._google_url(exp), fn = function gcalc(result_page) {
-      cb((/\/calc_img\.gif.*?<b>(.*?)<\/b>/i(result_page) || ",?")[1]);
+      cb((/\/calculator-40\.gif.*?<b>(.*?)<\/b>/i(result_page) || ",?")[1]);
     };
     pb ? CmdUtils.previewGet(pb, url, fn) : $.get(url, fn);
   },
