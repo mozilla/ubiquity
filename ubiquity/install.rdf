@@ -12,7 +12,7 @@
     <targetApplication><rdf:Description>
       <!--Firefox--><id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
       <minVersion>3.6</minVersion>
-      <maxVersion>4.0b8pre</maxVersion>
+      <maxVersion>4.0b9pre</maxVersion>
     </rdf:Description></targetApplication>
 
     <!-- Front End MetaData -->
