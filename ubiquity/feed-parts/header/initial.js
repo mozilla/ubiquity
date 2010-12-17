@@ -6,12 +6,12 @@ var Utils = {
 // Just like the standard Utils.uri, only if we get a malformed URI
 // error, we'll try re-evaluating the string using a base URI of the
 // feed making the call.
-Utils.uri = Utils.url = function uri(obj, defaultUri) {
-  try {
-    return this.__proto__.uri(obj, defaultUri);
-  } catch (e if (typeof obj === "string" &&
-                 e.result === Cr.NS_ERROR_MALFORMED_URI)) {
-    return this.__proto__.uri({uri: obj, base: feed.id}, defaultUri);
+let ({uri} = Utils)
+Utils.uri = Utils.url = function _uri(obj, defaultUri) {
+  try { return uri(obj, defaultUri) }
+  catch (e if (typeof obj == "string" &&
+               e.result === Cr.NS_ERROR_MALFORMED_URI)) {
+    return uri({uri: obj, base: feed.id}, defaultUri);
   }
 };
 Utils.ajaxGet = function ajaxGet(url, callback, errorCallback) {
