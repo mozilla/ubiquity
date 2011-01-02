@@ -83,6 +83,15 @@ var Utils = {
   // An array of tabs within the current chrome window.
   get currentTabs() gTabs.from(Utils.currentChromeWindow),
 
+  // === {{{ Utils.loggedIn }}} ===
+  // Whether or not the user has logged-in to the browser with master pass.
+  get loggedIn() {
+    var token = (Cc["@mozilla.org/security/pk11tokendb;1"]
+                 .getService(Ci.nsIPK11TokenDB)
+                 .getInternalKeyToken());
+    return !token.needsLogin() || token.isLoggedIn();
+  },
+
   __globalObject: this,
 };
 

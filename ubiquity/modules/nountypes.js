@@ -592,10 +592,7 @@ var noun_type_twitter_user = {
     // TODO: figure out how often to clear this list cache.
     if (this._list && !reload) return this._list;
     var list = [];
-    var token = (Cc["@mozilla.org/security/pk11tokendb;1"]
-                 .getService(Ci.nsIPK11TokenDB)
-                 .getInternalKeyToken());
-    if (!token.needsLogin() || token.isLoggedIn()) {
+    if (Utils.loggedIn) {
       // Look for twitter usernames stored in password manager
       const {LoginManager} = Utils, usersFound = {__proto__: null};
       for each (let url in ["https://twitter.com", "http://twitter.com"]) {
@@ -760,7 +757,6 @@ var noun_type_contact = {
   suggest: function nt_contact_suggest(text, html, callback) {
     var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
     if (this._list) return this._grep(text).concat(suggs);
-
     var self = this;
     this._list = [];
     getGmailContacts(
@@ -773,64 +769,60 @@ var noun_type_contact = {
         }
         callback(self._grep(text));
       },
-      function nt_contact_ng(info){
+      function nt_contact_ng(info) {
         Utils.setTimeout(function nt_contact_reset() { self._list = null },
                          self._retryInterval *= 2);
-        Utils.dump(info, "(retrying in", self._retryInterval / 1e3, "sec.)");
+        Utils.reportInfo(
+          info + " (retrying in " + self._retryInterval / 1e3 + " sec.)");
       });
     return suggs;
   },
   _list: null,
-  _retryInterval: 5 * 1e3,
+  _retryInterval: 5e3,
   _grep: function nt_contact__grep(text)
     Utils.uniq([].concat(CmdUtils.grepSuggs(text, this._list, "data"),
                          CmdUtils.grepSuggs(text, this._list)),
                "text"),
 };
 
-function getGmailContacts(ok, ng) jQuery.ajax({
-  url: "http://mail.google.com/mail/contacts/data/export",
-  data: {exportType: "ALL", out: "VCARD"},
-  success: function getGC_success(data) {
-    var contacts = [], name = "";
-    for each (let line in data.replace(/\r\n /g, "").split(/\r\n/)) {
-      if (!/^(FN|EMAIL).*?:(.*)/.test(line)) continue;
-      let {$1: key, $2: val} = RegExp;
-      if (key === "FN")
-        name = val !== "null" ? val : "";
-      else
-        contacts.push({name: name, email: val});
-    }
-    contacts.length ? ok(contacts) : ng(data);
-  },
-  error: function getGC_error(x) { ng(x.status + " " +x.statusText) },
-});
-
-function getYahooContacts(callback) {
-  var url = "http://us.mg1.mail.yahoo.com/yab";
-  //TODO: I have no idea what these params mean
-  var params = {
-    v: "XM",
-    prog: "ymdc",
-    tags: "short",
-    attrs: "1",
-    xf: "sf,mf",
-  };
-  return jQuery.get(url, params, function (data) {
-    var contacts = [];
-    for each(var line in jQuery(data).find("ct")) {
-      var name = jQuery(line).attr("yi");
-      //accept it as as long as it is not undefined
-      if (name) {
-        var contact = {};
-        contact["name"] = name;
-        //TODO: what about yahoo.co.uk or ymail?
-        contact["email"] = name + "@yahoo.com";
-        contacts.push(contact);
-      }
-    }
-    callback(contacts);
-  }, "text");
+function getGmailContacts(ok, ng) {
+  if (!Utils.loggedIn)
+    return ng("Not logged in.");
+  var logins = Utils.LoginManager
+    .findLogins({}, "https://www.google.com", "", "");
+  if (!logins.length)
+    return ng("No Google logins.");
+  var errors = 0;
+  for each (let login in logins) jQuery.ajax({
+    type: "POST", url: "https://www.google.com/accounts/ClientLogin",
+    data: {
+      Email  : login.username,
+      Passwd : login.password,
+      accountType: "GOOGLE", service: "cp", source: "Mozilla-Ubiquity-0.6",
+    },
+    error: googleContactsError,
+    success: function googleClientLoggedIn(data, status, xhr) {
+      var [, auth] = /^Auth=(.+)/m.exec(data) || 0;
+      if (!auth) return this.error(xhr);
+      jQuery.ajax({
+        url: "https://www.google.com/m8/feeds/contacts/default/full",
+        dataType: "xml",
+        beforeSend: function setGoogleLoginAuth(xhr) {
+          xhr.setRequestHeader("Authorization", "GoogleLogin auth=" + auth);
+        },
+        error: googleContactsError,
+        success: function onContacts(atom) let (email) ok(
+          [{name  : entry.querySelector("title").textContent,
+            email : email.getAttribute("address")}
+           for each (entry in Array.slice(atom.getElementsByTagName("entry")))
+             if (email = entry.querySelector("email"))]),
+      });
+    },
+  });
+  function googleContactsError(xhr) {
+    Utils.reportInfo(this.url + ": " + xhr.status + " " + xhr.statusText);
+    ++errors == logins.length && ng("Failed retrieving Google Contacts");
+  }
 }
 
 // === {{{ noun_type_geolocation }}} ===
