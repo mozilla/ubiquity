@@ -523,7 +523,8 @@ CmdUtils.CreateCommand({
   description: "Searches " + AmazLink + " for items matching your words.",
   help: "" + (
     <dl><dt>Available Indices</dt>
-    {noun_type_amazon_com_index._list.reduce(
+    // `[].concat` to workaround E4X-Proxy conundrum
+    {[].concat(noun_type_amazon_com_index._list).reduce(
       function (dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>),
   arguments: [
     {role: "object", nountype: noun_arb_text, label: SEARCH_TERM},

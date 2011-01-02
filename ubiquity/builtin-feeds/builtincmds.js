@@ -245,7 +245,7 @@ CmdUtils.CreateCommand({
     }
     CmdUtils.previewList(
       pb,
-      [<span> <code>{h}</code> </span> for each (h in his)],
+      ["" + <span> <code>{h}</code> </span> for each (h in his)],
       function cmdh__reuse(i) {
         context.chromeWindow.gUbiquity.preview(his[i]);
       });
