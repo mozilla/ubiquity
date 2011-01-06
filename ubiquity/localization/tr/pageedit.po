@@ -1,0 +1,79 @@
+# pageedit.po
+#
+# Localizers:
+# Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. delete command:
+#. use | to separate multiple name values:
+msgctxt "delete.names"
+msgid "delete"
+msgstr "sil|delete"
+
+msgctxt "delete.description"
+msgid "Deletes the selected chunk of HTML from the page."
+msgstr "Deletes the selected chunk of HTML from the page."
+
+#. undelete command:
+#. use | to separate multiple name values:
+msgctxt "undelete.names"
+msgid "undelete"
+msgstr "undelete"
+
+msgctxt "undelete.description"
+msgid "Restores the HTML deleted by the delete command."
+msgstr "Restores the HTML deleted by the delete command."
+
+#. edit page command:
+#. use | to separate multiple name values:
+msgctxt "edit page.names"
+msgid "edit page|turn on edit mode"
+msgstr "edit page|turn on edit mode"
+
+msgctxt "edit page.help"
+msgid "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
+msgstr "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
+
+msgctxt "edit page.description"
+msgid "Puts the web page into a mode where you can edit the contents."
+msgstr "Puts the web page into a mode where you can edit the contents."
+
+#. stop editing page command:
+#. use | to separate multiple name values:
+msgctxt "stop editing page.names"
+msgid "stop editing page|turn off edit mode"
+msgstr "stop editing page|turn off edit mode"
+
+msgctxt "stop editing page.description"
+msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
+msgstr "Si usa la orden «editar página» para poner la página en modo editable, use esta orden para finalizar ese modo y volver a ver la página normal. Si desea que los cambios persistan aunque recargue la página, use la orden  «guardar» antes."
+
+#. save page edits command:
+#. use | to separate multiple name values:
+msgctxt "save page edits.names"
+msgid "save page edits"
+msgstr "save page edits"
+
+msgctxt "save page edits.description"
+msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
+msgstr "Guarda las ediciones que haya realizado en la página en una anotación. Éstas permaneces aunque recargue la página. Puede eliminarlas con la orden «deshacer ediciones»."
+
+#. undo page edits command:
+#. use | to separate multiple name values:
+msgctxt "undo page edits.names"
+msgid "undo page edits|remove annotations"
+msgstr "undo page edits|remove annotations"
+
+msgctxt "undo page edits.description"
+msgid "Resets any annotation changes you've made to this page."
+msgstr "Resets any annotation changes you've made to this page."
+

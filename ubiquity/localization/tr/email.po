@@ -1,0 +1,109 @@
+# email.po
+#
+# Localizers:
+# Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. email command:
+#. use | to separate multiple name values:
+msgctxt "email.names"
+msgid "email|mail|send email|gmail.com"
+msgstr "email|mail|eposta|gmail"
+
+msgctxt "email.help"
+msgid ""
+"Currently only works with\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    so you'll need a Gmail account to use it.\n"
+"<br/>\n"
+"Try selecting part of a web page (including links, images, etc)\n"
+"    and then issuing \"email this\".\n"
+"<br/>\n"
+"You can also specify the recipient of the email using the word \"to\"\n"
+"    and the name of someone from your contact list.\n"
+"    For example, try issuing \"email hello to jono\"\n"
+"    (assuming you have a friend named \"jono\")."
+msgstr ""
+"Şu an sadece \n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",ile çalışıyor\n"
+"    bu yüzden bunu kullanmanız için bir Gmail hesabı gerekli.\n"
+"<br/>\n"
+"Web sitesinin bir kısmını(linkler, resimler, vs. içeren) seçin \n"
+"    ve sonra şunu yazın \"email this\".\n"
+"<br/>\n"
+"Ayrıca email alıcısının adını belirtebilirsiniz şu kelimeyi kullanarak \"şuna\"\n"
+"    ve iletişim listenizden birinin ismi.\n"
+"    Örneği, şu ifadeyi deneyin \"email selam şuna Ayhan\"\n"
+"    (\"Ayhan\" isimli bir arkadaşınız olduğunu varsayarak)."
+
+msgctxt "email.description"
+msgid "Begins composing an email to a person from your contact list."
+msgstr "iletişim listenizdeki bir kişi için bir email oluşturmaya başlar."
+
+msgctxt "email.preview"
+msgid "Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}."
+msgstr " {if recipient}${recipient} alıcısına{/if} şu an ki sayfanın bir linkini{if content} ve şu mesajı :<br/><br/>${content}{/if}<br/><br/>içeren bir e-posta oluşturur."
+
+msgctxt "email.execute"
+msgid "A gmonkey exception occurred."
+msgstr "A gmonkey exception occurred."
+
+#. get last email command:
+#. use | to separate multiple name values:
+msgctxt "get last email.names"
+msgid "get last email"
+msgstr "son emaile git|get last email"
+
+msgctxt "get last email.description"
+msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
+msgstr "En son gelen e-postlarınızı gösterir. Bir <a href=\"http://mail.google.com\">Gmail</a> hesabı gereklidir."
+
+msgctxt "get last email.preview"
+msgid "Displays your most recent incoming email..."
+msgstr "En son gelen e-postlarınızı gösterir..."
+
+msgctxt "get last email.preview"
+msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr "Okunmamış son e-postanız: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> diyor ki: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+
+msgctxt "get last email.preview"
+msgid "<b>You have no new mail!</b>"
+msgstr "<b>Yeni bir e-postanız yok!</b>"
+
+msgctxt "get last email.preview"
+msgid "You are not logged in!<br />Press enter to log in."
+msgstr "Mail hesabınıza giriş yapmamışsınız!<br />Girmek için buraya basın."
+
+msgctxt "get last email.execute"
+msgid "You have new email! ${lastEmail.author} says: ${lastEmail.subject}"
+msgstr "Yeni bir e-postanız var! ${lastEmail.author} diyor ki: ${lastEmail.subject}"
+
+msgctxt "get last email.execute"
+msgid "You have no new mail."
+msgstr "Yeni bir e-postanız yok!"
+
+#. get email address command:
+#. use | to separate multiple name values:
+msgctxt "get email address.names"
+msgid "get email address"
+msgstr "e-posta adresi al"
+
+msgctxt "get email address.help"
+msgid "Execute the command to copy the address to your clipboard."
+msgstr "Execute the command to copy the address to your clipboard."
+
+msgctxt "get email address.description"
+msgid "Looks up the email address of a person from your contacts list given their name. "
+msgstr "Looks up the email address of a person from your contacts list given their name. "
+

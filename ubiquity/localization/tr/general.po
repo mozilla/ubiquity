@@ -1,0 +1,267 @@
+# general.po
+# 
+# Localizers:
+# Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+
+#. bold command:
+#. use | to separate multiple name values:
+msgctxt "bold.names"
+msgid "bold"
+msgstr "koyu|bold"
+
+msgctxt "bold.description"
+msgid "If you're in a rich-text-edit area, makes the selected text bold."
+msgstr "If you're in a rich-text-edit area, makes the selected text bold."
+
+msgctxt "bold.execute"
+msgid "You're not in a rich text editing field."
+msgstr "You're not in a rich text editing field."
+
+
+#. italicize command:
+#. use | to separate multiple name values:
+msgctxt "italicize.names"
+msgid "italicize"
+msgstr "italik | yatık"
+
+msgctxt "italicize.description"
+msgid "If you're in a rich-text-edit area, makes the selected text italic."
+msgstr "If you're in a rich-text-edit area, makes the selected text italic."
+
+msgctxt "italicize.execute"
+msgid "You're not in a rich text editing field."
+msgstr "You're not in a rich text editing field."
+
+
+#. underline command:
+#. use | to separate multiple name values:
+msgctxt "underline.names"
+msgid "underline"
+msgstr "altıçizgili"
+
+msgctxt "underline.description"
+msgid "If you're in a rich-text-edit area, underlines the selected text."
+msgstr "If you're in a rich-text-edit area, underlines the selected text."
+
+msgctxt "underline.execute"
+msgid "You're not in a rich text editing field."
+msgstr "You're not in a rich text editing field."
+
+
+#. highlight command:
+#. use | to separate multiple name values:
+msgctxt "highlight.names"
+msgid "highlight|hilite"
+msgstr "highlight|hilite"
+
+msgctxt "highlight.description"
+msgid "Highlights your current selection, like <span style=\"background: yellow; color: black;\">this</span>."
+msgstr  "Highlights your current selection, like <span style=\"background: yellow; color: black;\">this</span>."
+
+
+#. undo text edit command:
+#. use | to separate multiple name values:
+msgctxt "undo text edit.names"
+msgid "undo text edit"
+msgstr "undo text edit"
+
+msgctxt "undo text edit.description"
+msgid "If you're in a rich-text-edit area, undoes your latest style/formatting or page-editing changes."
+msgstr "If you're in a rich-text-edit area, undoes your latest style/formatting or page-editing changes."
+
+msgctxt "undo text edit.execute"
+msgid "You're not in a rich text editing field."
+msgstr "You're not in a rich text editing field."
+
+
+#. redo text edit command:
+#. use | to separate multiple name values:
+msgctxt "redo text edit.names"
+msgid "redo text edit"
+msgstr "redo text edit"
+
+msgctxt "redo text edit.description"
+msgid "If you're in a rich-text-edit area, redoes your latest style/formatting or page-editing changes."
+msgstr "Si está en un área de texto enriquecido, repite el último cambio de estilo/formato o el último campo de edición de página."
+
+msgctxt "redo text edit.execute"
+msgid "You're not in a rich text editing field."
+msgstr "You're not in a rich text editing field."
+
+
+#. count words command:
+#. use | to separate multiple name values:
+msgctxt "count words.names"
+msgid "count words|word count"
+msgstr "count words|kelime say"
+
+msgctxt "count words.description"
+msgid "Displays the number of words in a selection."
+msgstr "Seçimdeki seçilen kelime sayısını gösterir."
+
+msgctxt "count words.preview"
+msgid "<b>${num}</b> words"
+msgstr "<b>${num}</b> kelime"
+
+msgctxt "count words.preview"
+msgid "Displays the number of words in a selection."
+msgstr "Muestra el número de palabras en la selección."
+
+msgctxt "count words.execute"
+msgid "${num} words"
+msgstr "${num} kelime"
+
+msgctxt "count words.execute"
+msgid "No words selected."
+msgstr "Herhangi bir kelime seçilmedi."
+
+
+#. link to wikipedia command:
+#. use | to separate multiple name values:
+msgctxt "link to wikipedia.names"
+msgid "link to wikipedia"
+msgstr "enlace a wikipedia|link a wikipedia"
+
+msgctxt "link to wikipedia.description"
+msgid "Turns a phrase into a link to the matching Wikipedia article."
+msgstr "Turns a phrase into a link to the matching Wikipedia article."
+
+
+#. calculate command:
+#. use | to separate multiple name values:
+msgctxt "calculate.names"
+msgid "calculate|gcalculate"
+msgstr "calculate|gcalculate|hesapla"
+
+msgctxt "calculate.help"
+msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
+msgstr "Şunları dene <code>22/7, 25% de 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 mod 2) / 3!, speed of light in miles per hour, 3 dolares en euros, 242 in hex, MCMXVI in decimal</code>"
+
+msgctxt "calculate.description"
+msgid "Calculates using\n"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a>\n"
+"which has all the features of a scientific calculator,\n"
+"    knows constants such as the speed of light,\n"
+"    and can convert between units and currencies.\n"
+"<br/>\n"
+"Uses\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"instead for simple expressions like\n"
+"<code>22/7</code>\n"
+"."
+msgstr "hesapla\n"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google hesap makinesi</a>\n"
+"bilimsel bir hesap makinesinin tüm özelliklerine sahiptir,\n"
+"    ışık hızı gibi sabitleri bilir,\n"
+"    birimler ve parasal değerleri çevirebilir.\n"
+"<br/>\n"
+"Kullanır\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"benzer basit ifadeler yerine\n"
+"<code>22/7</code>\n"
+"."
+
+#. translate command:
+#. use | to separate multiple name values:
+msgctxt "translate.names"
+msgid "translate"
+msgstr "çevir"
+
+msgctxt "translate.help"
+msgid "You can specify the language to translate to,\n"
+"    and the language to translate from.\n"
+"    For example, try issuing \"translate mother from english to chinese\".\n"
+"    If you leave out the languages, it will try to guess what you want.\n"
+"    It works on selected text in any web page,\n"
+"    but there's a limit (a couple of paragraphs)\n"
+"    to how much it can translate a selection at once.\n"
+"    If you want to translate a lot of text, leave out the input and\n"
+"    it will translate the whole page."
+msgstr "You can specify the language to translate to,\n"
+"    and the language to translate from.\n"
+"    For example, try issuing \"translate mother from english to chinese\".\n"
+"    If you leave out the languages, it will try to guess what you want.\n"
+"    It works on selected text in any web page,\n"
+"    but there's a limit (a couple of paragraphs)\n"
+"    to how much it can translate a selection at once.\n"
+"    If you want to translate a lot of text, leave out the input and\n"
+"    it will translate the whole page."
+
+
+msgctxt "translate.description"
+msgid "Translates from one language to another."
+msgstr "Bİr dilden diğerine çevirir."
+
+msgctxt "translate.preview"
+msgid "Translates ${url} into <b>${toLang}</b>."
+msgstr "Çevir ${url} şu dile <b>${toLang}</b>."
+
+msgctxt "translate.preview"
+msgid "Replaces the selected text with the <b>${toLang}</b> translation:"
+msgstr "Seçilen metni <b>${toLang} çevirisi ile değiştirirç</b>:"
+
+# shared strings in the function translateTo
+# manually added by mitcho
+msgid "Translation error: ${error}"
+msgstr "Çeviri hatası: ${error}"
+
+msgid "invalid translation language pair"
+msgstr "geçersiz çeviri dil çifti"
+
+msgid "could not reliably detect source language"
+msgstr "kaynak dil güvenli biçimde tespit edilemedi"
+
+
+#. create bookmarklet command command:
+#. use | to separate multiple name values:
+msgctxt "create bookmarklet command.names"
+msgid "create bookmarklet command"
+msgstr "yer imi oluştur"
+
+msgctxt "create bookmarklet command.help"
+msgid "For instance, if you have a bookmarklet called 'press this', you can say 'create bookmarklet command from press this'."
+msgstr "For instance, if you have a bookmarklet called 'press this', you can say 'create bookmarklet command from press this'."
+
+msgctxt "create bookmarklet command.description"
+msgid "Creates a new Ubiquity command from a bookmarklet."
+msgstr "Creates a new Ubiquity command from a bookmarklet."
+
+
+#. create search command command:
+#. use | to separate multiple name values:
+msgctxt "create search command.names"
+msgid "create search command"
+msgstr "Arama komutu oluştur"
+
+msgctxt "create search command.help"
+msgid "<ol style=\"list-style-image:none\">\n"
+"  <li>Select a searchbox.</li>\n"
+"  <li>Say 'create search command mysearch'.</li>\n"
+"  <li>Execute.</li>\n"
+"  <li>You now have a command called 'mysearch'.</li>\n"
+"</ol>"
+msgstr "<ol style=\"list-style-image:none\">\n"
+"  <li>Bir arama kutusu seç</li>\n"
+"  <li>'Arama komutu oluştur' 'aramam' yaz.</li>\n"
+"  <li>Çalıştır.</li>\n"
+"  <li>Artık 'aramam' adlı bir komuta sahipsiniz .</li>\n"
+"</ol>" 
+
+msgctxt "create search command.description"
+msgid "Creates a new Ubiquity command from a focused search-box and lets you set the command name."
+msgstr "odaklanılmış olan bir arama kutusundan yeni bir Ubiquity komutu oluşurur ve komuta isim vermenizi sağlar."
+
+msgctxt "create search command.preview"
+msgid "Creates a new search command called <b>${text}</b>"
+msgstr "<b>${text}</b> olarak adlandırılan yeni bir arama komutu oluşturur."
+
+msgctxt "create search command.execute"
+msgid "You need to focus a searchbox before running this command."
+msgstr "Bu komutu çalıştırmadan önce bir arama kutusuna odaklanma/tıklamalısınız."
+
+

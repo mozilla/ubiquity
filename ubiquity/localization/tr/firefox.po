@@ -1,0 +1,280 @@
+# firefox.po
+# 
+# Localizers:
+# Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:45+0900\n"
+
+#. exit firefox command:
+#. use | to separate multiple name values:
+msgctxt "exit firefox.names"
+msgid "exit firefox"
+msgstr "Firefox u kapat"
+
+msgctxt "exit firefox.description"
+msgid "Exits Firefox."
+msgstr "Firefox u kapat."
+
+
+#. restart firefox command:
+#. use | to separate multiple name values:
+msgctxt "restart firefox.names"
+msgid "restart firefox"
+msgstr "Firefox u yeniden başlat|restart firefox"
+
+msgctxt "restart firefox.description"
+msgid "Restarts Firefox."
+msgstr "Firefox u yeniden başlat."
+
+
+#. close window command:
+#. use | to separate multiple name values:
+msgctxt "close window.names"
+msgid "close window"
+msgstr "pencereyi kapat"
+
+msgctxt "close window.description"
+msgid "Closes current window."
+msgstr "Aktif pencereyi kapat."
+
+
+#. fullscreen command:
+#. use | to separate multiple name values:
+msgctxt "fullscreen.names"
+msgid "fullscreen"
+msgstr "tam ekran"
+
+msgctxt "fullscreen.description"
+msgid "Toggles fullscreen mode."
+msgstr "Toggles fullscreen mode."
+
+
+#. switch to tab command:
+#. use | to separate multiple name values:
+msgctxt "switch to tab.names"
+msgid "switch to tab"
+msgstr "sekme değiştir"
+
+msgctxt "switch to tab.description"
+msgid "Switches to the tab whose title or URL matches the input."
+msgstr "Cambia a la pestaña con el título o la URL que coincide con la entrada."
+
+
+#. close tab command:
+#. use | to separate multiple name values:
+msgctxt "close tab.names"
+msgid "close tab"
+msgstr "Sekmeyi kapat."
+
+msgctxt "close tab.description"
+msgid "Closes the tab whose title or URL matches the input or the current tab if no tab matches."
+msgstr "Closes the tab whose title or URL matches the input or the current tab if no tab matches."
+
+
+#. close all tabs with command:
+#. use | to separate multiple name values:
+msgctxt "close all tabs with.names"
+msgid "close all tabs with"
+msgstr "close all tabs with"
+
+msgctxt "close all tabs with.description"
+msgid "Closes all open tabs that have the given word in common."
+msgstr "Closes all open tabs that have the given word in common."
+
+msgctxt "close all tabs with.execute"
+msgid "${num} tabs closed."
+msgstr "${num} sekme kapatıldı."
+
+
+#. count tabs command:
+#. use | to separate multiple name values:
+msgctxt "count tabs.names"
+msgid "count tabs"
+msgstr "count tabs|sekme say"
+
+msgctxt "count tabs.description"
+msgid "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
+msgstr "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
+
+# added manually by mitcho
+# template in _count: no msgctxt as it is shared between preview + execute
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+
+
+#. refresh command:
+#. use | to separate multiple name values:
+msgctxt "refresh.names"
+msgid "refresh|reload"
+msgstr "refresh|yenile"
+
+msgctxt "refresh.description"
+msgid "Refreshes the current page."
+msgstr "Sayfayı yeniler."
+
+
+#. bookmark command:
+#. use | to separate multiple name values:
+msgctxt "bookmark.names"
+msgid "bookmark"
+msgstr "yer imi"
+
+msgctxt "bookmark.description"
+msgid "Adds the current page to bookmarks."
+msgstr "Şu anki sayfayı yer imlerine ekler"
+
+msgctxt "bookmark.execute"
+msgid "Page could not be bookmarked!"
+msgstr "Page could not be bookmarked!"
+
+
+#. print command:
+#. use | to separate multiple name values:
+msgctxt "print.names"
+msgid "print"
+msgstr "yazdır|print"
+
+msgctxt "print.description"
+msgid "Prints the current page."
+msgstr "Güncel sayfayı yazdırır."
+
+
+#. go back command:
+#. use | to separate multiple name values:
+msgctxt "go back.names"
+msgid "go back"
+msgstr "geri git"
+
+msgctxt "go back.description"
+msgid "Goes back in history."
+msgstr "Goes back in history."
+
+# added manually by mitcho
+msgctxt "go back.preview"
+msgid "Go back ${num} step{if num > 1}s{/if} in history."
+msgstr ""
+
+#. go forward command:
+#. use | to separate multiple name values:
+msgctxt "go forward.names"
+msgid "go forward"
+msgstr "avanzar|ir hacia delante en el historial"
+
+msgctxt "go forward.description"
+msgid "Goes forward in history."
+msgstr "Goes forward in history."
+
+# added manually by mitcho
+msgctxt "go forward.preview"
+msgid "Go forward ${num} step{if num > 1}s{/if} in history."
+msgstr ""
+
+
+#. go home command:
+#. use | to separate multiple name values:
+msgctxt "go home.names"
+msgid "go home"
+msgstr "Ana sayfaya git"
+
+msgctxt "go home.description"
+msgid "Goes to home page."
+msgstr "Ana sayfayı açar"
+
+
+#. zoom command:
+#. use | to separate multiple name values:
+msgctxt "zoom.names"
+msgid "zoom"
+msgstr "zoom|büyük|ölçeklendir"
+
+msgctxt "zoom.description"
+msgid "Zooms the Firefox window in or out."
+msgstr "Zooms the Firefox window in or out."
+
+
+msgctxt "zoom.preview"
+msgid "Zooms the Firefox window to ${text} of its normal size."
+msgstr "Zooms the Firefox window to ${text} of its normal size."
+
+
+#. tag command:
+#. use | to separate multiple name values:
+msgctxt "tag.names"
+msgid "tag"
+msgstr "etiketle"
+
+msgctxt "tag.help"
+msgid "Use commas to separate multiple tags."
+msgstr "Use commas to separate multiple tags."
+
+msgctxt "tag.description"
+msgid "Adds tags to the current page."
+msgstr "Adds tags to the current page."
+
+msgctxt "tag.preview"
+msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
+msgstr "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
+
+
+#. run bookmarklet command:
+#. use | to separate multiple name values:
+msgctxt "run bookmarklet.names"
+msgid "run bookmarklet|bml"
+msgstr "run bookmarklet|bml"
+
+msgctxt "run bookmarklet.help"
+msgid "Enter nothing to reload the list."
+msgstr "Enter nothing to reload the list."
+
+msgctxt "run bookmarklet.description"
+msgid "Runs a bookmarklet from your favorites."
+msgstr "Runs a bookmarklet from your favorites."
+
+
+#. undo closed tabs command:
+#. use | to separate multiple name values:
+msgctxt "undo closed tabs.names"
+msgid "undo closed tabs|uct"
+msgstr "undo closed tabs|uct"
+
+msgctxt "undo closed tabs.help"
+msgid "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to undo.</li>\n"
+"    <li>Type to filter, then execute to undo all.</li>\n"
+"    </ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to undo.</li>\n"
+"    <li>Type to filter, then execute to undo all.</li>\n"
+"    </ul>"
+
+msgctxt "undo closed tabs.description"
+msgid "Reopens tabs you've closed recently."
+msgstr "Reopens tabs you've closed recently."
+
+msgctxt "undo closed tabs.preview"
+msgid "No closed tabs."
+msgstr "No closed tabs."
+
+msgctxt "undo closed tabs.preview"
+msgid "No matched tabs."
+msgstr "No matched tabs."
+
+
+#. check livemark command:
+#. use | to separate multiple name values:
+msgctxt "check livemark.names"
+msgid "check livemark"
+msgstr ""
+
+msgctxt "check livemark.help"
+msgid "Execute to open the site."
+msgstr ""
+
+msgctxt "check livemark.description"
+msgid "Checks your livemarks."
+msgstr ""
+
+

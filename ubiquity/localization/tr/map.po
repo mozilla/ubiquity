@@ -1,0 +1,33 @@
+# map.po
+#
+# Localizers:
+# Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "harita"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Turns an address or location name into a Google Map."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+

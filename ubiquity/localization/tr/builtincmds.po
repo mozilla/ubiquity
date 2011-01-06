@@ -1,0 +1,161 @@
+# builtincmds.po
+#
+# Localizers | Yerelleştirici | Türkçeye Çeviren:
+# 1- Ayhan Eses-ayhan515 <paylasimlarimiz@gmail.com>
+# 2- 
+# 3- 
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Ayhan Eses-ayhan515-<paylasimlarimiz@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. help command:
+#. use | to separate multiple name values:
+msgctxt "help.names"
+msgid "help|about|?"
+msgstr "yardım|hakkında|?"
+
+msgctxt "help.description"
+msgid ""
+"Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
+"      Or, enter the name of a command to get help on that command."
+msgstr ""
+"Ubiquity <a href=\"about:ubiquity\">ana yardım sayfasına</a> git.<br/>\n"
+"      veya yardım almak istediğiniz komutun adını girin."
+
+#. open (ubiquity settings page) command:
+#. use | to separate multiple name values:
+msgctxt "open (ubiquity settings page).names"
+msgid "open|show"
+msgstr "aç|göster"
+
+msgctxt "open (ubiquity settings page).description"
+msgid "Opens one of the Ubiquity documentation/settings pages."
+msgstr "Ubiquity'nin dökümantasyon/ayar sayfalarından birini açar."
+
+msgctxt "open (ubiquity settings page).preview"
+msgid "Opens the Ubiquity ${goal} page."
+msgstr "Ubiquity ${goal} sayfasını açar."
+
+#. write ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "write ubiquity commands.names"
+msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
+msgstr "Ubiquity komutları yaz|Ubiquity komutlarını düzenle|Ubiquity'i hackle"
+
+msgctxt "write ubiquity commands.description"
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Sizi Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">komut editörü</a> sayfasına götürür."
+
+#. list ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "list ubiquity commands.names"
+msgid "list ubiquity commands"
+msgstr "Ubiquity komutlarını listele"
+
+msgctxt "list ubiquity commands.description"
+msgid ""
+"Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
+"      of all Ubiquity commands available and what they all do."
+msgstr ""
+"Ubiquity komut <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">listesini</a>\n"
+"      açar ve bu komutları ne yaptıklarını gösterir."
+
+#. change ubiquity settings command:
+#. use | to separate multiple name values:
+msgctxt "change ubiquity settings.names"
+msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
+msgstr "Ubiquity ayarlarını değiştir|Ubiquity seçeneklerini değiştir|Ubiquity temasını değiştir"
+
+msgctxt "change ubiquity settings.description"
+msgid ""
+"Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
+"      where you can change your skin, key combinations, etc."
+msgstr ""
+"Tema, tuş kombinasyonu vs. değiştirebileceğiniz ubiquity <a href=\"chrome://ubiquity/content/settings.xhtml\">ayarlar</a>,\n"
+"      sayfasına götürür."
+
+#. get support command:
+#. use | to separate multiple name values:
+msgctxt "get support.names"
+msgid "get support"
+msgstr "destek al"
+
+msgctxt "get support.description"
+msgid ""
+"Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
+"    where you can report bugs, get troubleshooting help, etc."
+msgstr ""
+"Hataları raporlayabileceğiniz, sorunlar için yardım alabileceğiniz vs.<a href=\"chrome://ubiquity/content/support.xhtml\">destek</a>,\n"
+"    sayfasına götürür."
+
+#. report bug command:
+#. use | to separate multiple name values:
+msgctxt "report bug.names"
+msgid "report bug"
+msgstr "hatayı raporla"
+
+msgctxt "report bug.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
+msgstr "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
+
+#. disable command command:
+#. use | to separate multiple name values:
+msgctxt "disable command.names"
+msgid "disable command"
+msgstr "komutu pasif yap"
+
+msgctxt "disable command.description"
+msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
+msgstr "Bir Ubiquity komutunu pasif yapar, böylece komut öneri listesinde bir daha görünmez."
+
+#. enable command command:
+#. use | to separate multiple name values:
+msgctxt "enable command.names"
+msgid "enable command"
+msgstr "komutu aktif yap"
+
+msgctxt "enable command.description"
+msgid "Re-enables a Ubiquity command that you disabled."
+msgstr "Daha önce pasif yapılan bir Ubiquity komutunu tekrar aktif yapar"
+
+#. command history command:
+#. use | to separate multiple name values:
+msgctxt "command history.names"
+msgid "command history|vita"
+msgstr "komut geçmişi|vida"
+
+msgctxt "command history.help"
+msgid ""
+"<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to reuse.</li>\n"
+"    <li>Type to filter.</li>\n"
+"    <li>Execute to delete all matched histories.</li>\n"
+"    <li>Edit <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> to\n"
+"      set max number of histories.</li></ul>"
+msgstr ""
+"<ul style=\"list-style-image:none\">\n"
+"    <li>Tekrar kullanmak için giriş tuşu veya tıklamayı kullan.</li>\n"
+"    <li>Filtreyi gir.</li>\n"
+"    <li>Eşleşen tüm geçmiş için silmeyi gerçekleştir</li>\n"
+"    <li>Max.komut geçmişi sayısını <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> para\n"
+"      düzenle.</li></ul>"
+
+msgctxt "command history.description"
+msgid "Accesses your command history."
+msgstr "Komut geçmişinize ulaşım"
+
+msgctxt "command history.preview"
+msgid "No histories match."
+msgstr "Eşleşen geçmiş yok."
+
+msgctxt "command history.execute"
+msgid "Deleted matched histories. Click here to undo."
+msgstr "Silinen eşleşen geçmişler. Geri almak için burayı tıklayın."
+
