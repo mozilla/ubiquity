@@ -16,5 +16,6 @@
   es: "Español",
   $: "$",
   nl: "Nederlands",
-  de: "Deutsch"
+  de: "Deutsch",
+  tr: "Türkçe"
 }

@@ -62,7 +62,7 @@ function onDocumentLoad() {
   $("#use-new-parser-checkbox")[0].checked = isNewParser;
   if (isNewParser) $(".parser2").show();
   for each (let code in ["ca", "da", "de", "en", "es",
-                         "ja", "nl", "pt", "$"]) {
+                         "ja", "nl", "pt", "tr", "$"]) {
     $langSelect.append(
       "<option value='" + code + "' " +
       (code === langCode ? " selected='selected'" : "") + ">" +
