@@ -368,9 +368,14 @@ function setLastResult(result) {
 // the requesting {{{XMLHttpRequest}}} instead.
 //
 // The geolocation object has at least the following properties:
-//   {{{lat}}}, {{{lon}}}, {{{city}}}, {{{state}}}, {{{country}}}
-// (See [[http://code.google.com/apis/maps/documentation/geocoding/#Types]]
-//  for a list of possible properties.)
+//
+// {{{ lat  lon  city  state  country  }}}
+//
+// Plus their short versions as {{{*Short}}} if available.
+//
+// * {{{countryShort}}} is aliased as {{{country_code}}} for backcompat.
+// * See [[http://code.google.com/apis/maps/documentation/geocoding/#Types]]
+//  for a list of possible properties.
 //
 // You can choose to use the function synchronously: do not pass in any
 // callback, and the geolocation object will instead be returned
@@ -396,8 +401,10 @@ function getGeoLocation(callback) {
         if (dat.status != "OK") break;
         for each (let result in dat.results)
           for each (let address in result.address_components)
-            for each (let type in address.types)
-              if (!loc[type]) loc[type] = address.long_name;
+            for each (let type in address.types) if (!loc[type])
+              ((loc[type] = address.long_name) === address.short_name ||
+               (loc[type + 'Short'] = address.short_name));
+        loc.country_code = loc.countryShort || loc.politicalShort;
         loc.country = loc.country || loc.political;
         loc.city    = loc.locality;
         loc.state   = loc.administrative_area_level_1;
