@@ -69,8 +69,8 @@ var Utils = {
   // An array of application chrome windows currently opened.
   get chromeWindows() {
     var wins = [];
-    var enum = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
-    while (enum.hasMoreElements()) wins.push(enum.getNext());
+    var nmrt = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
+    while (nmrt.hasMoreElements()) wins.push(nmrt.getNext());
     return wins;
   },
 
