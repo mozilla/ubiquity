@@ -97,6 +97,7 @@
 }
 
 #ubiquity-preview-container {
+  border: 0;
   margin-top: 10px;
 }
 
