@@ -292,7 +292,6 @@ function googleTranslate(html, langCodePair, callback, pblock) {
     },
     error: function onGoogleTranslateError(xhr) {
       var stat = xhr.status + " " + xhr.statusText;
-      displayMessage(stat, self);
       Utils.reportInfo(self.name + ": " + stat);
     },
   };
