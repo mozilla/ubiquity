@@ -96,6 +96,15 @@
   color: #fff;
 }
 
+#ubiquity-preview-container {
+  border: 0;
+  margin-top: 10px;
+}
+
+#ubiquity-browser {
+  width: 500px;
+}
+
 }
 
 @-moz-document url(chrome://ubiquity/content/suggest.html) {
